@@ -30,6 +30,7 @@
 #include "focus.h"
 #include "regbind.h"
 #include "screen.h"
+#include "screen.h"
 #include "bindmaps.h"
 #include <libextl/readconfig.h>
 #include "resize.h"
@@ -45,7 +46,7 @@ static bool redirect_error=FALSE;
 static bool ignore_badwindow=TRUE;
 
 
-static int my_redirect_error_handler(Display *UNUSED(dpy), XErrorEvent *UNUSED(ev))
+static int my_redirect_error_handler(Display *dpy, XErrorEvent *ev)
 {
     redirect_error=TRUE;
     return 0;
@@ -162,15 +163,10 @@ void rootwin_manage_initial_windows(WRootWin *rootwin)
 
 static void create_wm_windows(WRootWin *rootwin)
 {
-    const char *p[1];
-
     rootwin->dummy_win=XCreateWindow(ioncore_g.dpy, WROOTWIN_ROOT(rootwin),
                                      0, 0, 1, 1, 0,
                                      CopyFromParent, InputOnly,
                                      CopyFromParent, 0, NULL);
-
-    p[0] = "WRootWin";
-    xwindow_set_text_property(rootwin->dummy_win, XA_WM_NAME, p, 1);
 
     XSelectInput(ioncore_g.dpy, rootwin->dummy_win, PropertyChangeMask);
 }
@@ -200,12 +196,14 @@ static void preinit_gr(WRootWin *rootwin)
 }
 
 
+static Atom net_virtual_roots=None;
+
+
 static bool rootwin_init(WRootWin *rootwin, int xscr)
 {
     Display *dpy=ioncore_g.dpy;
     WFitParams fp;
     Window root;
-    WScreen *scr;
     
     /* Try to select input on the root window */
     root=RootWindow(dpy, xscr);
@@ -213,13 +211,12 @@ static bool rootwin_init(WRootWin *rootwin, int xscr)
     redirect_error=FALSE;
 
     XSetErrorHandler(my_redirect_error_handler);
-    XSelectInput(dpy, root, IONCORE_EVENTMASK_ROOT);
+    XSelectInput(dpy, root, IONCORE_EVENTMASK_ROOT|IONCORE_EVENTMASK_SCREEN);
     XSync(dpy, 0);
     XSetErrorHandler(my_error_handler);
 
     if(redirect_error){
-        warn(TR("Unable to redirect root window events for screen %d."
-                "Maybe another window manager is running?"),
+        warn(TR("Unable to redirect root window events for screen %d."),
              xscr);
         return FALSE;
     }
@@ -236,11 +233,12 @@ static bool rootwin_init(WRootWin *rootwin, int xscr)
     fp.g.w=DisplayWidth(dpy, xscr);
     fp.g.h=DisplayHeight(dpy, xscr);
     
-    if(!window_do_init((WWindow*)rootwin, NULL, &fp, root, "WRootWin")){
+    if(!screen_init((WScreen*)rootwin, NULL, &fp, xscr, root)){
+        free(rootwin);
         return FALSE;
     }
 
-    ((WWindow*)rootwin)->event_mask=IONCORE_EVENTMASK_ROOT;
+    ((WWindow*)rootwin)->event_mask=IONCORE_EVENTMASK_ROOT|IONCORE_EVENTMASK_SCREEN;
     ((WRegion*)rootwin)->flags|=REGION_BINDINGS_ARE_GRABBED|REGION_PLEASE_WARP;
     ((WRegion*)rootwin)->rootwin=rootwin;
     
@@ -251,19 +249,11 @@ static bool rootwin_init(WRootWin *rootwin, int xscr)
     create_wm_windows(rootwin);
     preinit_gr(rootwin);
     netwm_init_rootwin(rootwin);
-
-    region_add_bindmap((WRegion*)rootwin, ioncore_screen_bindmap);
     
-    scr=create_screen(rootwin, &fp, xscr);
-    if(scr==NULL){
-        return FALSE;
-    }
-    region_set_manager((WRegion*)scr, (WRegion*)rootwin);
-    region_map((WRegion*)scr);
+    net_virtual_roots=XInternAtom(ioncore_g.dpy, "_NET_VIRTUAL_ROOTS", False);
+    XDeleteProperty(ioncore_g.dpy, root, net_virtual_roots);
 
     LINK_ITEM(*(WRegion**)&ioncore_g.rootwins, (WRegion*)rootwin, p_next, p_prev);
-
-    ioncore_screens_updated(rootwin);
 
     xwindow_set_cursor(root, IONCORE_CURSOR_DEFAULT);
     
@@ -292,7 +282,9 @@ void rootwin_deinit(WRootWin *rw)
     
     XFreeGC(ioncore_g.dpy, rw->xor_gc);
     
-    window_deinit((WWindow*)rw);
+    rw->scr.mplex.win.win=None;
+
+    screen_deinit(&rw->scr);
 }
 
 
@@ -302,70 +294,23 @@ void rootwin_deinit(WRootWin *rw)
 /*{{{ region dynfun implementations */
 
 
-static void rootwin_do_set_focus(WRootWin *rootwin, bool warp)
-{
-    WRegion *sub;
-    
-    sub=REGION_ACTIVE_SUB(rootwin);
-    
-    if(sub==NULL || !REGION_IS_MAPPED(sub)){
-        WScreen *scr;
-        FOR_ALL_SCREENS(scr){
-            if(REGION_IS_MAPPED(scr)){
-                sub=(WRegion*)scr;
-                break;
-            }
-        }
-    }
-
-    if(sub!=NULL)
-        region_do_set_focus(sub, warp);
-    else
-        window_do_set_focus((WWindow*)rootwin, warp);
-}
-
-
-static bool rootwin_fitrep(WRootWin *UNUSED(rootwin), WWindow *UNUSED(par), 
-                           const WFitParams *UNUSED(fp))
+static bool rootwin_fitrep(WRootWin *rootwin, WWindow *par, 
+                           const WFitParams *fp)
 {
     D(warn("Don't know how to reparent or fit root windows."));
     return FALSE;
 }
 
 
-static void rootwin_map(WRootWin *UNUSED(rootwin))
+static void rootwin_map(WRootWin *rootwin)
 {
     D(warn("Attempt to map a root window."));
 }
 
 
-static void rootwin_unmap(WRootWin *UNUSED(rootwin))
+static void rootwin_unmap(WRootWin *rootwin)
 {
     D(warn("Attempt to unmap a root window -- impossible."));
-}
-
-
-static void rootwin_managed_remove(WRootWin *rootwin, WRegion *reg)
-{
-    region_unset_manager(reg, (WRegion*)rootwin);
-}
-
-static WRegion *rootwin_managed_disposeroot(WRootWin *UNUSED(rootwin), WRegion *reg)
-{
-    WScreen *scr=OBJ_CAST(reg, WScreen);
-    if(scr!=NULL && scr==scr->prev_scr){
-        warn(TR("Only screen may not be destroyed/detached."));
-        return NULL;
-    }
-
-    return reg;
-}
-
-
-
-static Window rootwin_x_window(WRootWin *rootwin)
-{
-    return WROOTWIN_ROOT(rootwin);
 }
 
 
@@ -375,12 +320,6 @@ static Window rootwin_x_window(WRootWin *rootwin)
 /*{{{ Misc */
 
 
-static bool scr_ok(WRegion *r)
-{
-    return (OBJ_IS(r, WScreen) && REGION_IS_MAPPED(r));
-}
-
-
 /*EXTL_DOC
  * Returns previously active screen on root window \var{rootwin}.
  */
@@ -388,46 +327,17 @@ EXTL_SAFE
 EXTL_EXPORT_MEMBER
 WScreen *rootwin_current_scr(WRootWin *rootwin)
 {
-    WRegion *r=REGION_ACTIVE_SUB(rootwin);
-    WScreen *scr;
-    
-    /* There should be no non-WScreen as children or managed by us, but... */
-    
-    if(r!=NULL && scr_ok(r))
-        return (WScreen*)r;
+    WScreen *scr, *fb=NULL;
     
     FOR_ALL_SCREENS(scr){
-        if(REGION_MANAGER(scr)==(WRegion*)rootwin
-           && REGION_IS_MAPPED(scr)){
-            break;
+        if(REGION_MANAGER(scr)==(WRegion*)rootwin && REGION_IS_MAPPED(scr)){
+            fb=scr;
+            if(REGION_IS_ACTIVE(scr))
+                return scr;
         }
     }
     
-    return scr;
-}
-
-/*EXTL_DOC
- * Warp the cursor pointer to this location
- *
- * I'm not *entirely* sure what 'safe' means, but this doesn't change internal
- * notion state, so I guess it's 'safe'...
- */
-EXTL_SAFE
-EXTL_EXPORT_MEMBER
-void rootwin_warp_pointer(WRootWin *root, int x, int y)
-{
-    XWarpPointer(ioncore_g.dpy, None, WROOTWIN_ROOT(root), 0, 0, 0, 0, x, y);
-}
-
-
-/*EXTL_DOC
- * Returns the first WRootWin
- */
-EXTL_SAFE
-EXTL_EXPORT
-WRootWin *ioncore_rootwin()
-{
-    return ioncore_g.rootwins;
+    return (fb ? fb : &rootwin->scr);
 }
 
 
@@ -440,18 +350,13 @@ WRootWin *ioncore_rootwin()
 static DynFunTab rootwin_dynfuntab[]={
     {region_map, rootwin_map},
     {region_unmap, rootwin_unmap},
-    {region_do_set_focus, rootwin_do_set_focus},
-    {(DynFun*)region_xwindow, (DynFun*)rootwin_x_window},
     {(DynFun*)region_fitrep, (DynFun*)rootwin_fitrep},
-    {region_managed_remove, rootwin_managed_remove},
-    {(DynFun*)region_managed_disposeroot,
-     (DynFun*)rootwin_managed_disposeroot},
     END_DYNFUNTAB
 };
 
 
 EXTL_EXPORT
-IMPLCLASS(WRootWin, WWindow, rootwin_deinit, rootwin_dynfuntab);
+IMPLCLASS(WRootWin, WScreen, rootwin_deinit, rootwin_dynfuntab);
 
     
 /*}}}*/

@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/xwindow.h
  *
- * Copyright (c) Tuomo Valkonen 1999-2009. 
+ * Copyright (c) Tuomo Valkonen 1999-2009.
  *
  * See the included file LICENSE for details.
  */
@@ -16,7 +16,7 @@
 #define XWINDOW_REGION_OF(WIN) xwindow_region_of(WIN)
 
 extern Window create_xwindow(WRootWin *rw, Window par,
-                             const WRectangle *geom, const char *name);
+                             const WRectangle *geom);
 
 extern WRegion *xwindow_region_of(Window win);
 extern WRegion *xwindow_region_of_t(Window win, const ClassDescr *descr);
@@ -27,9 +27,9 @@ extern void xwindow_do_set_focus(Window win);
 
 extern void xwindow_set_cursor(Window win, int cursor);
 
-/** 
+/**
  * On failure, clears winprops and returns -1.
- * On success, sets hints according to the window's WM_NORMAL_HINTS and 
+ * On success, sets hints according to the window's WM_NORMAL_HINTS and
  * returns a nonnegative value.
  */
 extern int xwindow_get_sizehints(Window win, XSizeHints *hints);

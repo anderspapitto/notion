@@ -17,7 +17,7 @@
 #include "screen.h"
 
 
-#define WROOTWIN_ROOT(X) ((X)->wwin.win)
+#define WROOTWIN_ROOT(X) (((WWindow*)(X))->win)
 #define FOR_ALL_ROOTWINS(RW)         \
     for(RW=ioncore_g.rootwins;         \
         RW!=NULL;                    \
@@ -25,7 +25,7 @@
 
 
 DECLCLASS(WRootWin){
-    WWindow wwin;
+    WScreen scr;
     int xscr;
     
     Colormap default_cmap;
@@ -41,7 +41,6 @@ DECLCLASS(WRootWin){
 
 extern void rootwin_deinit(WRootWin *rootwin);
 extern WScreen *rootwin_current_scr(WRootWin *rootwin);
-extern void rootwin_warp_pointer(WRootWin *root, int x, int y);
 
 extern void rootwin_manage_initial_windows(WRootWin *rootwin);
 extern WRootWin *create_rootwin(int xscr);
