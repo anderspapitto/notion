@@ -1,7 +1,7 @@
 #include "../luaextl.c"
 #include "../readconfig.c"
 
-static const char tostringstr[]=
+static const char tostringstr[] =
     "local arg = {...}\n"
     "print('first arg is a ' .. type(arg[1]))\n"
     "local basis = arg[1]()\n"
@@ -16,45 +16,38 @@ static const char tostringstr[]=
     "print('result is ' .. result)\n"
     "return result\n";
 
-int test_tostring()
-{
-    ExtlFn tostringfn;
-    ExtlFn fn;
-    ErrorLog el;
-    char *retstr=NULL;
+int test_tostring() {
+  ExtlFn tostringfn;
+  ExtlFn fn;
+  ErrorLog el;
+  char *retstr = NULL;
 
-    errorlog_begin(&el);
+  errorlog_begin(&el);
 
-    if(!extl_loadstring(tostringstr, &tostringfn))
-        return 1;
+  if (!extl_loadstring(tostringstr, &tostringfn)) return 1;
 
-    if(!extl_loadstring("print('testing\\n'); return 'test'", &fn))
-        return 2;
-fprintf(stderr, "Calling extl_call...\n");
-    if(!extl_call(tostringfn, "f", "s", fn, &retstr))
-        return 3;
+  if (!extl_loadstring("print('testing\\n'); return 'test'", &fn)) return 2;
+  fprintf(stderr, "Calling extl_call...\n");
+  if (!extl_call(tostringfn, "f", "s", fn, &retstr)) return 3;
 
-    if (retstr == NULL)
-        return 4;
- 
-    if(strcmp("\"test\"", retstr) != 0){
-        fprintf(stderr, "Result was '%s' instead of 'test'", retstr);
-        return 5;
-    }
+  if (retstr == NULL) return 4;
 
-    return 0;
+  if (strcmp("\"test\"", retstr) != 0) {
+    fprintf(stderr, "Result was '%s' instead of 'test'", retstr);
+    return 5;
+  }
+
+  return 0;
 }
 
+int main() {
+  int result = 0;
 
-int main()
-{
-    int result = 0;   
+  extl_init();
 
-    extl_init();
+  result += test_tostring();
 
-    result += test_tostring();
+  fprintf(stderr, "Result: %d\n", result);
 
-    fprintf(stderr, "Result: %d\n", result);
-
-    return result;
+  return result;
 }

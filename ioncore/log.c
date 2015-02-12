@@ -12,63 +12,58 @@
 #include <time.h>
 #include "log.h"
 
-const char* loglevel_names[] = {
-    "DEBUG",
-    "INFO",
-    "WARN",
-    "ERROR",
+const char *loglevel_names[] = {
+    "DEBUG", "INFO", "WARN", "ERROR",
 };
 
 /** For this category, show log messages at this loglevel and above */
-static LogLevel minimumLevel(LogCategory category)
-{
-    switch(category){
-        case VALGRIND:
-            return DEBUG;
-        default:
-            return INFO;
-    }
+static LogLevel minimumLevel(LogCategory category) {
+  switch (category) {
+    case VALGRIND:
+      return DEBUG;
+    default:
+      return INFO;
+  }
 }
 
 #define TIME_BUFFER_MAXSIZE 100
 
-static void printtime(FILE *stream, const char *format, time_t time)
-{
-    char buf[TIME_BUFFER_MAXSIZE];
-    strftime(buf, TIME_BUFFER_MAXSIZE, format, localtime(&time));
-    fprintf(stream, "%s", buf);
+static void printtime(FILE *stream, const char *format, time_t time) {
+  char buf[TIME_BUFFER_MAXSIZE];
+  strftime(buf, TIME_BUFFER_MAXSIZE, format, localtime(&time));
+  fprintf(stream, "%s", buf);
 }
 
-static void vlog_message(LogLevel level, LogCategory category, const char *file, int line, const char *function, const char *message, va_list argp)
-{
-    if(level >= minimumLevel(category)){
-        printtime(stderr, "%F %T ", time(NULL));
-        fprintf(stderr, "%-6s", loglevel_names[level]);
-        if(file==NULL)
-            fprintf(stderr, "Notion: ");
-        else
-            fprintf(stderr, "/notion/../%s:%d: %s: ", file, line, function);
+static void vlog_message(LogLevel level, LogCategory category, const char *file,
+                         int line, const char *function, const char *message,
+                         va_list argp) {
+  if (level >= minimumLevel(category)) {
+    printtime(stderr, "%F %T ", time(NULL));
+    fprintf(stderr, "%-6s", loglevel_names[level]);
+    if (file == NULL)
+      fprintf(stderr, "Notion: ");
+    else
+      fprintf(stderr, "/notion/../%s:%d: %s: ", file, line, function);
 
-        vfprintf(stderr, message, argp);
-        fprintf(stderr, "\n");
-    }
+    vfprintf(stderr, message, argp);
+    fprintf(stderr, "\n");
+  }
 }
 
-void log_message(LogLevel level, LogCategory category, const char *file, int line, const char* function, const char* message, ...)
-{
-    va_list argp;
-    va_start(argp, message);
-    vlog_message(level, category, file, line, function, message, argp);
-    va_end(argp);
+void log_message(LogLevel level, LogCategory category, const char *file,
+                 int line, const char *function, const char *message, ...) {
+  va_list argp;
+  va_start(argp, message);
+  vlog_message(level, category, file, line, function, message, argp);
+  va_end(argp);
 }
 
 #if __STDC_VERSION__ < 199901L
-extern void LOG(LogLevel level, LogCategory category, const char* message, ...)
-{
-    va_list argp;
-    va_start(argp, message);
-    vlog_message(level, category, NULL, -1, NULL, message, argp);
-    va_end(argp);
+extern void LOG(LogLevel level, LogCategory category, const char *message,
+                ...) {
+  va_list argp;
+  va_start(argp, message);
+  vlog_message(level, category, NULL, -1, NULL, message, argp);
+  va_end(argp);
 }
 #endif
-

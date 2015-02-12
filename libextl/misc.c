@@ -11,13 +11,10 @@
 
 #include "private.h"
 
+bool extl_obj_error(int ndx, const char *got, const char *wanted) {
+  extl_warn(TR("Type checking failed in level 2 call handler for "
+               "parameter %d (got %s, expected %s)."),
+            ndx, got ? got : "nil", wanted);
 
-bool extl_obj_error(int ndx, const char *got, const char *wanted)
-{
-    extl_warn(TR("Type checking failed in level 2 call handler for "
-                 "parameter %d (got %s, expected %s)."),
-              ndx, got ? got : "nil", wanted);
-
-    return FALSE;
+  return FALSE;
 }
-
