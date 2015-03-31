@@ -64,5 +64,4 @@ dist:
 
 test:
 	$(MAKE) -C mod_xrandr test
-	$(MAKE) -C mod_xinerama test
 	$(MAKE) -C test

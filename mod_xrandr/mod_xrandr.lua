@@ -10,10 +10,6 @@ local mod_xrandr=_G["mod_xrandr"]
 
 assert(mod_xrandr)
 
-if not package.loaded["mod_xinerama"] then 
-    dopath("mod_xinerama")
-end
-
 function filter(t, predicate)
      local result = {}
      for k,v in pairs(t) do
