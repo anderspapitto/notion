@@ -26,4 +26,4 @@ include $(TOPDIR)/build/rules.mk
 
 main.o: exports.h
 
-_install: module_install etc_install
+_install: module_install

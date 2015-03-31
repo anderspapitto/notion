@@ -150,12 +150,6 @@ lc_install:
 		$(INSTALL) -m $(DATA_MODE) $$i $(LCDIR); \
 	done
 
-etc_install:
-	$(INSTALLDIR) $(ETCDIR)
-	for i in $(ETC); do \
-		$(INSTALL) -m $(DATA_MODE) $$i $(ETCDIR); \
-	done
-
 # Dependencies
 ######################################
 

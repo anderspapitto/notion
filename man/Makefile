@@ -18,7 +18,7 @@ TARGETS=notion.1 notionflux.1 $(foreach tr, $(TRANSLATIONS), notion.$(tr).1) \
 	$(WELCOME_TARGETS)
 
 MKMAN=$(LUA) ../build/mkman.lua $(MKMAN_DEFS)
-MKMAN_DEFS=-D ETCDIR $(REL)$(ETCDIR) -D DOCDIR $(REL)$(DOCDIR)
+MKMAN_DEFS=-D DOCDIR $(REL)$(DOCDIR)
 
 ifeq ($(RELOCATABLE),1)
 REL="/..."
@@ -27,12 +27,6 @@ endif
 NROFF=nroff -man -Tlatin1
 #FILTERCRAP=perl -p -i -e 's/.\10//g'
 FILTERCRAP=$(LUA) -e 'io.write((string.gsub(io.read("*a"), ".\8", "")))'
-
-CONFIGS=../etc/cfg_notioncore.lua \
-	../etc/cfg_tiling.lua \
-	../etc/cfg_query.lua \
-	../etc/cfg_menu.lua
-
 ######################################
 
 include $(TOPDIR)/build/rules.mk
