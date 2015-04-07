@@ -140,16 +140,26 @@ void de_get_colour_group(WRootWin *rootwin, DEColourGroup *cg, ExtlTab tab,
   bool bgset;
   DEColour padinh;
 
-  de_get_colour(rootwin, &(cg->hl), tab, "highlight_colour",
-                (based_on ? based_on->cgrp.hl : DE_WHITE(rootwin)));
-  de_get_colour(rootwin, &(cg->sh), tab, "shadow_colour",
-                (based_on ? based_on->cgrp.sh : DE_WHITE(rootwin)));
-  de_get_colour(rootwin, &(cg->fg), tab, "foreground_colour",
-                (based_on ? based_on->cgrp.fg : DE_WHITE(rootwin)));
-  bgset = de_get_colour(rootwin, &(cg->bg), tab, "background_colour",
-                        (based_on ? based_on->cgrp.bg : DE_BLACK(rootwin)));
+  DEColour black, white;
 
-  padinh = (based_on ? based_on->cgrp.pad : DE_WHITE(rootwin));
+#ifdef HAVE_X11_XFT
+    de_alloc_colour(rootwin, &black, "black");
+    de_alloc_colour(rootwin, &white, "white");
+#else
+    black=DE_BLACK(rootwin);
+    white=DE_WHITE(rootwin);
+#endif
+
+  de_get_colour(rootwin, &(cg->hl), tab, "highlight_colour",
+                (based_on ? based_on->cgrp.hl : white));
+  de_get_colour(rootwin, &(cg->sh), tab, "shadow_colour",
+                (based_on ? based_on->cgrp.sh : white));
+  de_get_colour(rootwin, &(cg->fg), tab, "foreground_colour",
+                (based_on ? based_on->cgrp.fg : white));
+  bgset = de_get_colour(rootwin, &(cg->bg), tab, "background_colour",
+                        (based_on ? based_on->cgrp.bg : black));
+
+  padinh = (based_on ? based_on->cgrp.pad : white);
 
   de_get_colour_(rootwin, &(cg->pad), tab, "padding_colour",
                  (bgset ? cg->bg : padinh), padinh);

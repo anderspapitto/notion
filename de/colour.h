@@ -1,7 +1,7 @@
 /*
  * ion/de/colour.h
  *
- * Copyright (c) Tuomo Valkonen 1999-2009. 
+ * Copyright (c) Tuomo Valkonen 1999-2009.
  *
  * See the included file LICENSE for details.
  */
@@ -13,11 +13,19 @@
 #include <ioncore/global.h>
 #include <ioncore/rootwin.h>
 
+#ifdef HAVE_X11_XFT
+#include <X11/Xft/Xft.h>
+#endif /* HAVE_X11_XFT */
+
 
 INTRSTRUCT(DEColourGroup);
 
 
+#ifndef HAVE_X11_XFT
 typedef unsigned long DEColour;
+#else /* HAVE_X11_XFT */
+typedef XftColor DEColour;
+#endif /* HAVE_X11_XFT */
 
 
 DECLSTRUCT(DEColourGroup){
@@ -31,6 +39,7 @@ DECLSTRUCT(DEColourGroup){
 
 bool de_init_colour_group(WRootWin *rootwin, DEColourGroup *cg);
 bool de_alloc_colour(WRootWin *rootwin, DEColour *ret, const char *name);
+#define XftDEDefaultVisual()    DefaultVisual(ioncore_g.dpy, 0)
 bool de_duplicate_colour(WRootWin *rootwin, DEColour in, DEColour *out);
 void de_free_colour_group(WRootWin *rootwin, DEColourGroup *cg);
 void de_free_colour(WRootWin *rootwin, DEColour col);

@@ -2,7 +2,7 @@
  * notion/de/font.h
  *
  * Copyright (c) the Notion team 2013
- * Copyright (c) Tuomo Valkonen 1999-2009. 
+ * Copyright (c) Tuomo Valkonen 1999-2009.
  *
  * See the included file LICENSE for details.
  */
@@ -12,6 +12,9 @@
 
 #include <ioncore/common.h>
 #include <ioncore/gr.h>
+#ifdef HAVE_X11_XFT
+#include <X11/Xft/Xft.h>
+#endif /* HAVE_X11_XFT */
 
 INTRSTRUCT(DEFont);
 
@@ -27,6 +30,9 @@ DECLSTRUCT(DEFont){
     int refcount;
     XFontSet fontset;
     XFontStruct *fontstruct;
+#ifdef HAVE_X11_XFT /* HAVE_X11_XFT */
+    XftFont *font;
+#endif /* HAVE_X11_XFT */
     DEFont *next, *prev;
 };
 
@@ -39,11 +45,11 @@ extern void de_free_font(DEFont *font);
 extern void debrush_draw_string(DEBrush *brush, int x, int y,
                                 const char *str, int len, bool needfill);
 extern void debrush_do_draw_string(DEBrush *brush, int x, int y,
-                                   const char *str, int len, bool needfill, 
+                                   const char *str, int len, bool needfill,
                                    DEColourGroup *colours);
 extern void debrush_do_draw_string_default(DEBrush *brush, int x, int y,
-                                           const char *str, int len, 
-                                           bool needfill, 
+                                           const char *str, int len,
+                                           bool needfill,
                                            DEColourGroup *colours);
 
 extern void debrush_get_font_extents(DEBrush *brush, GrFontExtents *fnte);

@@ -43,6 +43,10 @@ bool debrush_init(DEBrush *brush, Window win, const GrStyleSpec *spec,
 
   gr_stylespec_init(&brush->current_attr);
 
+#ifdef HAVE_X11_XFT
+  brush->draw=NULL;
+#endif /* HAVE_X11_XFT */
+
   style->usecount++;
 
   if (!grbrush_init(&(brush->grbrush))) {
@@ -109,11 +113,30 @@ DEBrush *debrush_get_slave(DEBrush *master, WRootWin *rootwin,
 void debrush_deinit(DEBrush *brush) {
   destyle_unref(brush->d);
   brush->d = NULL;
+#ifdef HAVE_X11_XFT
+  if(brush->draw!=NULL)
+      XftDrawDestroy(brush->draw);
+#endif /* HAVE_X11_XFT */
   gr_stylespec_unalloc(&brush->current_attr);
   grbrush_deinit(&(brush->grbrush));
 }
 
 void debrush_release(DEBrush *brush) { destroy_obj((Obj *)brush); }
+
+#ifdef HAVE_X11_XFT
+XftDraw *debrush_get_draw(DEBrush *brush, Drawable d)
+{
+    if(brush->draw==NULL)
+        brush->draw=XftDrawCreate(ioncore_g.dpy, d,
+                                  XftDEDefaultVisual(),
+                                  DefaultColormap(ioncore_g.dpy,
+                                  0));
+    else
+        XftDrawChange(brush->draw, d);
+
+    return brush->draw;
+}
+#endif
 
 /*}}}*/
 

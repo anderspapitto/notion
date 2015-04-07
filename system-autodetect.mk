@@ -147,7 +147,8 @@ EXTRA_LIBS += -lrt
 
 CC ?= gcc
 
-WARN=-W -Wall -pedantic 
+# WARN=-W -Wall -pedantic 
+WARN=
 
 CFLAGS += -Os $(WARN) $(DEFINES) $(INCLUDES) $(EXTRA_INCLUDES) \
           -DHAS_SYSTEM_ASPRINTF=$(HAS_SYSTEM_ASPRINTF)
@@ -213,3 +214,14 @@ ifeq ($(PRELOAD_MODULES),1)
 X11_LIBS += -lXinerama -lXrandr
 endif
 
+
+## Xft support
+##
+
+USE_XFT=1
+
+ifeq ($(USE_XFT),1)
+    X11_INCLUDES += `pkg-config xft --cflags`
+    X11_LIBS += `pkg-config xft --libs`
+    DEFINES += -DHAVE_X11_XFT
+endif
