@@ -147,8 +147,7 @@ EXTRA_LIBS += -lrt
 
 CC ?= gcc
 
-# WARN=-W -Wall -pedantic 
-WARN=
+WARN=-W -Wall -pedantic 
 
 CFLAGS += -Os $(WARN) $(DEFINES) $(INCLUDES) $(EXTRA_INCLUDES) \
           -DHAS_SYSTEM_ASPRINTF=$(HAS_SYSTEM_ASPRINTF)
