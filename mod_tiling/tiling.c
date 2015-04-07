@@ -1310,15 +1310,15 @@ WSplit *load_splitsplit(WTiling *ws, const WRectangle *geom, ExtlTab tab) {
   split = create_splitsplit(geom, dir);
   if (split == NULL) return NULL;
 
-  tls = MAXOF(tls, MINS);
-  brs = MAXOF(brs, MINS);
+  tls = maxof(tls, MINS);
+  brs = maxof(brs, MINS);
 
   geom2 = *geom;
   if (dir == SPLIT_HORIZONTAL) {
-    tls = MAXOF(0, geom->w) * tls / (tls + brs);
+    tls = maxof(0, geom->w) * tls / (tls + brs);
     geom2.w = tls;
   } else {
-    tls = MAXOF(0, geom->h) * tls / (tls + brs);
+    tls = maxof(0, geom->h) * tls / (tls + brs);
     geom2.h = tls;
   }
 

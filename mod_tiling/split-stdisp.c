@@ -56,7 +56,7 @@ int stdisp_recommended_w(WSplitST *stdisp) {
     return REGION_GEOM(ws).w;
   }
 
-  return MAXOF(CF_STDISP_MIN_SZ, region_min_w(stdisp->regnode.reg));
+  return maxof(CF_STDISP_MIN_SZ, region_min_w(stdisp->regnode.reg));
 }
 
 int stdisp_recommended_h(WSplitST *stdisp) {
@@ -68,7 +68,7 @@ int stdisp_recommended_h(WSplitST *stdisp) {
     return REGION_GEOM(ws).h;
   }
 
-  return MAXOF(CF_STDISP_MIN_SZ, region_min_h(stdisp->regnode.reg));
+  return maxof(CF_STDISP_MIN_SZ, region_min_h(stdisp->regnode.reg));
 }
 
 static bool stdisp_dir_ok(WSplitSplit *p, WSplitST *stdisp) {

@@ -432,7 +432,7 @@ WStacking *stacking_find_to_focus(WStacking *stacking, WStacking *to_try,
     }
 
     if (st->level >= STACKING_LEVEL_MODAL1)
-      min_level = MAXOF(min_level, st->level);
+      min_level = maxof(min_level, st->level);
   } while (st != stacking);
 
   return found;

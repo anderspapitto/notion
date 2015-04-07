@@ -156,7 +156,7 @@ uint gr_stylespec_score2(const GrStyleSpec *spec, const GrStyleSpec *attr1,
   for (i = 0; i < spec->n; i++) {
     uint sc = scorefind(attr1, &spec->attrs[i]);
 
-    if (attr2 != NULL) sc = MAXOF(sc, scorefind(attr2, &spec->attrs[i]));
+    if (attr2 != NULL) sc = maxof(sc, scorefind(attr2, &spec->attrs[i]));
 
     if (sc == 0) {
       score = 0;

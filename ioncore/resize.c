@@ -126,13 +126,13 @@ static void moveres_draw_infowin(WMoveresMode *mode) {
     h = mode->geom.h;
 
     if (mode->hints.base_set) {
-      w = MAXOF(0, w - mode->hints.base_width);
-      h = MAXOF(0, h - mode->hints.base_height);
+      w = maxof(0, w - mode->hints.base_width);
+      h = maxof(0, h - mode->hints.base_height);
     }
 
     if (mode->hints.inc_set) {
-      w /= MAXOF(1, mode->hints.width_inc);
-      h /= MAXOF(1, mode->hints.height_inc);
+      w /= maxof(1, mode->hints.width_inc);
+      h /= maxof(1, mode->hints.height_inc);
     }
 
     snprintf(buf, INFOWIN_BUFFER_LEN, "%dx%d", w, h);
@@ -325,8 +325,8 @@ static void moveresmode_delta(WMoveresMode *mode, int dx1, int dx2, int dy1,
       realdy2 = sg->y + sg->h - rq.geom.y - rq.geom.h;
   }
 
-  w = MAXOF(1, mode->origgeom.w - realdx1 + realdx2);
-  h = MAXOF(1, mode->origgeom.h - realdy1 + realdy2);
+  w = maxof(1, mode->origgeom.w - realdx1 + realdx2);
+  h = maxof(1, mode->origgeom.h - realdy1 + realdy2);
 
   if (mode->snap_enabled && mode->hints.base_set) {
     w = clamp_up(w, mode->hints.base_width - er, mode->hints.base_width);
@@ -484,8 +484,8 @@ void rqgeomparams_from_table(WRQGeomParams *rq, const WRectangle *origg,
   if (extl_table_gets_i(g, "h", &(rq->geom.h)))
     rq->flags &= ~REGION_RQGEOM_WEAK_H;
 
-  rq->geom.w = MAXOF(1, rq->geom.w);
-  rq->geom.h = MAXOF(1, rq->geom.h);
+  rq->geom.w = maxof(1, rq->geom.w);
+  rq->geom.h = maxof(1, rq->geom.h);
 }
 
 /*EXTL_DOC

@@ -228,38 +228,38 @@ static void splitfloat_reparent(WSplitFloat *split, WWindow *target) {
 
 void splitfloat_tl_pwin_to_cnt(WSplitFloat *split, WRectangle *g) {
   if (split->ssplit.dir == SPLIT_HORIZONTAL)
-    g->w = MAXOF(1, g->w - split->tlpwin->bdw.right);
+    g->w = maxof(1, g->w - split->tlpwin->bdw.right);
   else
-    g->h = MAXOF(1, g->h - split->tlpwin->bdw.bottom);
+    g->h = maxof(1, g->h - split->tlpwin->bdw.bottom);
 }
 
 void splitfloat_br_pwin_to_cnt(WSplitFloat *split, WRectangle *g) {
   if (split->ssplit.dir == SPLIT_HORIZONTAL) {
     int delta = split->tlpwin->bdw.left;
-    g->w = MAXOF(1, g->w - delta);
+    g->w = maxof(1, g->w - delta);
     g->x += delta;
   } else {
     int delta = split->tlpwin->bdw.top;
-    g->h = MAXOF(1, g->h - delta);
+    g->h = maxof(1, g->h - delta);
     g->y += delta;
   }
 }
 
 void splitfloat_tl_cnt_to_pwin(WSplitFloat *split, WRectangle *g) {
   if (split->ssplit.dir == SPLIT_HORIZONTAL)
-    g->w = MAXOF(1, g->w + split->tlpwin->bdw.right);
+    g->w = maxof(1, g->w + split->tlpwin->bdw.right);
   else
-    g->h = MAXOF(1, g->h + split->tlpwin->bdw.bottom);
+    g->h = maxof(1, g->h + split->tlpwin->bdw.bottom);
 }
 
 void splitfloat_br_cnt_to_pwin(WSplitFloat *split, WRectangle *g) {
   if (split->ssplit.dir == SPLIT_HORIZONTAL) {
     int delta = split->tlpwin->bdw.left;
-    g->w = MAXOF(1, g->w + delta);
+    g->w = maxof(1, g->w + delta);
     g->x -= delta;
   } else {
     int delta = split->tlpwin->bdw.top;
-    g->h = MAXOF(1, g->h + delta);
+    g->h = maxof(1, g->h + delta);
     g->y -= delta;
   }
 }
@@ -320,18 +320,18 @@ static void splitfloat_update_bounds(WSplitFloat *split, bool recursive) {
 
   if (split->ssplit.dir == SPLIT_HORIZONTAL) {
     node->max_w = infadd(tl_max_w, br_max_w);
-    node->min_w = MINOF(tl_min_w, br_min_w);
+    node->min_w = minof(tl_min_w, br_min_w);
     node->unused_w = 0;
-    node->min_h = MAXOF(tl_min_h, br_min_h);
-    node->max_h = MAXOF(MINOF(tl_max_h, br_max_h), node->min_h);
-    node->unused_h = MINOF(tl->unused_h, br->unused_h);
+    node->min_h = maxof(tl_min_h, br_min_h);
+    node->max_h = maxof(minof(tl_max_h, br_max_h), node->min_h);
+    node->unused_h = minof(tl->unused_h, br->unused_h);
   } else {
     node->max_h = infadd(tl_max_h, br_max_h);
-    node->min_h = MINOF(tl_min_h, br_min_h);
+    node->min_h = minof(tl_min_h, br_min_h);
     node->unused_h = 0;
-    node->min_w = MAXOF(tl_min_w, br_min_w);
-    node->max_w = MAXOF(MINOF(tl_max_w, br_max_w), node->min_w);
-    node->unused_w = MINOF(tl->unused_w, br->unused_w);
+    node->min_w = maxof(tl_min_w, br_min_w);
+    node->max_w = maxof(minof(tl_max_w, br_max_w), node->min_w);
+    node->unused_w = minof(tl->unused_w, br->unused_w);
   }
 }
 
@@ -362,26 +362,26 @@ static void bound(int *what, int min, int max) {
 
 static void adjust_sizes(int *tls_, int *brs_, int nsize, int tlmin, int brmin,
                          int tlmax, int brmax, int primn) {
-  int tls = MAXOF(0, *tls_);
-  int brs = MAXOF(0, *brs_);
-  nsize = MAXOF(1, nsize);
+  int tls = maxof(0, *tls_);
+  int brs = maxof(0, *brs_);
+  nsize = maxof(1, nsize);
 
   if (primn == PRIMN_TL) {
-    tls = MAXOF(1, nsize - brs);
+    tls = maxof(1, nsize - brs);
     bound(&tls, tlmin, tlmax);
     brs = nsize - tls;
     bound(&brs, brmin, brmax);
     tls = nsize - brs;
     bound(&tls, tlmin, tlmax);
   } else if (primn == PRIMN_BR) {
-    brs = MAXOF(1, nsize - tls);
+    brs = maxof(1, nsize - tls);
     bound(&brs, brmin, brmax);
     tls = nsize - brs;
     bound(&tls, tlmin, tlmax);
     brs = nsize - tls;
     bound(&brs, brmin, brmax);
   } else { /* && PRIMN_ANY */
-    tls = tls * nsize / MAXOF(2, tls + brs);
+    tls = tls * nsize / maxof(2, tls + brs);
     bound(&tls, tlmin, tlmax);
     brs = nsize - tls;
     bound(&brs, brmin, brmax);
@@ -396,7 +396,7 @@ static void adjust_sizes(int *tls_, int *brs_, int nsize, int tlmin, int brmin,
 static void adjust_size(int *sz, int dir, WSplitFloat *f, WSplit *s) {
   int mi = splitfloat_get_min(f, dir, s);
   int ma = splitfloat_get_max(f, dir, s);
-  *sz = MAXOF(mi, MINOF(*sz, ma));
+  *sz = maxof(mi, minof(*sz, ma));
 }
 
 static void splitfloat_do_resize(WSplitFloat *split, const WRectangle *ng,
@@ -426,14 +426,14 @@ static void splitfloat_do_resize(WSplitFloat *split, const WRectangle *ng,
   if (dir == SPLIT_VERTICAL) {
     if (ng->h <= tlg.h + brg.h) {
       if (transpose) {
-        ntlg.h = MINOF(tlg.w, ng->h * 2 / 3);
-        nbrg.h = MINOF(brg.w, ng->h * 2 / 3);
+        ntlg.h = minof(tlg.w, ng->h * 2 / 3);
+        nbrg.h = minof(brg.w, ng->h * 2 / 3);
         adjust_size(&ntlg.h, dir, split, split->ssplit.tl);
         adjust_size(&nbrg.h, dir, split, split->ssplit.br);
         adjust = (ng->h > ntlg.h + nbrg.h);
       } else {
-        ntlg.h = MINOF(ng->h, tlg.h);
-        nbrg.h = MINOF(ng->h, brg.h);
+        ntlg.h = minof(ng->h, tlg.h);
+        nbrg.h = minof(ng->h, brg.h);
         adjust = FALSE;
       }
     } else {
@@ -453,14 +453,14 @@ static void splitfloat_do_resize(WSplitFloat *split, const WRectangle *ng,
   } else {
     if (ng->w <= tlg.w + brg.w) {
       if (transpose) {
-        ntlg.w = MINOF(tlg.h, ng->w * 2 / 3);
-        nbrg.w = MINOF(brg.h, ng->w * 2 / 3);
+        ntlg.w = minof(tlg.h, ng->w * 2 / 3);
+        nbrg.w = minof(brg.h, ng->w * 2 / 3);
         adjust_size(&ntlg.w, dir, split, split->ssplit.tl);
         adjust_size(&nbrg.w, dir, split, split->ssplit.br);
         adjust = (ng->w > ntlg.w + nbrg.w);
       } else {
-        ntlg.w = MINOF(ng->w, tlg.w);
-        nbrg.w = MINOF(ng->w, brg.w);
+        ntlg.w = minof(ng->w, tlg.w);
+        nbrg.w = minof(ng->w, brg.w);
         adjust = FALSE;
       }
     } else {
@@ -495,19 +495,19 @@ static void calc_amount(int *amount, int *oamount, int rs, WSplitSplit *p,
 
   if (rs >= 0) {
     if (p->dir == SPLIT_VERTICAL)
-      *amount = MAXOF(0, MINOF(rs, GEOM(p).h - ng->h));
+      *amount = maxof(0, minof(rs, GEOM(p).h - ng->h));
     else
-      *amount = MAXOF(0, MINOF(rs, GEOM(p).w - ng->w));
+      *amount = maxof(0, minof(rs, GEOM(p).w - ng->w));
   } else {
     if (p->dir == SPLIT_VERTICAL) {
-      int overlap = MAXOF(0, og->h - (GEOM(p).h - ng->h));
-      *amount = -MINOF(-rs, overlap);
-      *oamount = MAXOF(0, MINOF(*amount - rs, omax - og->h));
+      int overlap = maxof(0, og->h - (GEOM(p).h - ng->h));
+      *amount = -minof(-rs, overlap);
+      *oamount = maxof(0, minof(*amount - rs, omax - og->h));
       *amount -= *oamount;
     } else {
-      int overlap = MAXOF(0, og->w - (GEOM(p).w - ng->w));
-      *amount = -MINOF(-rs, overlap);
-      *oamount = MAXOF(0, MINOF(*amount - rs, omax - og->w));
+      int overlap = maxof(0, og->w - (GEOM(p).w - ng->w));
+      *amount = -minof(-rs, overlap);
+      *oamount = maxof(0, minof(*amount - rs, omax - og->w));
       *amount -= *oamount;
     }
   }
@@ -573,16 +573,16 @@ static void splitfloat_do_rqsize(WSplitFloat *split, WSplit *node,
   nng = pg;
 
   if (p->dir == SPLIT_VERTICAL) {
-    nog.h = MINOF(pg.h, MAXOF(0, og.h + oamount));
-    nng.h = MINOF(pg.h, MAXOF(0, ng.h + amount + pg.h - GEOM(p).h));
+    nog.h = minof(pg.h, maxof(0, og.h + oamount));
+    nng.h = minof(pg.h, maxof(0, ng.h + amount + pg.h - GEOM(p).h));
     if (thisnode == PRIMN_TL)
       nog.y = pg.y + pg.h - nog.h;
     else
       nng.y = pg.y + pg.h - nng.h;
     vprimn = thisnode;
   } else {
-    nog.w = MINOF(pg.w, MAXOF(0, og.w + oamount));
-    nng.w = MINOF(pg.w, MAXOF(0, ng.w + amount + pg.w - GEOM(p).w));
+    nog.w = minof(pg.w, maxof(0, og.w + oamount));
+    nng.w = minof(pg.w, maxof(0, ng.w + amount + pg.w - GEOM(p).w));
     if (thisnode == PRIMN_TL)
       nog.x = pg.x + pg.w - nog.w;
     else
@@ -640,8 +640,8 @@ static void adjust_tls_brs(int *tls, int *brs, int total) {
     *brs = total - (*tls);
   }
 
-  *tls = MINOF(MAXOF(MINS, *tls), total);
-  *brs = MINOF(MAXOF(MINS, *brs), total);
+  *tls = minof(maxof(MINS, *tls), total);
+  *brs = minof(maxof(MINS, *brs), total);
 }
 
 static void calc_tlg_brg(const WRectangle *geom, int tls, int brs, int dir,
@@ -782,7 +782,7 @@ WSplitRegion *splittree_split_floating(WSplit *node, int dir, int primn,
     bo = BR_BORDER(sf);
   }
 
-  mins = MAXOF(omins + bo, nmins + bn);
+  mins = maxof(omins + bo, nmins + bn);
 
   /* Potentially resize old node. */
 
@@ -810,8 +810,8 @@ WSplitRegion *splittree_split_floating(WSplit *node, int dir, int primn,
 
   /* Calculate geometries. */
 
-  sn = MAXOF(nmins + bn, s / 2);
-  so = MAXOF(omins + bo, s - s / 2);
+  sn = maxof(nmins + bn, s / 2);
+  so = maxof(omins + bo, s - s / 2);
 
   ((WSplit *)sf)->geom = node->geom;
 

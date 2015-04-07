@@ -489,8 +489,8 @@ static void geom_group_to_parent(WGroup *ws, const WRectangle *g,
                                  WRectangle *wg) {
   wg->x = g->x + REGION_GEOM(ws).x;
   wg->y = g->y + REGION_GEOM(ws).y;
-  wg->w = MAXOF(1, g->w);
-  wg->h = MAXOF(1, g->h);
+  wg->w = maxof(1, g->w);
+  wg->h = maxof(1, g->h);
 }
 
 static int group_must_focus(WGroup *ws, WStacking *st) {

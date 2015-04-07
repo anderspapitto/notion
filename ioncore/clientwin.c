@@ -496,8 +496,8 @@ WClientWin *ioncore_manage_clientwin(Window win, bool maprq) {
     goto fail2;
   }
 
-  attr.width = MAXOF(attr.width, 1);
-  attr.height = MAXOF(attr.height, 1);
+  attr.width = maxof(attr.width, 1);
+  attr.height = maxof(attr.height, 1);
 
   /* Find root window */
   FOR_ALL_ROOTWINS(rootwin) {
@@ -622,16 +622,16 @@ static bool reparent_root(WClientWin *cwin) {
   } else {
     int dr = REGION_GEOM(par).w - REGION_GEOM(cwin).w - REGION_GEOM(cwin).x;
     int db = REGION_GEOM(par).h - REGION_GEOM(cwin).h - REGION_GEOM(cwin).y;
-    dr = MAXOF(dr, 0);
-    db = MAXOF(db, 0);
+    dr = maxof(dr, 0);
+    db = maxof(db, 0);
 
     XTranslateCoordinates(ioncore_g.dpy, par->win, attr.root, 0, 0, &x, &y,
                           &dummy);
 
     x -= xgravity_deltax(cwin->size_hints.win_gravity,
-                         MAXOF(0, REGION_GEOM(cwin).x), dr);
+                         maxof(0, REGION_GEOM(cwin).x), dr);
     y -= xgravity_deltay(cwin->size_hints.win_gravity,
-                         MAXOF(0, REGION_GEOM(cwin).y), db);
+                         maxof(0, REGION_GEOM(cwin).y), db);
   }
 
   XReparentWindow(ioncore_g.dpy, cwin->win, attr.root, x, y);
@@ -897,8 +897,8 @@ static bool clientwin_fitrep(WClientWin *cwin, WWindow *np,
 
   REGION_GEOM(cwin) = geom;
 
-  w = MAXOF(1, geom.w);
-  h = MAXOF(1, geom.h);
+  w = maxof(1, geom.w);
+  h = maxof(1, geom.h);
 
   if (cwin->flags & CLIENTWIN_PROP_ACROBATIC && !REGION_IS_MAPPED(cwin)) {
     XMoveResizeWindow(ioncore_g.dpy, cwin->win, -2 * REGION_GEOM(cwin).w,
@@ -1090,7 +1090,7 @@ static bool check_normal_cfgrq(WClientWin *cwin, XConfigureRequestEvent *ev) {
         rq.geom.x += xgravity_deltax(cwin->size_hints.win_gravity, 0,
                                      ev->width - rq.geom.w);
       }
-      rq.geom.w = MAXOF(ev->width, 1);
+      rq.geom.w = maxof(ev->width, 1);
       rq.flags &= ~REGION_RQGEOM_WEAK_W;
     }
     if (ev->value_mask & CWHeight) {
@@ -1099,7 +1099,7 @@ static bool check_normal_cfgrq(WClientWin *cwin, XConfigureRequestEvent *ev) {
         rq.geom.y += xgravity_deltay(cwin->size_hints.win_gravity, 0,
                                      ev->height - rq.geom.h);
       }
-      rq.geom.h = MAXOF(ev->height, 1);
+      rq.geom.h = maxof(ev->height, 1);
       rq.flags &= ~REGION_RQGEOM_WEAK_H;
     }
     if (ev->value_mask & CWX) {
@@ -1281,7 +1281,7 @@ WRegion *clientwin_load(WWindow *par, const WFitParams *fp, ExtlTab tab) {
   convert_geom(fp, cwin, &rg);
   REGION_GEOM(cwin) = rg;
   do_reparent_clientwin(cwin, par->win, rg.x, rg.y);
-  XResizeWindow(ioncore_g.dpy, win, MAXOF(1, rg.w), MAXOF(1, rg.h));
+  XResizeWindow(ioncore_g.dpy, win, maxof(1, rg.w), maxof(1, rg.h));
 
   if (!postmanage_check(cwin, &attr)) {
     clientwin_destroyed(cwin);
