@@ -77,7 +77,7 @@ include $(TOPDIR)/build/lua-detect.mk
 ##
 
 # Paths
-X11_PREFIX ?= /usr/X11R6
+X11_PREFIX ?= /usr
 # SunOS/Solaris
 #X11_PREFIX ?= /usr/openwin
 
@@ -171,7 +171,7 @@ XOPEN_SOURCE=-D_XOPEN_SOURCE -D_XOPEN_SOURCE_EXTENDED
 # SunOS, (Irix)
 #XOPEN_SOURCE=-D__EXTENSIONS__
 
-C99_SOURCE?=-std=c99 -DCF_HAS_VA_COPY
+C99_SOURCE?=-std=gnu11 -DCF_HAS_VA_COPY
 
 # The -DCF_HAS_VA_COPY option should allow for some optimisations, and 
 # in some cases simply defining

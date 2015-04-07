@@ -121,7 +121,7 @@ LDFLAGS=-g -Os $(EXTRA_LIBS) $(LIBS)
 # SunOS, (Irix)
 #XOPEN_SOURCE=-D__EXTENSIONS__
 
-#C99_SOURCE=-std=c99 -DCF_HAS_VA_COPY
+C99_SOURCE=-std=gnu11 -DCF_HAS_VA_COPY
 
 # The -DCF_HAS_VA_COPY option should allow for some optimisations, and 
 # in some cases simply defining
