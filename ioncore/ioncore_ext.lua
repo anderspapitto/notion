@@ -24,7 +24,6 @@ dopath('ioncore_bindings')
 dopath('ioncore_winprops')
 dopath('ioncore_misc')
 dopath('ioncore_wd')
-dopath('ioncore_menudb')
 dopath('ioncore_tabnum')
 dopath('ioncore_quasiact')
 
@@ -78,11 +77,8 @@ export(ioncore,
        "warn",
        "exec",
        "TR",
-       "bdoc",
-       "defmenu",
-       "defctxmenu",
-       "menuentry",
-       "submenu")
+       "bdoc"
+       )
 
 -- Mark ourselves loaded.
 package.loaded["ioncore"]=true
