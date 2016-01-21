@@ -1657,16 +1657,10 @@ static int extl_l1_call_handler(lua_State *st) {
 #ifdef EXTL_LOG_ERRORS
   WarnChain ch;
 #endif
-  L1Param param = {{
-                    NULL,
-                   },
-                   {
-                    NULL,
-                   },
-                   NULL,
-                   0,
-                   0,
-                   0};
+  L1Param param = { { NULL, },
+                    { NULL, },
+                    NULL, 0, 0, 0
+  };
   L1Param *old_param;
   int ret;
   int n = lua_gettop(st);
@@ -2274,11 +2268,11 @@ void extl_dohook(lua_State *L, lua_Debug *ar) {
     (*current_hook)(event, ar->name, ar->source + 1, ar->linedefined);
 }
 
-int extl_sethook(ExtlHook hook) {
+void extl_sethook(ExtlHook hook) {
   current_hook = hook;
-  return lua_sethook(l_st, extl_dohook, LUA_MASKCALL | LUA_MASKRET, -1);
+  lua_sethook(l_st, extl_dohook, LUA_MASKCALL | LUA_MASKRET, -1);
 }
 
-int extl_resethook() { return lua_sethook(l_st, NULL, 0, -1); }
+void extl_resethook() { lua_sethook(l_st, NULL, 0, -1); }
 
 /*}}}*/
