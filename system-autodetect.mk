@@ -11,6 +11,8 @@
 #DIST: PREFIX=/usr/local
 PREFIX ?= /usr
 
+PKG_CONFIG ?= pkg-config
+
 # Unless you are creating a package conforming to some OS's standards, you
 # probably do not want to modify the following directories:
 
