@@ -153,50 +153,65 @@ bool mod_sm_have_match_list() {
 
 /* Tries to match a window against a list of loaded matches */
 
-static WWinMatch *match_cwin(WClientWin *cwin) {
-  WWinMatch *match = match_list;
-  int win_match;
-  XClassHint clss;
-  char *client_id = mod_sm_get_client_id(cwin->win);
-  char *window_role = mod_sm_get_window_role(cwin->win);
-  char *wm_cmd = mod_sm_get_window_cmd(cwin->win);
-  char **wm_name = NULL;
-  int n;
+static WWinMatch *match_cwin(WClientWin *cwin)
+{
+    WWinMatch *match=NULL;
+    int win_match;
+    XClassHint clss={NULL, NULL};
+    char *client_id=mod_sm_get_client_id(cwin->win);
+    char *window_role=mod_sm_get_window_role(cwin->win);
+    char *wm_cmd=mod_sm_get_window_cmd(cwin->win);
+    char **wm_name=NULL;
+    int n;
 
-  wm_name = xwindow_get_text_property(cwin->win, XA_WM_NAME, &n);
-  if (n <= 0) assert(wm_name == NULL);
+    wm_name=xwindow_get_text_property(cwin->win, XA_WM_NAME, &n);
+    if(n<=0)
+        assert(wm_name==NULL);
 
-  XGetClassHint(ioncore_g.dpy, cwin->win, &clss);
-
-  for (; match != NULL; match = match->next) {
-    win_match = 0;
-
-    if (client_id || match->client_id) {
-      if (xstreq(match->client_id, client_id)) {
-        win_match += 2;
-        if (xstreq(match->window_role, window_role)) win_match++;
-      }
+    if (!XGetClassHint(ioncore_g.dpy, cwin->win, &clss)){
+        warn("XGetClassHint failed");
+        goto done;
     }
-    if (win_match < 3) {
-      if (xstreq(match->wclass, clss.res_class) &&
-          xstreq(match->winstance, clss.res_name)) {
-        win_match++;
-        if (win_match < 3) {
-          if (xstreq(match->wm_cmd, wm_cmd)) win_match++;
-          if (wm_name != NULL && *wm_name != NULL &&
-              xstreq(match->wm_name, *wm_name)) {
-            win_match++;
-          }
+
+    for(match=match_list; match!=NULL; match=match->next){
+
+        win_match=0;
+
+        if(xstreq(match->client_id, client_id)){
+            win_match+=2;
+            if(xstreq(match->window_role, window_role))
+                win_match++;
         }
-      }
+        if(win_match<3){
+            if(xstreq(match->wclass, clss.res_class) && xstreq(match->winstance, clss.res_name)){
+                win_match++;
+                if(win_match<3){
+                    if(xstreq(match->wm_cmd, wm_cmd))
+                        win_match++;
+                    if(wm_name!=NULL && xstreq(match->wm_name, *wm_name)){
+                        win_match++;
+                    }
+                }
+            }
+        }
+        if(win_match>2)
+            break;
     }
-    if (win_match > 2) break;
-  }
-  XFree(client_id);
-  XFree(window_role);
-  XFreeStringList(wm_name);
-  free(wm_cmd);
-  return match;
+
+done:
+    if (client_id)
+        XFree(client_id);
+    if (window_role)
+        XFree(window_role);
+    if (wm_name)
+        XFreeStringList(wm_name);
+    free(wm_cmd);
+    if (clss.res_name)
+        XFree(clss.res_name);
+    if (clss.res_class)
+        XFree(clss.res_class);
+
+    return match;
 }
 
 /* Returns frame_id of a match. Called from add_clientwin_alt in sm.c */
