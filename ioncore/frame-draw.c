@@ -378,28 +378,7 @@ void frame_release_brushes(WFrame *frame) {
 }
 
 bool frame_set_background(WFrame *frame, bool set_always) {
-  GrTransparency mode = GR_TRANSPARENCY_DEFAULT;
-
-  if (FRAME_CURRENT(frame) != NULL) {
-    if (OBJ_IS(FRAME_CURRENT(frame), WClientWin)) {
-      WClientWin *cwin = (WClientWin *)FRAME_CURRENT(frame);
-      mode = (cwin->flags & CLIENTWIN_PROP_TRANSPARENT ? GR_TRANSPARENCY_YES
-                                                       : GR_TRANSPARENCY_NO);
-    } else if (!OBJ_IS(FRAME_CURRENT(frame), WGroup)) {
-      mode = GR_TRANSPARENCY_NO;
-    }
-  }
-
-  if (mode != frame->tr_mode || set_always) {
-    frame->tr_mode = mode;
-    if (frame->brush != NULL) {
-      grbrush_enable_transparency(frame->brush, mode);
-      window_draw((WWindow *)frame, TRUE);
-    }
-    return TRUE;
-  }
-
-  return FALSE;
+    window_draw((WWindow *)frame, TRUE);
 }
 
 void frame_setup_dragwin_style(WFrame *frame, GrStyleSpec *spec, int tab) {

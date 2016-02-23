@@ -94,9 +94,6 @@ static DEBrush *do_get_brush(Window win, WRootWin *rootwin,
   gr_stylespec_unalloc(&spec);
 
   /* Set background colour */
-  if (brush != NULL && !slave) {
-    grbrush_enable_transparency(&(brush->grbrush), GR_TRANSPARENCY_DEFAULT);
-  }
 
   return brush;
 }
@@ -247,7 +244,6 @@ static DynFunTab debrush_dynfuntab[] = {
     {grbrush_draw_textbox, debrush_draw_textbox},
     {grbrush_draw_textboxes, debrush_draw_textboxes},
     {grbrush_set_window_shape, debrush_set_window_shape},
-    {grbrush_enable_transparency, debrush_enable_transparency},
     {grbrush_clear_area, debrush_clear_area},
     {grbrush_fill_area, debrush_fill_area},
     {(DynFun *)grbrush_get_extra, (DynFun *)debrush_get_extra},

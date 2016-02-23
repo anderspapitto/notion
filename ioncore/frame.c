@@ -87,7 +87,6 @@ bool frame_init(WFrame *frame, WWindow *parent, const WFitParams *fp,
   frame->titles_n = 0;
   frame->bar_h = 0;
   frame->bar_w = fp->g.w;
-  frame->tr_mode = GR_TRANSPARENCY_DEFAULT;
   frame->brush = NULL;
   frame->bar_brush = NULL;
   frame->mode = mode;

@@ -101,9 +101,6 @@ static void clientwin_get_winprops(WClientWin *cwin) {
 
   if (tab == extl_table_none()) return;
 
-  if (extl_table_is_bool_set(tab, "transparent"))
-    cwin->flags |= CLIENTWIN_PROP_TRANSPARENT;
-
   if (extl_table_is_bool_set(tab, "acrobatic"))
     cwin->flags |= CLIENTWIN_PROP_ACROBATIC;
 
@@ -584,7 +581,7 @@ void clientwin_tfor_changed(WClientWin *cwin) {
     param.tfor=clientwin_get_transient_for(cwin);
     if(param.tfor==NULL)
         return;
-    
+
     region_rootpos((WRegion*)cwin, &(param.geom.x), &(param.geom.y));
     param.geom.w=REGION_GEOM(cwin).w;
     param.geom.h=REGION_GEOM(cwin).h;
@@ -593,7 +590,7 @@ void clientwin_tfor_changed(WClientWin *cwin) {
     param.switchto=region_may_control_focus((WRegion*)cwin);
     param.jumpto=extl_table_is_bool_set(cwin->proptab, "jumpto");
     param.gravity=ForgetGravity;
-    
+
     CALL_ALT_B(succeeded, clientwin_do_manage_alt, (cwin, &param));
     warn("WM_TRANSIENT_FOR changed for \"%s\".",
          region_name((WRegion*)cwin));

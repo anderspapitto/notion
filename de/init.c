@@ -207,8 +207,6 @@ void de_get_extra_cgrps(WRootWin *rootwin, DEStyle *style, ExtlTab tab) {
 
 /*}}}*/
 
-/*{{{ Misc. */
-
 void de_get_text_align(int *alignret, ExtlTab tab) {
   char *align = NULL;
 
@@ -225,14 +223,6 @@ void de_get_text_align(int *alignret, ExtlTab tab) {
 
   free(align);
 }
-
-void de_get_transparent_background(uint *mode, ExtlTab tab) {
-  bool b;
-
-  if (extl_table_gets_b(tab, "transparent_background", &b)) *mode = b;
-}
-
-/*}}}*/
 
 /*{{{ Extras filter/copy */
 
@@ -276,7 +266,6 @@ void de_get_nonfont(WRootWin *rootwin, DEStyle *style, ExtlTab tab) {
 
   if (based_on != NULL) {
     style->border = based_on->border;
-    style->transparency_mode = based_on->transparency_mode;
     style->textalign = based_on->textalign;
     style->spacing = based_on->spacing;
   }
@@ -285,8 +274,6 @@ void de_get_nonfont(WRootWin *rootwin, DEStyle *style, ExtlTab tab) {
   de_get_border_val(&(style->spacing), tab, "spacing");
 
   de_get_text_align(&(style->textalign), tab);
-
-  de_get_transparent_background(&(style->transparency_mode), tab);
 
   style->cgrp_alloced = TRUE;
   de_get_colour_group(rootwin, &(style->cgrp), tab, based_on);

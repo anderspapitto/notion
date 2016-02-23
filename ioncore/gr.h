@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/gr.h
  *
- * Copyright (c) Tuomo Valkonen 1999-2009. 
+ * Copyright (c) Tuomo Valkonen 1999-2009.
  *
  * See the included file LICENSE for details.
  */
@@ -66,12 +66,6 @@ typedef struct{
 } GrTextElem;
 
 typedef enum{
-    GR_TRANSPARENCY_NO,
-    GR_TRANSPARENCY_YES,
-    GR_TRANSPARENCY_DEFAULT
-} GrTransparency;
-
-typedef enum{
     GR_BORDERLINE_NONE,
     GR_BORDERLINE_LEFT,
     GR_BORDERLINE_RIGHT,
@@ -114,7 +108,7 @@ extern bool gr_stylespec_append(GrStyleSpec *dst, const GrStyleSpec *src);
 extern void gr_stylespec_unalloc(GrStyleSpec *spec);
 extern bool gr_stylespec_equals(const GrStyleSpec *s1, const GrStyleSpec *s2);
 extern bool gr_stylespec_load(GrStyleSpec *spec, const char *str);
-extern bool gr_stylespec_load_(GrStyleSpec *spec, const char *str, 
+extern bool gr_stylespec_load_(GrStyleSpec *spec, const char *str,
                                bool no_order_score);
 
 /* GrBrush */
@@ -122,7 +116,7 @@ extern bool gr_stylespec_load_(GrStyleSpec *spec, const char *str,
 extern GrBrush *gr_get_brush(Window win, WRootWin *rootwin,
                              const char *style);
 
-DYNFUN GrBrush *grbrush_get_slave(GrBrush *brush, WRootWin *rootwin, 
+DYNFUN GrBrush *grbrush_get_slave(GrBrush *brush, WRootWin *rootwin,
                                   const char *style);
 
 extern void grbrush_release(GrBrush *brush);
@@ -163,25 +157,23 @@ DYNFUN void grbrush_draw_textbox(GrBrush *brush, const WRectangle *geom,
                                  const char *text, bool needfill);
 
 DYNFUN void grbrush_draw_textboxes(GrBrush *brush, const WRectangle *geom,
-                                   int n, const GrTextElem *elem, 
+                                   int n, const GrTextElem *elem,
                                    bool needfill);
 
 /* Misc */
 
-/* Behaviour of the following two functions for "slave brushes" is undefined. 
- * If the parameter rough to grbrush_set_window_shape is set, the actual 
+/* Behaviour of the following two functions for "slave brushes" is undefined.
+ * If the parameter rough to grbrush_set_window_shape is set, the actual
  * shape may be changed for corner smoothing and other superfluous effects.
  * (This feature is only used by floatframes.)
  */
 DYNFUN void grbrush_set_window_shape(GrBrush *brush, bool rough,
                                      int n, const WRectangle *rects);
 
-DYNFUN void grbrush_enable_transparency(GrBrush *brush, GrTransparency mode);
-
 DYNFUN void grbrush_fill_area(GrBrush *brush, const WRectangle *geom);
 DYNFUN void grbrush_clear_area(GrBrush *brush, const WRectangle *geom);
 
-DYNFUN bool grbrush_get_extra(GrBrush *brush, const char *key, 
+DYNFUN bool grbrush_get_extra(GrBrush *brush, const char *key,
                               char type, void *data);
 
 #endif /* ION_IONCORE_GR_H */

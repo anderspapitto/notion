@@ -30,7 +30,6 @@ static void panehandle_getbrush(WPaneHandle *pwin) {
     pwin->brush = brush;
 
     grbrush_get_border_widths(brush, &(pwin->bdw));
-    grbrush_enable_transparency(brush, GR_TRANSPARENCY_YES);
   }
 }
 

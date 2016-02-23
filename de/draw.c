@@ -517,24 +517,6 @@ void debrush_set_window_shape(DEBrush *brush, bool UNUSED(rough), int n,
                           ShapeSet, Unsorted);
 }
 
-void debrush_enable_transparency(DEBrush *brush, GrTransparency mode) {
-  XSetWindowAttributes attr;
-  ulong attrflags = 0;
-
-  if (mode == GR_TRANSPARENCY_DEFAULT) mode = brush->d->transparency_mode;
-
-  if (mode == GR_TRANSPARENCY_YES) {
-    attrflags = CWBackPixmap;
-    attr.background_pixmap = ParentRelative;
-  } else {
-    attrflags = CWBackPixel;
-    attr.background_pixel = PIXEL(brush->d->cgrp.bg);
-  }
-
-  XChangeWindowAttributes(ioncore_g.dpy, brush->win, attrflags, &attr);
-  XClearWindow(ioncore_g.dpy, brush->win);
-}
-
 void debrush_fill_area(DEBrush *brush, const WRectangle *geom) {
   DEColourGroup *cg = debrush_get_current_colour_group(brush);
   GC gc = brush->d->normal_gc;

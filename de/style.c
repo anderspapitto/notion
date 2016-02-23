@@ -217,8 +217,6 @@ bool destyle_init(DEStyle *style, WRootWin *rootwin, const char *name) {
 
   style->font = NULL;
 
-  style->transparency_mode = GR_TRANSPARENCY_NO;
-
   style->n_extra_cgrps = 0;
   style->extra_cgrps = NULL;
 

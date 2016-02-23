@@ -79,10 +79,10 @@ bool screen_init(WScreen *scr, WRootWin *parent, const WFitParams *fp, int id,
     return FALSE;
   }
 
-  /*scr->mplex.win.region.rootwin=rootwin;
-  region_set_parent((WRegion*)scr, (WRegion*)rootwin);*/
   scr->mplex.flags |= MPLEX_ADD_TO_END;
   scr->mplex.win.region.flags |= REGION_BINDINGS_ARE_GRABBED;
+  //scr->mplex.win.region.rootwin=rootwin;
+  //region_set_parent((WRegion*)scr, (WRegion*)rootwin);
 
   if (!is_root) {
     scr->mplex.win.region.flags |= REGION_MAPPED;

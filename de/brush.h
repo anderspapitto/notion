@@ -104,12 +104,7 @@ extern void debrush_draw_textboxes(DEBrush *brush, const WRectangle *geom,
 extern DEBrushExtrasFn debrush_tab_extras;
 extern DEBrushExtrasFn debrush_menuentry_extras;
 
-/* Misc */
-
-extern void debrush_set_window_shape(DEBrush *brush, bool rough,
-                                     int n, const WRectangle *rects);
-
-extern void debrush_enable_transparency(DEBrush *brush, GrTransparency mode);
+extern void debrush_set_window_shape(DEBrush *brush, bool rough, int n, const WRectangle *rects);
 extern void debrush_fill_area(DEBrush *brush, const WRectangle *geom);
 extern void debrush_clear_area(DEBrush *brush, const WRectangle *geom);
 

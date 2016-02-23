@@ -467,10 +467,6 @@ void grbrush_set_window_shape(GrBrush *brush, bool rough, int n,
   CALL_DYN(grbrush_set_window_shape, brush, (brush, rough, n, rects));
 }
 
-void grbrush_enable_transparency(GrBrush *brush, GrTransparency tr) {
-  CALL_DYN(grbrush_enable_transparency, brush, (brush, tr));
-}
-
 void grbrush_fill_area(GrBrush *brush, const WRectangle *geom) {
   CALL_DYN(grbrush_fill_area, brush, (brush, geom));
 }
