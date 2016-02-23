@@ -269,11 +269,8 @@ static void dock_get_outline_style(WDock *dock, int *ret) {
 
 static void dock_get_tile_size(WDock *dock, WRectangle *ret) {
   ExtlTab tile_size_table;
-
-  ret->x = 0;
-  ret->y = 0;
-  ret->w = dock_param_tile_width.dflt;
-  ret->h = dock_param_tile_height.dflt;
+  ret->x = 0; ret->y = 0;
+  ret->w = dock_param_tile_width.dflt; ret->h = dock_param_tile_height.dflt;
   if (dock->brush == NULL) return;
   if (grbrush_get_extra(dock->brush, "tile_size", 't', &tile_size_table)) {
     extl_table_gets_i(tile_size_table, dock_param_tile_width.key, &ret->w);
@@ -283,27 +280,6 @@ static void dock_get_tile_size(WDock *dock, WRectangle *ret) {
 }
 
 static void dock_get_pos_grow(WDock *dock, int *pos, int *grow) {
-  WMPlex *mplex = OBJ_CAST(REGION_PARENT(dock), WMPlex);
-  WRegion *mplex_stdisp;
-  WMPlexSTDispInfo din;
-
-  if (mplex != NULL) {
-    mplex_get_stdisp(mplex, &mplex_stdisp, &din);
-    if (mplex_stdisp == (WRegion *)dock) {
-      /* Ok, we're assigned as a status display for mplex, so
-       * get parameters from there.
-       */
-      *pos = ((din.pos == MPLEX_STDISP_TL || din.pos == MPLEX_STDISP_BL)
-                  ? DOCK_HPOS_LEFT
-                  : DOCK_HPOS_RIGHT) |
-             ((din.pos == MPLEX_STDISP_TL || din.pos == MPLEX_STDISP_TR)
-                  ? DOCK_VPOS_TOP
-                  : DOCK_VPOS_BOTTOM);
-      *grow = dock->grow;
-      return;
-    }
-  }
-
   *grow = dock->grow;
   *pos = dock->pos;
 }
@@ -362,10 +338,8 @@ static void dock_reshape(WDock *dock) {
       XRectangle rect;
 
       geom = REGION_GEOM(dock);
-      rect.x = 0;
-      rect.y = 0;
-      rect.width = geom.w;
-      rect.height = geom.h;
+      rect.x = 0; rect.y = 0;
+      rect.width = geom.w; rect.height = geom.h;
       XShapeCombineRectangles(ioncore_g.dpy, ((WWindow *)dock)->win,
                               ShapeBounding, 0, 0, &rect, 1, ShapeSet, 0);
     } break;
@@ -700,11 +674,8 @@ void dock_size_hints(WDock *dock, WSizeHints *hints) {
 
 static bool dock_fitrep(WDock *dock, WWindow *parent, const WFitParams *fp) {
   if (!window_fitrep(&(dock->win), parent, fp)) return FALSE;
-
   dock_arrange_dockapps(dock, &(fp->g), NULL, NULL);
-
   if (ioncore_g.shape_extension) dock_reshape(dock);
-
   return TRUE;
 }
 
@@ -724,10 +695,8 @@ static void dock_draw(WDock *dock, bool complete) {
 
   if (dock->brush == NULL) return;
 
-  g.x = 0;
-  g.y = 0;
-  g.w = REGION_GEOM(dock).w;
-  g.h = REGION_GEOM(dock).h;
+  g.x = 0; g.y = 0;
+  g.w = REGION_GEOM(dock).w; g.h = REGION_GEOM(dock).h;
 
   grbrush_begin(dock->brush, &g, (complete ? 0 : GRBRUSH_NO_CLEAR_OK));
 
@@ -784,46 +753,12 @@ static void dock_updategr(WDock *dock) {
 
 static void mplexpos(int pos, int *mpos) {
   int hp = pos & DOCK_HPOS_MASK, vp = pos & DOCK_VPOS_MASK;
-  int p;
-
-  p = (vp != DOCK_VPOS_MIDDLE
-           ? (vp == DOCK_VPOS_TOP
-                  ? (hp != DOCK_HPOS_CENTER
-                         ? (hp == DOCK_HPOS_RIGHT ? MPLEX_STDISP_TR
-                                                  : MPLEX_STDISP_TL)
-                         : -1)
-                  : (hp != DOCK_HPOS_CENTER
-                         ? (hp == DOCK_HPOS_RIGHT ? MPLEX_STDISP_BR
-                                                  : MPLEX_STDISP_BL)
-                         : -1))
-           : -1);
-
-  if (p == -1)
-    warn("Invalid dock position while as stdisp.");
-  else
-    *mpos = p;
+  *mpos = MPLEX_STDISP_BL;
 }
 
 static void mplexszplcy(int pos, WSizePolicy *szplcy) {
   int hp = pos & DOCK_HPOS_MASK, vp = pos & DOCK_VPOS_MASK;
-  WSizePolicy p;
-
-  p = (vp != DOCK_VPOS_MIDDLE
-           ? (vp == DOCK_VPOS_TOP ? (hp != DOCK_HPOS_CENTER
-                                         ? (hp == DOCK_HPOS_RIGHT
-                                                ? SIZEPOLICY_GRAVITY_NORTHEAST
-                                                : SIZEPOLICY_GRAVITY_NORTHWEST)
-                                         : SIZEPOLICY_GRAVITY_NORTH)
-                                  : (hp != DOCK_HPOS_CENTER
-                                         ? (hp == DOCK_HPOS_RIGHT
-                                                ? SIZEPOLICY_GRAVITY_SOUTHEAST
-                                                : SIZEPOLICY_GRAVITY_SOUTHWEST)
-                                         : SIZEPOLICY_GRAVITY_SOUTH))
-           : (hp != DOCK_HPOS_CENTER
-                  ? (hp == DOCK_HPOS_RIGHT ? SIZEPOLICY_GRAVITY_EAST
-                                           : SIZEPOLICY_GRAVITY_WEST)
-                  : SIZEPOLICY_GRAVITY_CENTER));
-
+  WSizePolicy p = SIZEPOLICY_GRAVITY_SOUTHWEST;
   *szplcy = p;
 }
 
@@ -842,37 +777,13 @@ static void dock_do_set(WDock *dock, ExtlTab conftab, bool resize) {
   }
 
   if (extl_table_gets_b(conftab, "save", &save)) dock->save = save;
-
   if (dock_param_extl_table_set(&dock_param_pos, conftab, &dock->pos))
     posset = TRUE;
-
   if (dock_param_extl_table_set(&dock_param_grow, conftab, &dock->grow))
     growset = TRUE;
-
   if (extl_table_gets_b(conftab, dock_param_is_auto.key, &b)) dock->is_auto = b;
-
   if (resize && (growset || posset)) {
     WMPlex *par = OBJ_CAST(REGION_PARENT(dock), WMPlex);
-    WRegion *stdisp = NULL;
-    WMPlexSTDispInfo din;
-
-    if (par != NULL) {
-      mplex_get_stdisp(par, &stdisp, &din);
-      din.fullsize = FALSE; /* not supported. */
-      if (stdisp == (WRegion *)dock) {
-        if (posset) mplexpos(dock->pos, &din.pos);
-        if (growset) {
-          /* Update min/max first */
-          dock_managed_rqgeom_(dock, NULL, 0, NULL, NULL, TRUE);
-        }
-        mplex_set_stdisp(par, (WRegion *)dock, &din);
-      } else if ((WRegion *)par == REGION_MANAGER(dock)) {
-        WSizePolicy szplcy;
-        mplexszplcy(dock->pos, &szplcy);
-        mplex_set_szplcy(par, (WRegion *)dock, szplcy);
-      }
-    }
-
     dock_resize(dock);
   }
 }
@@ -934,21 +845,15 @@ static bool dock_init(WDock *dock, WWindow *parent, const WFitParams *fp) {
   dock->is_auto = dock_param_is_auto.dflt;
   dock->brush = NULL;
   dock->dockapps = NULL;
-  dock->min_w = 1;
-  dock->min_h = 1;
-  dock->max_w = 1;
-  dock->max_h = 1;
+  dock->min_w = 1; dock->min_h = 1;
+  dock->max_w = 1; dock->max_h = 1;
   dock->arrange_called = FALSE;
   dock->save = TRUE;
 
   if (!window_init((WWindow *)dock, parent, &fp2, "WDock")) return FALSE;
-
   region_add_bindmap((WRegion *)dock, dock_bindmap);
-
   window_select_input(&(dock->win), IONCORE_EVENTMASK_CWINMGR);
-
   dock_brush_get(dock);
-
   LINK_ITEM(docks, dock, dock_next, dock_prev);
 
   return TRUE;
@@ -960,11 +865,8 @@ static WDock *create_dock(WWindow *parent, const WFitParams *fp) {
 
 static void dock_deinit(WDock *dock) {
   while (dock->dockapps != NULL) destroy_obj((Obj *)dock->dockapps->reg);
-
   UNLINK_ITEM(docks, dock, dock_next, dock_prev);
-
   dock_brush_release(dock);
-
   window_deinit((WWindow *)dock);
 }
 
@@ -1005,23 +907,9 @@ WDock *mod_dock_create(ExtlTab tab) {
     }
   }
 
-  if (!floating) {
-    mplex_get_stdisp((WMPlex *)screen, &stdisp, &din);
-    if (stdisp != NULL && !extl_table_is_bool_set(tab, "force")) {
-      warn(
-          "Screen %d already has an stdisp. Refusing to add embedded "
-          "dock.",
-          screenid);
-      return NULL;
-    }
-  }
-
   /* Create the dock */
   fp.mode = REGION_FIT_BOUNDS | REGION_FIT_WHATEVER;
-  fp.g.x = 0;
-  fp.g.y = 0;
-  fp.g.w = 1;
-  fp.g.h = 1;
+  fp.g.x = 0; fp.g.y = 0; fp.g.w = 1; fp.g.h = 1;
 
   dock = create_dock((WWindow *)screen, &fp);
 
@@ -1045,10 +933,8 @@ WDock *mod_dock_create(ExtlTab tab) {
     par.flags = (MPLEX_ATTACH_UNNUMBERED | MPLEX_ATTACH_SIZEPOLICY |
                  MPLEX_ATTACH_GEOM | MPLEX_ATTACH_PASSIVE);
 
-    par.geom.w = dock->min_w;
-    par.geom.h = dock->min_h;
-    par.geom.x = 0;
-    par.geom.y = 0;
+    par.geom.w = dock->min_w; par.geom.h = dock->min_h;
+    par.geom.x = 0; par.geom.y = 0;
 
     mplexszplcy(dock->pos, &par.szplcy);
 
@@ -1062,7 +948,8 @@ WDock *mod_dock_create(ExtlTab tab) {
   } else {
     mplexpos(dock->pos, &din.pos);
     din.fullsize = FALSE; /* not supported */
-    if (mplex_set_stdisp((WMPlex *)screen, (WRegion *)dock, &din)) return dock;
+    if (mplex_set_stdisp((WMPlex *)screen, (WRegion *)dock, &din))
+        return dock;
   }
 
   /* Failed to attach. */
