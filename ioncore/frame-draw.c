@@ -1,11 +1,3 @@
-/*
- * ion/ioncore/frame-draw.c
- *
- * Copyright (c) Tuomo Valkonen 1999-2009.
- *
- * See the included file LICENSE for details.
- */
-
 #include <string.h>
 
 #include <libtu/objp.h>
@@ -26,8 +18,6 @@
   ((FRAME)->barmode == FRAME_BAR_INSIDE || (FRAME)->barmode == FRAME_BAR_NONE)
 #define BAR_EXISTS(FRAME) ((FRAME)->barmode != FRAME_BAR_NONE)
 #define BAR_H(FRAME) (FRAME)->bar_h
-
-/*{{{ Attributes */
 
 GR_DEFATTR(active);
 GR_DEFATTR(inactive);
@@ -58,14 +48,10 @@ static void ensure_create_attrs() {
 void frame_update_attr(WFrame *frame, int i, WRegion *reg) {
   GrStyleSpec *spec;
   bool selected, tagged, dragged, activity;
-
   if (i >= frame->titles_n) {
-    /* Might happen when deinitialising */
-    return;
+    return; /* Might happen when deinitialising */
   }
-
   ensure_create_attrs();
-
   spec = &frame->titles[i].attr;
 
   selected = (reg == FRAME_CURRENT(frame));
@@ -80,26 +66,16 @@ void frame_update_attr(WFrame *frame, int i, WRegion *reg) {
   gr_stylespec_set(spec, activity ? GR_ATTR(activity) : GR_ATTR(no_activity));
 }
 
-/*}}}*/
-
-/*{{{ (WFrame) dynfun default implementations */
-
 static uint get_spacing(const WFrame *frame) {
   GrBorderWidths bdw;
-
   if (frame->brush == NULL) return 0;
-
   grbrush_get_border_widths(frame->brush, &bdw);
-
   return bdw.spacing;
 }
 
 void frame_border_geom(const WFrame *frame, WRectangle *geom) {
-  geom->x = 0;
-  geom->y = 0;
-  geom->w = REGION_GEOM(frame).w;
-  geom->h = REGION_GEOM(frame).h;
-
+  geom->x = 0; geom->y = 0;
+  geom->w = REGION_GEOM(frame).w; geom->h = REGION_GEOM(frame).h;
   if (!BAR_INSIDE_BORDER(frame) && frame->brush != NULL) {
     geom->y += frame->bar_h;
     geom->h = maxof(0, geom->h - frame->bar_h);
@@ -108,14 +84,10 @@ void frame_border_geom(const WFrame *frame, WRectangle *geom) {
 
 void frame_border_inner_geom(const WFrame *frame, WRectangle *geom) {
   GrBorderWidths bdw;
-
   frame_border_geom(frame, geom);
-
   if (frame->brush != NULL) {
     grbrush_get_border_widths(frame->brush, &bdw);
-
-    geom->x += bdw.left;
-    geom->y += bdw.top;
+    geom->x += bdw.left; geom->y += bdw.top;
     geom->w = maxof(0, geom->w - (bdw.left + bdw.right));
     geom->h = maxof(0, geom->h - (bdw.top + bdw.bottom));
   }
@@ -123,35 +95,26 @@ void frame_border_inner_geom(const WFrame *frame, WRectangle *geom) {
 
 void frame_bar_geom(const WFrame *frame, WRectangle *geom) {
   uint off;
-
   if (BAR_INSIDE_BORDER(frame)) {
     off = 0; /*get_spacing(frame);*/
     frame_border_inner_geom(frame, geom);
   } else {
     off = 0;
-    geom->x = 0;
-    geom->y = 0;
-    geom->w = (frame->barmode == FRAME_BAR_SHAPED ? frame->bar_w
-                                                  : REGION_GEOM(frame).w);
+    geom->x = 0; geom->y = 0;
+    geom->w = (frame->barmode == FRAME_BAR_SHAPED ? frame->bar_w : REGION_GEOM(frame).w);
   }
-  geom->x += off;
-  geom->y += off;
-  geom->w = maxof(0, geom->w - 2 * off);
-  geom->h = BAR_H(frame);
+  geom->x += off; geom->y += off;
+  geom->w = maxof(0, geom->w - 2 * off); geom->h = BAR_H(frame);
 }
 
 void frame_managed_geom(const WFrame *frame, WRectangle *geom) {
   uint spacing = get_spacing(frame);
-
   frame_border_inner_geom(frame, geom);
-
   if (BAR_INSIDE_BORDER(frame) && BAR_EXISTS(frame)) {
     geom->y += frame->bar_h + spacing;
     geom->h -= frame->bar_h + spacing;
   }
-
-  geom->w = maxof(geom->w, 0);
-  geom->h = maxof(geom->h, 0);
+  geom->w = maxof(geom->w, 0); geom->h = maxof(geom->h, 0);
 }
 
 int frame_shaded_height(const WFrame *frame) {
@@ -161,9 +124,7 @@ int frame_shaded_height(const WFrame *frame) {
     return frame->bar_h;
   } else {
     GrBorderWidths bdw;
-
     grbrush_get_border_widths(frame->brush, &bdw);
-
     return frame->bar_h + bdw.top + bdw.bottom;
   }
 }
@@ -177,16 +138,13 @@ void frame_set_shape(WFrame *frame) {
       frame_bar_geom(frame, gs + n);
       n++;
     }
-    frame_border_geom(frame, gs + n);
-    n++;
-
+    frame_border_geom(frame, gs + n); n++;
     grbrush_set_window_shape(frame->brush, TRUE, n, gs);
   }
 }
 
 void frame_clear_shape(WFrame *frame) {
-  if (frame->brush != NULL)
-    grbrush_set_window_shape(frame->brush, TRUE, 0, NULL);
+  if (frame->brush != NULL) grbrush_set_window_shape(frame->brush, TRUE, 0, NULL);
 }
 
 static void free_title(WFrame *frame, int i) {
@@ -202,11 +160,8 @@ void frame_recalc_bar(WFrame *frame, bool complete) {
   WRegion *sub;
   char *title;
   bool set_shape;
-
   if (frame->bar_brush == NULL || frame->titles == NULL) return;
-
   set_shape = frame->tabs_params.alg(frame, complete);
-
   if (set_shape) {
     if (frame->barmode == FRAME_BAR_SHAPED)
       frame_set_shape(frame);
@@ -215,12 +170,11 @@ void frame_recalc_bar(WFrame *frame, bool complete) {
   }
 
   i = 0;
-
   if (FRAME_MCOUNT(frame) == 0) {
     free_title(frame, i);
     textw = frame->titles[i].iw;
     if (textw > 0) {
-      title = grbrush_make_label(frame->bar_brush, TR("<empty frame>"), textw);
+      title = grbrush_make_label(frame->bar_brush, TR("[ -- EmptyFrame -- ]"), textw);
       frame->titles[i].text = title;
     }
     return;
@@ -247,8 +201,7 @@ void frame_draw_bar(const WFrame *frame, bool complete) {
   frame_bar_geom(frame, &geom);
   grbrush_begin(frame->bar_brush, &geom, GRBRUSH_AMEND);
   grbrush_init_attr(frame->bar_brush, &frame->baseattr);
-  grbrush_draw_textboxes(frame->bar_brush, &geom, frame->titles_n,
-                         frame->titles, complete);
+  grbrush_draw_textboxes(frame->bar_brush, &geom, frame->titles_n, frame->titles, complete);
   grbrush_end(frame->bar_brush);
 }
 
@@ -272,23 +225,17 @@ void frame_brushes_updated(WFrame *frame) {
 
   if (frame->mode == FRAME_MODE_FLOATING) {
     barmode = FRAME_BAR_SHAPED;
-  } else if (frame->mode == FRAME_MODE_TILED ||
-             frame->mode == FRAME_MODE_UNKNOWN ||
-             frame->mode == FRAME_MODE_TRANSIENT_ALT) {
+  } else if (frame->mode == FRAME_MODE_TILED || frame->mode == FRAME_MODE_UNKNOWN || frame->mode == FRAME_MODE_TRANSIENT_ALT) {
     barmode = FRAME_BAR_INSIDE;
   } else {
     barmode = FRAME_BAR_NONE;
   }
 
   if (grbrush_get_extra(frame->brush, "bar", 's', &s)) {
-    if (strcmp(s, "inside") == 0)
-      barmode = FRAME_BAR_INSIDE;
-    else if (strcmp(s, "outside") == 0)
-      barmode = FRAME_BAR_OUTSIDE;
-    else if (strcmp(s, "shaped") == 0)
-      barmode = FRAME_BAR_SHAPED;
-    else if (strcmp(s, "none") == 0)
-      barmode = FRAME_BAR_NONE;
+    if (strcmp(s, "inside") == 0) barmode = FRAME_BAR_INSIDE;
+    else if (strcmp(s, "outside") == 0) barmode = FRAME_BAR_OUTSIDE;
+    else if (strcmp(s, "shaped") == 0) barmode = FRAME_BAR_SHAPED;
+    else if (strcmp(s, "none") == 0) barmode = FRAME_BAR_NONE;
     free(s);
   }
 
@@ -305,21 +252,13 @@ void frame_brushes_updated(WFrame *frame) {
 
     frame->bar_h = bdw.top + bdw.bottom + fnte.max_height;
   }
-
-  /* tabs and bar width calculation stuff */
   frame_tabs_calc_brushes_updated(frame);
 }
 
-/*}}}*/
-
-/*{{{ Misc. */
-
 void frame_updategr(WFrame *frame) {
   frame_release_brushes(frame);
-
   frame_initialise_gr(frame);
 
-  /* Update children */
   region_updategr_default((WRegion *)frame);
 
   mplex_fit_managed(&frame->mplex);
@@ -355,26 +294,15 @@ void frame_initialise_gr(WFrame *frame) {
   const char *tab_style = framemode_get_tab_style(frame->mode);
 
   frame->brush = gr_get_brush(win, rw, style);
-
   if (frame->brush == NULL) return;
-
   frame->bar_brush = grbrush_get_slave(frame->brush, rw, tab_style);
-
   if (frame->bar_brush == NULL) return;
-
   frame_brushes_updated(frame);
 }
 
 void frame_release_brushes(WFrame *frame) {
-  if (frame->bar_brush != NULL) {
-    grbrush_release(frame->bar_brush);
-    frame->bar_brush = NULL;
-  }
-
-  if (frame->brush != NULL) {
-    grbrush_release(frame->brush);
-    frame->brush = NULL;
-  }
+  if (frame->bar_brush != NULL) { grbrush_release(frame->bar_brush); frame->bar_brush = NULL; }
+  if (frame->brush != NULL) { grbrush_release(frame->brush); frame->brush = NULL; }
 }
 
 bool frame_set_background(WFrame *frame, bool set_always) {
@@ -386,26 +314,16 @@ void frame_setup_dragwin_style(WFrame *frame, GrStyleSpec *spec, int tab) {
   gr_stylespec_append(spec, &frame->titles[tab].attr);
 }
 
-/*}}}*/
-
-/*{{{ Activated/inactivated */
-
 void frame_inactivated(WFrame *frame) {
   ensure_create_attrs();
-
   gr_stylespec_set(&frame->baseattr, GR_ATTR(inactive));
   gr_stylespec_unset(&frame->baseattr, GR_ATTR(active));
-
   window_draw((WWindow *)frame, FALSE);
 }
 
 void frame_activated(WFrame *frame) {
   ensure_create_attrs();
-
   gr_stylespec_set(&frame->baseattr, GR_ATTR(active));
   gr_stylespec_unset(&frame->baseattr, GR_ATTR(inactive));
-
   window_draw((WWindow *)frame, FALSE);
 }
-
-/*}}}*/

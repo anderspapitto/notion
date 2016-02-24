@@ -1,11 +1,3 @@
-/*
- * ion/ioncore/frame.c
- *
- * Copyright (c) Tuomo Valkonen 1999-2009.
- *
- * See the included file LICENSE for details.
- */
-
 #include <string.h>
 
 #include <libtu/obj.h>
@@ -38,12 +30,9 @@
 #include "framedpholder.h"
 #include "return.h"
 
-extern bool frame_set_background(WFrame *frame, bool set_always);
 extern void frame_initialise_gr(WFrame *frame);
-
 static bool frame_initialise_titles(WFrame *frame);
 static void frame_free_titles(WFrame *frame);
-
 static void frame_add_mode_bindmaps(WFrame *frame);
 
 WHook *frame_managed_changed_hook = NULL;
@@ -53,43 +42,28 @@ WHook *frame_managed_changed_hook = NULL;
 #define DEST_EMPTY(FRAME) framemode_is_floating(frame_mode(FRAME))
 
 WFrameMode framemode_unalt(WFrameMode mode) {
-  if (mode == FRAME_MODE_UNKNOWN_ALT)
-    return FRAME_MODE_UNKNOWN;
-  else if (mode == FRAME_MODE_TILED_ALT)
-    return FRAME_MODE_TILED;
-  else if (mode == FRAME_MODE_FLOATING_ALT)
-    return FRAME_MODE_FLOATING;
-  else if (mode == FRAME_MODE_TRANSIENT_ALT)
-    return FRAME_MODE_TRANSIENT;
-  else
-    return mode;
+  if (mode == FRAME_MODE_UNKNOWN_ALT) return FRAME_MODE_UNKNOWN;
+  else if (mode == FRAME_MODE_TILED_ALT) return FRAME_MODE_TILED;
+  else if (mode == FRAME_MODE_FLOATING_ALT) return FRAME_MODE_FLOATING;
+  else if (mode == FRAME_MODE_TRANSIENT_ALT) return FRAME_MODE_TRANSIENT;
+  else return mode;
 }
 
 static WFrameMode framemode_is_floating(WFrameMode mode) {
   WFrameMode modea = framemode_unalt(mode);
-
   return (modea == FRAME_MODE_FLOATING || modea == FRAME_MODE_TRANSIENT);
 }
 
-/*{{{ Destroy/create frame */
-
-bool frame_init(WFrame *frame, WWindow *parent, const WFitParams *fp,
-                WFrameMode mode, char *name) {
+bool frame_init(WFrame *frame, WWindow *parent, const WFitParams *fp, WFrameMode mode, char *name) {
   WRectangle mg;
 
   frame->flags = 0;
-  frame->saved_geom.w = 0;
-  frame->saved_geom.h = 0;
-  frame->saved_geom.x = 0;
-  frame->saved_geom.y = 0;
+  frame->saved_geom.w = 0; frame->saved_geom.h = 0;
+  frame->saved_geom.x = 0; frame->saved_geom.y = 0;
   frame->tab_dragged_idx = -1;
-  frame->titles = NULL;
-  frame->titles_n = 0;
-  frame->bar_h = 0;
-  frame->bar_w = fp->g.w;
-  frame->brush = NULL;
-  frame->bar_brush = NULL;
-  frame->mode = mode;
+  frame->titles = NULL; frame->titles_n = 0;
+  frame->bar_h = 0; frame->bar_w = fp->g.w;
+  frame->brush = NULL; frame->bar_brush = NULL; frame->mode = mode;
   frame_tabs_width_recalc_init(frame);
 
   gr_stylespec_init(&frame->baseattr);
@@ -103,18 +77,13 @@ bool frame_init(WFrame *frame, WWindow *parent, const WFitParams *fp,
   region_add_bindmap((WRegion *)frame, ioncore_mplex_bindmap);
 
   frame_add_mode_bindmaps(frame);
-
   mplex_managed_geom((WMPlex *)frame, &mg);
-
   if (mg.h <= 1) frame->flags |= FRAME_SHADED;
-
   ((WRegion *)frame)->flags |= REGION_PLEASE_WARP;
-
   return TRUE;
 }
 
-WFrame *create_frame(WWindow *parent, const WFitParams *fp, WFrameMode mode,
-                     char *name) {
+WFrame *create_frame(WWindow *parent, const WFitParams *fp, WFrameMode mode, char *name) {
   CREATEOBJ_IMPL(WFrame, frame, (p, parent, fp, mode, name));
 }
 
@@ -124,10 +93,6 @@ void frame_deinit(WFrame *frame) {
   gr_stylespec_unalloc(&frame->baseattr);
   mplex_deinit((WMPlex *)frame);
 }
-
-/*}}}*/
-
-/*{{{ Mode switching */
 
 static void frame_add_mode_bindmaps(WFrame *frame) {
   WFrameMode modea = framemode_unalt(frame->mode);
@@ -140,8 +105,6 @@ static void frame_add_mode_bindmaps(WFrame *frame) {
     region_add_bindmap((WRegion *)frame, ioncore_frame_transient_bindmap);
     region_add_bindmap((WRegion *)frame, ioncore_frame_floating_bindmap);
   } else {
-    /* mode==FRAME_MODE_TILED || mode==FRAME_MODE_TILED_ALT ||
-     * mode==FRAME_MODE_UNKNOWN */
     region_add_bindmap((WRegion *)frame, ioncore_mplex_toplevel_bindmap);
     region_add_bindmap((WRegion *)frame, ioncore_frame_toplevel_bindmap);
     region_add_bindmap((WRegion *)frame, ioncore_frame_tiled_bindmap);
@@ -150,9 +113,7 @@ static void frame_add_mode_bindmaps(WFrame *frame) {
 
 void frame_set_mode(WFrame *frame, WFrameMode mode) {
   if (frame->mode == mode) return;
-
   frame_clear_shape(frame);
-
   frame_release_brushes(frame);
 
   region_remove_bindmap((WRegion *)frame, ioncore_mplex_toplevel_bindmap);
@@ -162,9 +123,7 @@ void frame_set_mode(WFrame *frame, WFrameMode mode) {
   region_remove_bindmap((WRegion *)frame, ioncore_frame_transient_bindmap);
 
   frame->mode = mode;
-
   frame_add_mode_bindmaps(frame);
-
   frame_updategr(frame);
 }
 
@@ -207,18 +166,12 @@ bool frame_set_mode_extl(WFrame *frame, const char *modestr) {
   return TRUE;
 }
 
-/*}}}*/
-
-/*{{{ Tabs */
-
 int frame_tab_at_x(WFrame *frame, int x) {
   WRectangle bg;
   int tab, tx;
 
   frame_bar_geom(frame, &bg);
-
   if (x >= bg.x + bg.w || x < bg.x) return -1;
-
   tx = bg.x;
 
   for (tab = 0; tab < FRAME_MCOUNT(frame); tab++) {
@@ -230,11 +183,8 @@ int frame_tab_at_x(WFrame *frame, int x) {
 }
 
 int frame_nth_tab_x(WFrame *frame, int n) {
-  uint x = 0;
-  int i;
-
-  for (i = 0; i < n; i++) x += frame_nth_tab_w(frame, i);
-
+  uint x = 0; int i = 0;
+  for (; i < n; i++) x += frame_nth_tab_w(frame, i);
   return x;
 }
 
@@ -242,15 +192,11 @@ int frame_nth_tab_w(WFrame *frame, int n) {
   GrBorderWidths bdw = GR_BORDER_WIDTHS_INIT;
 
   if (n > frame->titles_n) {
-    fprintf(
-        stderr,
-        "WARNING: we should not be here, please contact notion developers\n");
+    fprintf( stderr, "WARNING: we should not be here, please contact notion developers\n");
     return 0;
   }
   if (frame->titles[n].iw == 0) return 0; /* Too small tab. */
-
-  if (frame->bar_brush != NULL)
-    grbrush_get_border_widths(frame->bar_brush, &bdw);
+  if (frame->bar_brush != NULL) grbrush_get_border_widths(frame->bar_brush, &bdw);
 
   return frame->titles[n].iw + (n == 0 ? bdw.left : bdw.tb_ileft) +
          (n == frame->titles_n - 1 ? bdw.right : bdw.tb_iright + bdw.spacing);
@@ -258,7 +204,6 @@ int frame_nth_tab_w(WFrame *frame, int n) {
 
 void frame_update_attr_nth(WFrame *frame, int i) {
   if (i < 0 || i >= frame->titles_n) return;
-
   frame_update_attr(frame, i, mplex_mx_nth((WMPlex *)frame, i));
 }
 
@@ -289,19 +234,14 @@ static void frame_free_titles(WFrame *frame) {
 
 static void do_init_title(WFrame *frame, int i, WRegion *sub) {
   frame->titles[i].text = NULL;
-
   gr_stylespec_init(&frame->titles[i].attr);
-
   frame_update_attr(frame, i, sub);
 }
 
 static bool frame_initialise_titles(WFrame *frame) {
   int i, n = FRAME_MCOUNT(frame);
-
   frame_free_titles(frame);
-
   if (n == 0) n = 1;
-
   frame->titles = ALLOC_N(GrTextElem, n);
   if (frame->titles == NULL) return FALSE;
   frame->titles_n = n;
@@ -317,15 +257,9 @@ static bool frame_initialise_titles(WFrame *frame) {
       i++;
     }
   }
-
   frame_recalc_bar(frame, FALSE);
-
   return TRUE;
 }
-
-/*}}}*/
-
-/*{{{ Resize and reparent */
 
 bool frame_fitrep(WFrame *frame, WWindow *par, const WFitParams *fp) {
   WRectangle old_geom, mg;
@@ -333,11 +267,8 @@ bool frame_fitrep(WFrame *frame, WWindow *par, const WFitParams *fp) {
   bool hchg = (REGION_GEOM(frame).h != fp->g.h);
 
   old_geom = REGION_GEOM(frame);
-
   if (!window_fitrep(&(frame->mplex.win), par, fp)) return FALSE;
-
   mplex_managed_geom((WMPlex *)frame, &mg);
-
   if (!(frame->flags & FRAME_KEEP_FLAGS)) {
     if (hchg) {
       if (mg.h <= 1) {
@@ -391,10 +322,8 @@ void frame_size_hints(WFrame *frame, WSizeHints *hints_ret) {
   if (!USE_MINMAX(frame)) {
     hints_ret->max_set = 0;
     hints_ret->min_set = 0;
-    /*hints_ret->base_set=0;*/
     hints_ret->aspect_set = 0;
     hints_ret->no_constrain = FALSE;
-    /*hints_ret->no_constrain=TRUE;*/
   }
 
   if (!hints_ret->min_set) {
@@ -436,13 +365,7 @@ void frame_size_hints(WFrame *frame, WSizeHints *hints_ret) {
   }
 }
 
-/*}}}*/
-
-/*{{{ Client window rqgeom */
-
-static void frame_managed_rqgeom_absolute(WFrame *frame, WRegion *sub,
-                                          const WRQGeomParams *rq,
-                                          WRectangle *geomret) {
+static void frame_managed_rqgeom_absolute(WFrame *frame, WRegion *sub, const WRQGeomParams *rq, WRectangle *geomret) {
   if (!FORWARD_CWIN_RQGEOM(frame)) {
     region_managed_rqgeom_absolute_default((WRegion *)frame, sub, rq, geomret);
   } else {
@@ -457,8 +380,7 @@ static void frame_managed_rqgeom_absolute(WFrame *frame, WRegion *sub,
     if (rq->flags & REGION_RQGEOM_GRAVITY) gravity = rq->gravity;
 
     mplex_managed_geom(&frame->mplex, &off);
-    off.x = -off.x;
-    off.y = -off.y;
+    off.x = -off.x; off.y = -off.y;
     off.w = REGION_GEOM(frame).w - off.w;
     off.h = REGION_GEOM(frame).h - off.h;
 
@@ -486,28 +408,19 @@ static void frame_managed_rqgeom_absolute(WFrame *frame, WRegion *sub,
     region_rqgeom((WRegion *)frame, &rq2, geomret);
 
     if (geomret != NULL) {
-      geomret->x -= off.x;
-      geomret->y -= off.y;
-      geomret->w -= off.w;
-      geomret->h -= off.h;
+      geomret->x -= off.x; geomret->y -= off.y;
+      geomret->w -= off.w; geomret->h -= off.h;
     }
   }
 }
 
-/*}}}*/
-
-/*{{{ Frame recreate pholder stuff */
-
-static WFramedPHolder *frame_make_recreate_pholder(WFrame *frame,
-                                                   WPHolder *rph) {
+static WFramedPHolder *frame_make_recreate_pholder(WFrame *frame, WPHolder *rph) {
   WFramedParam fparam = FRAMEDPARAM_INIT;
   WFramedPHolder *fph = NULL;
 
   if (rph != NULL) {
     fparam.mode = frame->mode;
-
     fph = create_framedpholder(rph, &fparam);
-
     if (fph == NULL) destroy_obj((Obj *)rph);
   }
 
@@ -516,12 +429,9 @@ static WFramedPHolder *frame_make_recreate_pholder(WFrame *frame,
 
 static void mplex_migrate_phs_to_fph(WMPlex *mplex, WFramedPHolder *fph) {
   WMPlexPHolder *phs, *ph;
-
   phs = mplex->misc_phs;
   mplex->misc_phs = NULL;
-
   phs->recreate_pholder = fph;
-
   for (ph = phs; ph != NULL; ph = ph->next) ph->mplex = NULL;
 }
 
@@ -562,10 +472,6 @@ bool frame_rescue_clientwins(WFrame *frame, WRescueInfo *info) {
   return ret;
 }
 
-/*}}}*/
-
-/*{{{ Misc. */
-
 bool frame_set_shaded(WFrame *frame, int sp) {
   bool set = (frame->flags & FRAME_SHADED);
   bool nset = libtu_do_setparam(sp, set);
@@ -585,11 +491,8 @@ bool frame_set_shaded(WFrame *frame, int sp) {
   }
 
   frame->flags |= FRAME_SHADED_TOGGLE;
-
   region_rqgeom((WRegion *)frame, &rq, NULL);
-
   frame->flags &= ~FRAME_SHADED_TOGGLE;
-
   return (frame->flags & FRAME_SHADED);
 }
 
@@ -657,10 +560,8 @@ bool frame_set_grattr_extl(WFrame *frame, const char *attr, const char *how) {
   }
 }
 
-void frame_managed_notify(WFrame *frame, WRegion *UNUSED(sub),
-                          WRegionNotify how) {
+void frame_managed_notify(WFrame *frame, WRegion *UNUSED(sub), WRegionNotify how) {
   bool complete;
-
   if (how == ioncore_g.notifies.activated ||
       how == ioncore_g.notifies.inactivated || how == ioncore_g.notifies.name ||
       how == ioncore_g.notifies.activity ||
@@ -675,30 +576,18 @@ void frame_managed_notify(WFrame *frame, WRegion *UNUSED(sub),
 
 static void frame_size_changed_default(WFrame *frame, bool wchg, bool hchg) {
   int bar_w = frame->bar_w;
-
   if (wchg) frame_recalc_bar(frame, TRUE);
-
-  if (frame->barmode == FRAME_BAR_SHAPED &&
-      ((!wchg && hchg) || (wchg && bar_w == frame->bar_w))) {
+  if (frame->barmode == FRAME_BAR_SHAPED && ((!wchg && hchg) || (wchg && bar_w == frame->bar_w))) {
     frame_set_shape(frame);
   }
 }
 
-static void frame_managed_changed(WFrame *frame, int mode, bool sw,
-                                  WRegion *reg) {
+static void frame_managed_changed(WFrame *frame, int mode, bool sw, WRegion *reg) {
   bool need_draw = TRUE;
-
-  if (mode != MPLEX_CHANGE_SWITCHONLY)
-    frame_initialise_titles(frame);
-  else
-    frame_update_attrs(frame);
-
-  if (sw) need_draw = !frame_set_background(frame, FALSE);
-
+  if (mode != MPLEX_CHANGE_SWITCHONLY) frame_initialise_titles(frame);
+  else frame_update_attrs(frame);
   if (need_draw) frame_draw_bar(frame, mode != MPLEX_CHANGE_SWITCHONLY);
-
-  mplex_call_changed_hook((WMPlex *)frame, frame_managed_changed_hook, mode, sw,
-                          reg);
+  mplex_call_changed_hook((WMPlex *)frame, frame_managed_changed_hook, mode, sw, reg);
 }
 
 WRegion *frame_managed_disposeroot(WFrame *frame, WRegion *reg) {
@@ -707,17 +596,12 @@ WRegion *frame_managed_disposeroot(WFrame *frame, WRegion *reg) {
     WRegion *tmp = region_disposeroot((WRegion *)frame);
     return (tmp != NULL ? tmp : reg);
   }
-
   return reg;
 }
 
 int frame_default_index(WFrame *UNUSED(frame)) {
   return ioncore_g.frame_default_index;
 }
-
-/*}}}*/
-
-/*{{{ prepare_manage_transient */
 
 WPHolder *frame_prepare_manage_transient(WFrame *frame,
                                          const WClientWin *transient,
@@ -735,10 +619,6 @@ WPHolder *frame_prepare_manage_transient(WFrame *frame,
   }
 }
 
-/*}}}*/
-
-/*{{{ Save/load */
-
 ExtlTab frame_get_configuration(WFrame *frame) {
   ExtlTab tab = mplex_get_configuration(&frame->mplex);
 
@@ -748,7 +628,6 @@ ExtlTab frame_get_configuration(WFrame *frame) {
     extl_table_sets_i(tab, "saved_y", frame->saved_geom.y);
     extl_table_sets_i(tab, "saved_h", frame->saved_geom.h);
   }
-
   if (frame->flags & FRAME_SAVED_HORIZ) {
     extl_table_sets_i(tab, "saved_x", frame->saved_geom.x);
     extl_table_sets_i(tab, "saved_w", frame->saved_geom.w);
@@ -790,7 +669,6 @@ WRegion *frame_load(WWindow *par, const WFitParams *fp, ExtlTab tab) {
   }
 
   frame = create_frame(par, fp, mode, "WFrame");
-
   if (frame != NULL) frame_do_load(frame, tab);
 
   if (DEST_EMPTY(frame) && frame->mplex.mgd == NULL) {
@@ -808,46 +686,25 @@ WRegion *frame_load(WWindow *par, const WFitParams *fp, ExtlTab tab) {
   return (WRegion *)frame;
 }
 
-/*}}}*/
-
-/*{{{ Dynfuntab and class info */
-
 static DynFunTab frame_dynfuntab[] = {
     {region_size_hints, frame_size_hints},
-
     {mplex_managed_changed, frame_managed_changed},
     {mplex_size_changed, frame_size_changed_default},
     {region_managed_notify, frame_managed_notify},
-
     {region_activated, frame_activated},
     {region_inactivated, frame_inactivated},
-
     {(DynFun *)window_press, (DynFun *)frame_press},
-
     {(DynFun *)region_get_configuration, (DynFun *)frame_get_configuration},
-
     {window_draw, frame_draw},
-
     {mplex_managed_geom, frame_managed_geom},
-
     {region_updategr, frame_updategr},
-
     {(DynFun *)region_fitrep, (DynFun *)frame_fitrep},
-
     {(DynFun *)region_managed_disposeroot, (DynFun *)frame_managed_disposeroot},
-
     {region_managed_rqgeom_absolute, frame_managed_rqgeom_absolute},
-
     {(DynFun *)mplex_default_index, (DynFun *)frame_default_index},
-
-    {(DynFun *)region_prepare_manage_transient,
-     (DynFun *)frame_prepare_manage_transient},
-
+    {(DynFun *)region_prepare_manage_transient, (DynFun *)frame_prepare_manage_transient},
     {(DynFun *)region_rescue_clientwins, (DynFun *)frame_rescue_clientwins},
-
     END_DYNFUNTAB};
 
 EXTL_EXPORT
 IMPLCLASS(WFrame, WMPlex, frame_deinit, frame_dynfuntab);
-
-/*}}}*/
