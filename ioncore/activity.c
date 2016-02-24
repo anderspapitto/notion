@@ -1,11 +1,3 @@
-/*
- * ion/ioncore/activity.c
- *
- * Copyright (c) Tuomo Valkonen 1999-2009.
- *
- * See the included file LICENSE for details.
- */
-
 #include <libtu/setparam.h>
 #include <libtu/minmax.h>
 #include <libtu/objlist.h>

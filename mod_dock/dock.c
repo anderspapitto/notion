@@ -761,8 +761,7 @@ static bool dock_do_attach_final(WDock *dock, WRegion *reg, void *UNUSED(unused)
 static WRegion *dock_do_attach(WDock *dock, WRegionAttachData *data) {
     WFitParams fp;
     dock_get_tile_size(dock, &(fp.g));
-    fp.g.x = 0;
-    fp.g.y = 0;
+    fp.g.x = 0; fp.g.y = 0;
     fp.mode = REGION_FIT_WHATEVER | REGION_FIT_BOUNDS;
     return region_attach_helper((WRegion *)dock, (WWindow *)dock, &fp,
                                 (WRegionDoAttachFn *)dock_do_attach_final, NULL,
