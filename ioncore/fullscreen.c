@@ -27,10 +27,8 @@ bool region_fullscreen_scr(WRegion *reg, WScreen *scr, bool switchto) {
     ret = (mplex_attach_simple((WMPlex *)scr, reg, swf) != NULL);
     if (!ret) warn(TR("Failed to enter full screen mode."));
 
-    if (!ret && newph)
-        destroy_obj((Obj *)ph);
-    else if (!region_do_set_return(reg, ph))
-        destroy_obj((Obj *)ph);
+    if (!ret && newph) destroy_obj((Obj *)ph);
+    else if (!region_do_set_return(reg, ph)) destroy_obj((Obj *)ph);
 
     return TRUE;
 }

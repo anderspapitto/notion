@@ -263,7 +263,6 @@ void frame_updategr(WFrame *frame) {
 
   mplex_fit_managed(&frame->mplex);
   frame_recalc_bar(frame, TRUE);
-  frame_set_background(frame, TRUE);
 }
 
 static StringIntMap frame_tab_styles[] = {
@@ -303,10 +302,6 @@ void frame_initialise_gr(WFrame *frame) {
 void frame_release_brushes(WFrame *frame) {
   if (frame->bar_brush != NULL) { grbrush_release(frame->bar_brush); frame->bar_brush = NULL; }
   if (frame->brush != NULL) { grbrush_release(frame->brush); frame->brush = NULL; }
-}
-
-bool frame_set_background(WFrame *frame, bool set_always) {
-    window_draw((WWindow *)frame, TRUE);
 }
 
 void frame_setup_dragwin_style(WFrame *frame, GrStyleSpec *spec, int tab) {
