@@ -1,11 +1,3 @@
-/*
- * ion/ioncore/mplex.c
- *
- * Copyright (c) Tuomo Valkonen 1999-2009.
- *
- * See the included file LICENSE for details.
- */
-
 #include <limits.h>
 #include <string.h>
 
@@ -615,10 +607,6 @@ static void mplex_refocus(WMPlex *mplex, WStacking *node, bool warp) {
   if (foc != NULL) region_maybewarp(foc->reg, warp);
 }
 
-/*}}}*/
-
-/*{{{ Switch */
-
 static void mplex_do_remanage_stdisp(WMPlex *mplex, WRegion *sub) {
   WRegion *stdisp = (WRegion *)(mplex->stdispwatch.obj);
 
@@ -639,23 +627,17 @@ static void mplex_do_remanage_stdisp(WMPlex *mplex, WRegion *sub) {
 }
 
 void mplex_remanage_stdisp(WMPlex *mplex) {
-  mplex_do_remanage_stdisp(
-      mplex, (mplex->mx_current != NULL ? mplex->mx_current->st->reg : NULL));
+  mplex_do_remanage_stdisp(mplex, (mplex->mx_current != NULL ? mplex->mx_current->st->reg : NULL));
 }
 
-static void mplex_do_node_display(WMPlex *mplex, WStacking *node,
-                                  bool call_changed) {
+static void mplex_do_node_display(WMPlex *mplex, WStacking *node, bool call_changed) {
   WRegion *sub = node->reg;
   WLListNode *mxc = mplex->mx_current;
   WFitParams fp;
 
   if (!STACKING_IS_HIDDEN(node)) return;
-
-  if (node->lnode != NULL && node->lnode != mxc)
-    mplex_do_remanage_stdisp(mplex, sub);
-
+  if (node->lnode != NULL && node->lnode != mxc) mplex_do_remanage_stdisp(mplex, sub);
   node->hidden = FALSE;
-
   if (SUBS_MAY_BE_MAPPED(mplex))
     region_map(sub);
   else
@@ -696,7 +678,6 @@ static void mplex_do_node_display(WMPlex *mplex, WStacking *node,
         }
       }
     }
-
     if (call_changed)
       mplex_managed_changed(mplex, MPLEX_CHANGE_SWITCHONLY, TRUE, sub);
   }
@@ -714,9 +695,7 @@ bool mplex_do_prepare_focus(WMPlex *mplex, WStacking *node, WStacking *sub,
 
   /* Display the node in any case */
   if (node != NULL && !ew) mplex_do_node_display(mplex, node, TRUE);
-
   if (!region_prepare_focus((WRegion *)mplex, flags, res)) return FALSE;
-
   foc = mplex_do_to_focus_on(mplex, node, sub, hidelistp, NULL /*&within*/);
 
   if (foc != NULL) {
@@ -751,18 +730,11 @@ bool mplex_managed_prepare_focus(WMPlex *mplex, WRegion *disp, int flags,
     return mplex_do_prepare_focus(mplex, node, NULL, flags, res);
 }
 
-/*}}}*/
-
-/*{{{ Switch exports */
-
 static void do_switch(WMPlex *mplex, WLListNode *lnode) {
   WStacking *node = (lnode != NULL ? lnode->st : NULL);
-
   if (node != NULL) {
     bool mcf = region_may_control_focus((WRegion *)mplex);
-
     mplex_do_node_display(mplex, node, TRUE);
-
     if (mcf) mplex_refocus(mplex, node, TRUE);
   }
 }
@@ -781,8 +753,7 @@ void mplex_switch_nth(WMPlex *mplex, uint n) {
  */
 EXTL_EXPORT_MEMBER
 void mplex_switch_next(WMPlex *mplex) {
-  do_switch(mplex,
-            LIST_NEXT_WRAP(mplex->mx_list, mplex->mx_current, next, prev));
+  do_switch(mplex, LIST_NEXT_WRAP(mplex->mx_list, mplex->mx_current, next, prev));
 }
 
 /*EXTL_DOC
@@ -791,8 +762,7 @@ void mplex_switch_next(WMPlex *mplex) {
  */
 EXTL_EXPORT_MEMBER
 void mplex_switch_prev(WMPlex *mplex) {
-  do_switch(mplex,
-            LIST_PREV_WRAP(mplex->mx_list, mplex->mx_current, next, prev));
+  do_switch(mplex, LIST_PREV_WRAP(mplex->mx_list, mplex->mx_current, next, prev));
 }
 
 /*EXTL_DOC
@@ -808,26 +778,19 @@ bool mplex_set_hidden(WMPlex *mplex, WRegion *reg, int sp) {
   bool mcf = region_may_control_focus((WRegion *)mplex);
   WStacking *node = mplex_find_stacking(mplex, reg);
   bool hidden, nhidden;
-
   if (node == NULL) return FALSE;
-
   hidden = STACKING_IS_HIDDEN(node);
   nhidden = libtu_do_setparam(sp, hidden);
-
   if (!hidden && nhidden) {
     node->hidden = TRUE;
-
     if (REGION_IS_MAPPED(mplex) && !MPLEX_MGD_UNVIEWABLE(mplex))
       region_unmap(reg);
-
     /* lnode -> switch next? */
   } else if (hidden && !nhidden) {
     mplex_do_node_display(mplex, node, TRUE);
   }
-
   if (mcf && !PASSIVE(node))
     mplex_refocus(mplex, (nhidden ? NULL : node), TRUE);
-
   return STACKING_IS_HIDDEN(node);
 }
 
@@ -849,7 +812,6 @@ EXTL_SAFE
 EXTL_EXPORT_MEMBER
 bool mplex_is_hidden(WMPlex *mplex, WRegion *reg) {
   WStacking *node = mplex_find_stacking(mplex, reg);
-
   return (node != NULL && STACKING_IS_HIDDEN(node));
 }
 
@@ -867,21 +829,16 @@ static WStacking *mplex_prv(WMPlex *mplex, WStacking *st, bool wrap) {
 
 typedef WStacking *NxtFn(WMPlex *mplex, WStacking *st, bool wrap);
 
-static WRegion *do_navi(WMPlex *mplex, WStacking *sti, NxtFn *fn,
-                        WRegionNaviData *data, bool sti_ok, bool wrap) {
+static WRegion *do_navi(WMPlex *mplex, WStacking *sti, NxtFn *fn, WRegionNaviData *data, bool sti_ok, bool wrap) {
   WStacking *st, *stacking;
   uint min_level = 0;
 
   stacking = mplex_get_stacking(mplex);
-
   if (stacking != NULL) min_level = stacking_min_level_mapped(stacking);
-
   st = sti;
   while (1) {
     st = fn(mplex, st, wrap);
-
     if (st == NULL || (st == sti && !sti_ok)) break;
-
     if (!st->hidden) {
       if (OBJ_IS(st->reg, WGroup)) {
         /* WGroup navigation code should respect modal stuff. */
@@ -892,23 +849,16 @@ static WRegion *do_navi(WMPlex *mplex, WStacking *sti, NxtFn *fn,
           return region_navi_cont((WRegion *)mplex, st->reg, data);
       }
     }
-
     if (st == sti) break;
   }
-
   return NULL;
 }
 
-WRegion *mplex_navi_first(WMPlex *mplex, WRegionNavi nh,
-                          WRegionNaviData *data) {
+WRegion *mplex_navi_first(WMPlex *mplex, WRegionNavi nh, WRegionNaviData *data) {
   WStacking *lst = mplex->mgd;
   WRegion *res = NULL;
 
   if (lst != NULL) {
-    if (nh == REGION_NAVI_ANY) {
-      /* ? */
-    }
-
     if (nh == REGION_NAVI_ANY || nh == REGION_NAVI_END ||
         nh == REGION_NAVI_BOTTOM || nh == REGION_NAVI_RIGHT) {
       res = do_navi(mplex, lst, mplex_prv, data, TRUE, TRUE);
@@ -916,7 +866,6 @@ WRegion *mplex_navi_first(WMPlex *mplex, WRegionNavi nh,
       res = do_navi(mplex, lst->mgr_prev, mplex_nxt, data, TRUE, TRUE);
     }
   }
-
   return region_navi_cont((WRegion *)mplex, res, data);
 }
 
@@ -934,10 +883,6 @@ WRegion *mplex_navi_next(WMPlex *mplex, WRegion *rel, WRegionNavi nh,
     return mplex_navi_first(mplex, nh, data);
   }
 
-  if (nh == REGION_NAVI_ANY) {
-    /* ? */
-  }
-
   if (nh == REGION_NAVI_ANY || nh == REGION_NAVI_END ||
       nh == REGION_NAVI_BOTTOM || nh == REGION_NAVI_RIGHT) {
     res = do_navi(mplex, st, mplex_nxt, data, FALSE, FALSE);
@@ -947,10 +892,6 @@ WRegion *mplex_navi_next(WMPlex *mplex, WRegion *rel, WRegionNavi nh,
 
   return region_navi_cont((WRegion *)mplex, res, data);
 }
-
-/*}}}*/
-
-/*{{{ Stacking */
 
 bool mplex_managed_rqorder(WMPlex *mplex, WRegion *reg, WRegionOrder order) {
   WStacking **stackingp = mplex_get_stackingp(mplex);
@@ -968,10 +909,6 @@ bool mplex_managed_rqorder(WMPlex *mplex, WRegion *reg, WRegionOrder order) {
   return TRUE;
 }
 
-/*}}}*/
-
-/*{{{ Attach */
-
 static bool mplex_stack(WMPlex *mplex, WStacking *st) {
   WStacking *tmp = NULL;
   WStacking **stackingp = mplex_get_stackingp(mplex);
@@ -986,10 +923,6 @@ static bool mplex_stack(WMPlex *mplex, WStacking *st) {
 }
 
 static void mplex_unstack(WMPlex *mplex, WStacking *st) {
-  /*WStacking *stacking;*/
-
-  /*stacking=mplex_get_stacking(mplex);*/
-
   stacking_unstack(&mplex->win, st);
 }
 
@@ -1042,10 +975,8 @@ bool mplex_do_attach_final(WMPlex *mplex, WRegion *reg, WMPlexPHolder *ph) {
       stacking_free(node);
       return FALSE;
     }
-    lnode->next = NULL;
-    lnode->prev = NULL;
-    lnode->phs = NULL;
-    lnode->st = node;
+    lnode->next = NULL; lnode->prev = NULL;
+    lnode->phs = NULL; lnode->st = node;
     node->lnode = lnode;
   }
 
@@ -1077,13 +1008,9 @@ bool mplex_do_attach_final(WMPlex *mplex, WRegion *reg, WMPlexPHolder *ph) {
   }
 
   LINK_ITEM(mplex->mgd, node, mgr_next, mgr_prev);
-
   if (!OBJ_IS(reg, WGroup)) mplex_stack(mplex, node);
-
   region_set_manager(reg, (WRegion *)mplex);
-
   if (param->flags & MPLEX_ATTACH_PASSIVE) reg->flags |= REGION_SKIP_FOCUS;
-
   if (!(param->flags & MPLEX_ATTACH_WHATEVER)) {
     WFitParams fp;
 
@@ -1136,41 +1063,29 @@ static void mplex_attach_fp(WMPlex *mplex, const WMPlexAttachParams *param,
   fp->mode = REGION_FIT_WHATEVER | REGION_FIT_BOUNDS;
 }
 
-WRegion *mplex_do_attach_pholder(WMPlex *mplex, WMPlexPHolder *ph,
-                                 WRegionAttachData *data) {
+WRegion *mplex_do_attach_pholder(WMPlex *mplex, WMPlexPHolder *ph, WRegionAttachData *data) {
   WFitParams fp;
-
   mplex_attach_fp(mplex, &ph->param, &fp);
-
   return region_attach_helper((WRegion *)mplex, (WWindow *)mplex, &fp,
                               (WRegionDoAttachFn *)mplex_do_attach_final,
                               (void *)ph, data);
 }
 
-WRegion *mplex_do_attach(WMPlex *mplex, WMPlexAttachParams *param,
-                         WRegionAttachData *data) {
+WRegion *mplex_do_attach(WMPlex *mplex, WMPlexAttachParams *param, WRegionAttachData *data) {
   WMPlexPHolder *ph;
   WRegion *reg;
-
   ph = create_mplexpholder(mplex, NULL, param);
-
   if (ph == NULL) return NULL;
-
   reg = mplex_do_attach_pholder(mplex, ph, data);
-
   destroy_obj((Obj *)ph);
-
   return reg;
 }
 
-WRegion *mplex_do_attach_new(WMPlex *mplex, WMPlexAttachParams *param,
-                             WRegionCreateFn *fn, void *fn_param) {
+WRegion *mplex_do_attach_new(WMPlex *mplex, WMPlexAttachParams *param, WRegionCreateFn *fn, void *fn_param) {
   WRegionAttachData data;
-
   data.type = REGION_ATTACH_NEW;
   data.u.n.fn = fn;
   data.u.n.param = fn_param;
-
   return mplex_do_attach(mplex, param, &data);
 }
 
@@ -1202,27 +1117,15 @@ static void get_params(WMPlex *mplex, ExtlTab tab, int mask,
       }
     }
 
-    if (extl_table_is_bool_set(tab, "modal"))
-      par->level = maxof(par->level, STACKING_LEVEL_MODAL1);
+    if (extl_table_is_bool_set(tab, "modal")) par->level = maxof(par->level, STACKING_LEVEL_MODAL1);
   }
 
-  if (extl_table_is_bool_set(tab, "unnumbered"))
-    par->flags |= MPLEX_ATTACH_UNNUMBERED & ok;
-
-  if (extl_table_is_bool_set(tab, "switchto"))
-    par->flags |= MPLEX_ATTACH_SWITCHTO & ok;
-
-  if (extl_table_is_bool_set(tab, "hidden"))
-    par->flags |= MPLEX_ATTACH_HIDDEN & ok;
-
-  if (extl_table_is_bool_set(tab, "passive"))
-    par->flags |= MPLEX_ATTACH_PASSIVE & ok;
-
-  if (extl_table_is_bool_set(tab, "pseudomodal"))
-    par->flags |= MPLEX_ATTACH_PSEUDOMODAL & ok;
-
-  if (extl_table_gets_i(tab, "index", &(par->index)))
-    par->flags |= MPLEX_ATTACH_INDEX & ok;
+  if (extl_table_is_bool_set(tab, "unnumbered")) par->flags |= MPLEX_ATTACH_UNNUMBERED & ok;
+  if (extl_table_is_bool_set(tab, "switchto")) par->flags |= MPLEX_ATTACH_SWITCHTO & ok;
+  if (extl_table_is_bool_set(tab, "hidden")) par->flags |= MPLEX_ATTACH_HIDDEN & ok;
+  if (extl_table_is_bool_set(tab, "passive")) par->flags |= MPLEX_ATTACH_PASSIVE & ok;
+  if (extl_table_is_bool_set(tab, "pseudomodal")) par->flags |= MPLEX_ATTACH_PSEUDOMODAL & ok;
+  if (extl_table_gets_i(tab, "index", &(par->index))) par->flags |= MPLEX_ATTACH_INDEX & ok;
 
   if (ok & MPLEX_ATTACH_SIZEPOLICY) {
     if (extl_table_gets_sizepolicy(tab, "sizepolicy", &par->szplcy)) {
@@ -1372,10 +1275,6 @@ WPHolder *mplex_prepare_manage(WMPlex *mplex, const WClientWin *cwin,
   return (WPHolder *)mph;
 }
 
-/*}}}*/
-
-/*{{{ Remove */
-
 void mplex_managed_remove(WMPlex *mplex, WRegion *sub) {
   bool mx = FALSE, hadfocus = FALSE, mcf;
   WRegion *stdisp = (WRegion *)(mplex->stdispwatch.obj);
@@ -1427,13 +1326,9 @@ void mplex_managed_remove(WMPlex *mplex, WRegion *sub) {
   stacking_free(node);
 
   region_unset_manager(sub, (WRegion *)mplex);
-
   if (OBJ_IS_BEING_DESTROYED(mplex)) return;
-
   if (next != NULL) mplex_do_node_display(mplex, next, FALSE);
-
   if (hadfocus && mcf) mplex_refocus(mplex, next, FALSE);
-
   if (mx) mplex_managed_changed(mplex, MPLEX_CHANGE_REMOVE, next != NULL, sub);
 }
 
@@ -1443,10 +1338,6 @@ void mplex_child_removed(WMPlex *mplex, WRegion *sub) {
     mplex_set_stdisp(mplex, NULL, NULL);
   }
 }
-
-/*}}}*/
-
-/*{{{ Rescue */
 
 bool mplex_rescue_clientwins(WMPlex *mplex, WRescueInfo *info) {
   bool ret1, ret2;
@@ -1466,17 +1357,11 @@ bool mplex_rescue_clientwins(WMPlex *mplex, WRescueInfo *info) {
   /* Then the rest (possibly retrying failed mx stuff).
    */
   mplex_iter_init(&tmp, mplex);
-  ret1 = region_rescue_some_clientwins((WRegion *)mplex, info,
-                                       (WRegionIterator *)mplex_iter, &tmp);
-
+  ret1 = region_rescue_some_clientwins((WRegion *)mplex, info, (WRegionIterator *)mplex_iter, &tmp);
   ret2 = region_rescue_child_clientwins((WRegion *)mplex, info);
 
   return (ret1 && ret2);
 }
-
-/*}}}*/
-
-/*{{{ Status display support */
 
 bool mplex_set_stdisp(WMPlex *mplex, WRegion *reg,
                       const WMPlexSTDispInfo *din) {
@@ -1489,28 +1374,23 @@ bool mplex_set_stdisp(WMPlex *mplex, WRegion *reg,
 
   if (oldstdisp != NULL) {
     mgr = region_managed_within((WRegion *)mplex, oldstdisp);
-
     if (!CAN_MANAGE_STDISP(mgr)) mgr = NULL;
   }
 
   if (din != NULL) mplex->stdispinfo = *din;
-
   if (reg == NULL) {
     watch_reset(&(mplex->stdispwatch));
-
     if (mgr != NULL) {
       region_unmanage_stdisp(mgr, TRUE, FALSE);
       if (oldstdisp != NULL) region_detach_manager(oldstdisp);
     }
   } else {
     watch_setup(&(mplex->stdispwatch), (Obj *)reg, NULL);
-
     mplex_remanage_stdisp(mplex);
   }
 
   if (oldstdisp != NULL && oldstdisp != reg)
     mainloop_defer_destroy((Obj *)oldstdisp);
-
   return TRUE;
 }
 
@@ -1525,8 +1405,7 @@ static StringIntMap pos_map[] = {{"tl", MPLEX_STDISP_TL},
                                  {"br", MPLEX_STDISP_BR},
                                  {NULL, 0}};
 
-static bool do_attach_stdisp(WRegion *UNUSED(mplex), WRegion *UNUSED(reg),
-                             void *UNUSED(unused)) {
+static bool do_attach_stdisp(WRegion *UNUSED(mplex), WRegion *UNUSED(reg), void *UNUSED(unused)) {
   /* We do not actually manage the stdisp. */
   return TRUE;
 }
@@ -1575,10 +1454,8 @@ WRegion *mplex_set_stdisp_extl(WMPlex *mplex, ExtlTab t) {
     WRegionAttachData data;
     WFitParams fp;
 
-    fp.g.x = 0;
-    fp.g.y = 0;
-    fp.g.w = REGION_GEOM(mplex).w;
-    fp.g.h = REGION_GEOM(mplex).h;
+    fp.g.x = 0; fp.g.y = 0;
+    fp.g.w = REGION_GEOM(mplex).w; fp.g.h = REGION_GEOM(mplex).h;
     fp.mode = REGION_FIT_BOUNDS | REGION_FIT_WHATEVER;
 
     /* Full mplex size is stupid so use saved geometry initially
@@ -1601,11 +1478,7 @@ WRegion *mplex_set_stdisp_extl(WMPlex *mplex, ExtlTab t) {
     return FALSE;
   }
 
-  if (!mplex_set_stdisp(mplex, stdisp, &din)) {
-    destroy_obj((Obj *)stdisp);
-    return NULL;
-  }
-
+  if (!mplex_set_stdisp(mplex, stdisp, &din)) { destroy_obj((Obj *)stdisp); return NULL; }
   return stdisp;
 }
 
@@ -1641,15 +1514,9 @@ ExtlTab mplex_get_stdisp_extl(WMPlex *mplex) {
   return mplex_do_get_stdisp_extl(mplex, FALSE);
 }
 
-/*}}}*/
-
-/*{{{ Dynfuns */
-
 void mplex_managed_geom_default(const WMPlex *mplex, WRectangle *geom) {
-  geom->x = 0;
-  geom->y = 0;
-  geom->w = REGION_GEOM(mplex).w;
-  geom->h = REGION_GEOM(mplex).h;
+  geom->x = 0; geom->y = 0;
+  geom->w = REGION_GEOM(mplex).w; geom->h = REGION_GEOM(mplex).h;
 }
 
 void mplex_managed_geom(const WMPlex *mplex, WRectangle *geom) {
@@ -1680,10 +1547,6 @@ void region_manage_stdisp(WRegion *reg, WRegion *stdisp,
 void region_unmanage_stdisp(WRegion *reg, bool permanent, bool nofocus) {
   CALL_DYN(region_unmanage_stdisp, reg, (reg, permanent, nofocus));
 }
-
-/*}}}*/
-
-/*{{{ Changed hook helper */
 
 static const char *mode2str(int mode) {
   if (mode == MPLEX_CHANGE_SWITCHONLY)
@@ -1727,14 +1590,8 @@ void mplex_call_changed_hook(WMPlex *mplex, WHook *hook, int mode, bool sw,
   hook_call_p(hook, &p, (WHookMarshallExtl *)mrsh_chg);
 }
 
-/*}}} */
-
-/*{{{ Save/load */
-
-static void save_node(WMPlex *mplex, ExtlTab subs, int *n, WStacking *node,
-                      bool unnumbered) {
+static void save_node(WMPlex *mplex, ExtlTab subs, int *n, WStacking *node, bool unnumbered) {
   ExtlTab st, g;
-
   st = region_get_configuration(node->reg);
 
   if (st != extl_table_none()) {
@@ -1779,23 +1636,12 @@ ExtlTab mplex_get_configuration(WMPlex *mplex) {
 
   extl_unref_table(subs);
 
-  /*stdisptab=mplex_do_get_stdisp_extl(mplex, TRUE);
-  if(stdisptab!=extl_table_none()){
-      extl_table_sets_t(tab, "stdisp", stdisptab);
-      extl_unref_table(stdisptab);
-  }*/
-
   return tab;
 }
 
 void mplex_load_contents(WMPlex *mplex, ExtlTab tab) {
   ExtlTab substab, subtab;
   int n, i;
-
-  /*if(extl_table_gets_t(tab, "stdisp", &subtab)){
-      mplex_set_stdisp_extl(mplex, subtab);
-      extl_unref_table(subtab);
-  }*/
 
   if (extl_table_gets_t(tab, "managed", &substab) ||
       extl_table_gets_t(tab, "subs", &substab)) {
@@ -1829,60 +1675,34 @@ void mplex_load_contents(WMPlex *mplex, ExtlTab tab) {
   }
 }
 
-WRegion *mplex_load(WWindow *par, const WFitParams *fp, ExtlTab tab,
-                    const char *name) {
+WRegion *mplex_load(WWindow *par, const WFitParams *fp, ExtlTab tab, const char *name) {
   WMPlex *mplex = create_mplex(par, fp, name);
   if (mplex != NULL) mplex_load_contents(mplex, tab);
   return (WRegion *)mplex;
 }
 
-/*}}}*/
-
-/*{{{ Dynfuntab and class info */
-
 static DynFunTab mplex_dynfuntab[] = {
     {region_do_set_focus, mplex_do_set_focus},
-
     {region_managed_remove, mplex_managed_remove},
-
     {region_managed_rqgeom, mplex_managed_rqgeom},
-
     {(DynFun *)region_managed_prepare_focus,
      (DynFun *)mplex_managed_prepare_focus},
-
     {(DynFun *)region_handle_drop, (DynFun *)mplex_handle_drop},
-
     {region_map, mplex_map},
     {region_unmap, mplex_unmap},
-
     {(DynFun *)region_prepare_manage, (DynFun *)mplex_prepare_manage},
-
     {(DynFun *)region_current, (DynFun *)mplex_current},
-
     {(DynFun *)region_rescue_clientwins, (DynFun *)mplex_rescue_clientwins},
-
     {(DynFun *)region_get_configuration, (DynFun *)mplex_get_configuration},
-
     {mplex_managed_geom, mplex_managed_geom_default},
-
     {(DynFun *)region_fitrep, (DynFun *)mplex_fitrep},
-
     {region_child_removed, mplex_child_removed},
-
     {(DynFun *)region_managed_get_pholder, (DynFun *)mplex_managed_get_pholder},
-
-    {(DynFun *)region_get_rescue_pholder_for,
-     (DynFun *)mplex_get_rescue_pholder_for},
-
+    {(DynFun *)region_get_rescue_pholder_for, (DynFun *)mplex_get_rescue_pholder_for},
     {(DynFun *)region_navi_first, (DynFun *)mplex_navi_first},
-
     {(DynFun *)region_navi_next, (DynFun *)mplex_navi_next},
-
     {(DynFun *)region_managed_rqorder, (DynFun *)mplex_managed_rqorder},
-
     END_DYNFUNTAB};
 
 EXTL_EXPORT
 IMPLCLASS(WMPlex, WWindow, mplex_deinit, mplex_dynfuntab);
-
-/*}}}*/
