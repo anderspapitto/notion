@@ -235,11 +235,6 @@ err:
     listenfd = -1;
   }
 
-  /*if(listenfile!=NULL){
-      free(listenfile);
-      listenfile=NULL;
-  }*/
-
   return FALSE;
 }
 
@@ -254,8 +249,6 @@ void close_connections() {
 
   if (listenfile != NULL) {
     unlink(listenfile);
-    /*free(listenfile);
-    listenfile=NULL;*/
   }
 
   for (i = 0; i < MAX_SERVED; i++) {
