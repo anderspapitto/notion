@@ -1,11 +1,3 @@
---
--- ion/share/ioncore-bindings.lua
--- 
--- Copyright (c) Tuomo Valkonen 2004-2009.
---
--- See the included file LICENSE for details.
---
-
 local ioncore=_G.ioncore
 
 local warn=ioncore.warn

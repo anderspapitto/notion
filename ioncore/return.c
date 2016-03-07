@@ -50,21 +50,6 @@ WPHolder *region_make_return_pholder(WRegion *reg) {
   return region_managed_get_pholder(mgr, reg);
 }
 
-/*
-extern WPHolder *region_set_return(WRegion *reg)
-{
-    WPHolder *ph=region_make_return_pholder(reg);
-
-    if(ph!=NULL){
-        if(region_do_set_return(reg, ph))
-            return ph;
-        destroy_obj((Obj*)ph);
-    }
-
-    return NULL;
-}
-*/
-
 /*}}}*/
 
 /*{{{ Get */

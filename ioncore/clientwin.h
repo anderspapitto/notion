@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/clientwin.h
  *
- * Copyright (c) Tuomo Valkonen 1999-2009. 
+ * Copyright (c) Tuomo Valkonen 1999-2009.
  *
  * See the included file LICENSE for details.
  */
@@ -25,7 +25,6 @@
 #define CLIENTWIN_P_WM_DELETE        0x00001
 #define CLIENTWIN_P_WM_TAKE_FOCUS    0x00002
 #define CLIENTWIN_PROP_ACROBATIC     0x00010
-#define CLIENTWIN_PROP_TRANSPARENT   0x00020
 #define CLIENTWIN_PROP_IGNORE_CFGRQ  0x00040
 #define CLIENTWIN_PROP_LAZY_RESIZE   0x00080
 #define CLIENTWIN_PROP_MINSIZE       0x00100
@@ -47,12 +46,12 @@
 
 DECLCLASS(WClientWin){
     WRegion region;
-    
+
     int flags;
     int state;
     int event_mask;
     Window win;
-    
+
     int orig_bw;
 
     Colormap cmap;
@@ -61,7 +60,7 @@ DECLCLASS(WClientWin){
     int n_cmapwins;
 
     XSizeHints size_hints;
-    
+
     ExtlTab proptab;
 };
 
@@ -69,7 +68,7 @@ DECLCLASS(WClientWin){
 extern void clientwin_get_protocols(WClientWin *cwin);
 /**
  * On failure, sets cwin->sizehints based on winprops and returns -1
- * On success, sets cwin->sizehints based on WM_NORMAL_HINTS and winprops 
+ * On success, sets cwin->sizehints based on WM_NORMAL_HINTS and winprops
  * and returns a nonnegative value.
  */
 extern int clientwin_get_size_hints(WClientWin *cwin);

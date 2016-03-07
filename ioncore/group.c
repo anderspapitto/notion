@@ -1,11 +1,3 @@
-/*
- * ion/ioncore/group.c
- *
- * Copyright (c) Tuomo Valkonen 1999-2009.
- *
- * See the included file LICENSE for details.
- */
-
 #include <string.h>
 
 #include <X11/Xatom.h>
@@ -370,13 +362,6 @@ WPHolder *group_get_rescue_pholder_for(WGroup *ws, WRegion *forwhat) {
   } else {
     ap.geom_weak = REGION_RQGEOM_WEAK_X | REGION_RQGEOM_WEAK_Y;
   }
-
-  /* frame mode */
-  /*{
-      WFrame *frame=OBJ_CAST(forwhat, WFrame);
-      if(frame!=NULL)
-          fp.mode=frame->mode;
-  }*/
 
   ph = (WPHolder *)create_grouppholder(ws, NULL, &ap);
 
@@ -1039,18 +1024,6 @@ void group_size_hints(WGroup *ws, WSizeHints *hints_ret) {
 Window group_xwindow(const WGroup *ws) { return ws->dummywin; }
 
 /*EXTL_DOC
- * Returns the group of \var{reg}, if it is managed by one,
- * and \var{reg} itself otherwise.
- */
-/*EXTL_EXPORT_MEMBER
-WRegion *region_group_of(WRegion *reg)
-{
-    WRegion *mgr=REGION_MANAGER(reg);
-
-    return (OBJ_IS(mgr, WGroup) ? mgr : reg);
-}*/
-
-/*EXTL_DOC
  * Returns the group of \var{reg}, if \var{reg} is its bottom,
  * and \var{reg} itself otherwise.
  */
@@ -1159,48 +1132,27 @@ WRegion *group_loaj(WWindow *par, const WFitParams *fp, ExtlTab tab) {
 
 static DynFunTab group_dynfuntab[] = {
     {(DynFun *)region_fitrep, (DynFun *)group_fitrep},
-
     {region_map, group_map},
-
     {region_unmap, group_unmap},
-
     {(DynFun *)region_managed_prepare_focus,
      (DynFun *)group_managed_prepare_focus},
-
     {region_do_set_focus, group_do_set_focus},
-
     {region_managed_notify, group_managed_notify},
-
     {region_managed_remove, group_managed_remove},
-
     {(DynFun *)region_get_configuration, (DynFun *)group_get_configuration},
-
     {(DynFun *)region_current, (DynFun *)group_current},
-
     {(DynFun *)region_rescue_clientwins, (DynFun *)group_rescue_clientwins},
-
     {region_restack, group_restack},
-
     {region_stacking, group_stacking},
-
     {(DynFun *)region_managed_get_pholder, (DynFun *)group_managed_get_pholder},
-
     {region_managed_rqgeom, group_managed_rqgeom},
-
     {region_managed_rqgeom_absolute, group_managed_rqgeom_absolute},
-
     {(DynFun *)group_do_add_managed, (DynFun *)group_do_add_managed_default},
-
     {region_size_hints, group_size_hints},
-
     {(DynFun *)region_xwindow, (DynFun *)group_xwindow},
-
     {(DynFun *)region_navi_first, (DynFun *)group_navi_first},
-
     {(DynFun *)region_navi_next, (DynFun *)group_navi_next},
-
     {(DynFun *)region_managed_rqorder, (DynFun *)group_managed_rqorder},
-
     {(DynFun *)region_get_rescue_pholder_for,
      (DynFun *)group_get_rescue_pholder_for},
 

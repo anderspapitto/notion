@@ -1,12 +1,3 @@
-/*
- * libtu/types.h
- *
- * Copyright (c) Tuomo Valkonen 1999-2002. 
- *
- * You may distribute and modify this library under the terms of either
- * the Clarified Artistic License or the GNU LGPL, version 2.1 or later.
- */
-
 #ifndef LIBTU_TYPES_H
 #define LIBTU_TYPES_H
 
@@ -31,7 +22,7 @@
   * they can be typedef'd or not. Unless you want to go through using
   * autoconf or similar methods. ==> Just stick to #define. :-(
   */
-  
+
 #ifndef uchar
 #define uchar unsigned char
 #endif
@@ -65,7 +56,7 @@ typedef unsigned int uint;
 #ifndef ulong
 typedef unsigned long ulong;
 #endif
- 
+
 #endif /* LIBTU_TYPEDEF_UXXX */
 
 
@@ -74,13 +65,13 @@ typedef unsigned long ulong;
 #ifndef bool
 #define bool int
 #endif
- 
+
 #else /* LIBTU_TYPEDEF_BOOL */
 
 #ifndef bool
 typedef int bool;
 #endif
- 
+
 #endif /* LIBTU_TYPEDEF_BOOL */
 
 #endif /* LIBTU_TYPES_H */
