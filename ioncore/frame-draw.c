@@ -263,6 +263,7 @@ void frame_updategr(WFrame *frame) {
 
   mplex_fit_managed(&frame->mplex);
   frame_recalc_bar(frame, TRUE);
+  window_draw((WWindow *)frame, TRUE);
 }
 
 static StringIntMap frame_tab_styles[] = {
