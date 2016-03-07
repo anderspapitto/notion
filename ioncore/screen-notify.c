@@ -100,10 +100,11 @@ static int get_stdisp_pos(WScreen *scr) {
 /*{{{ Notifywin */
 
 static WInfoWin *get_notifywin(WScreen *scr) {
-  int stdisp_pos = get_stdisp_pos(scr);
-  return do_get_popup_win(scr, &scr->notifywin_watch,
-                          (stdisp_pos >= 0) ? stdisp_pos : MPLEX_STDISP_TL,
-                          "actnotify");
+    int stdisp_pos = get_stdisp_pos(scr);
+    return do_get_popup_win(scr, &scr->notifywin_watch,
+                            MPLEX_STDISP_TR,
+                            "actnotify"
+    );
 }
 
 void screen_notify(WScreen *scr, const char *str) {
