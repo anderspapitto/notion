@@ -1,11 +1,3 @@
---
--- ion/share/ioncore_winprops.lua
--- 
--- Copyright (c) Tuomo Valkonen 2004-2009.
---
--- See the included file LICENSE for details.
---
-
 local ioncore=_G.ioncore
 
 local winprops={}
@@ -15,28 +7,19 @@ local function ifnil(...)
     local n=#arg
     local function nxt(_, i)
         local j=i+1
-        if i==n then
-            return nil
-        else
+        if i==n then return nil else
             local j=i+1
-            if not arg[j] then
-                return nxt(nil, j)
-            else
+            if not arg[j] then return nxt(nil, j) else
                 return j, arg[j]
             end
         end
     end
-            
     return nxt, nil, 0
 end
 
 local function ipairs_r(tab)
     local function nxt(_, n)
-        if n==1 then
-            return nil
-        else
-            return n-1, tab[n-1]
-        end
+        if n==1 then return nil else return n-1, tab[n-1] end
     end
     return nxt, nil, #tab+1
 end
@@ -46,11 +29,9 @@ end
 function ioncore.getwinprop(cwin)
     local id=cwin:get_ident()
     local props, prop
-
     for _, c in ifnil(id.class, "*") do
         for _, r in ifnil(id.role, "*") do
             for _, i in ifnil(id.instance, "*") do
-                --printpp(c, r, i)
                 props={}
                 pcall(function() props=winprops[c][r][i] or {} end)
                 for idx, prop in ipairs_r(props) do
@@ -127,12 +108,9 @@ function ioncore.defwinprop(list)
     local class, role, instance = "*", "*", "*"
     
     for k, v in pairs(list) do
-        if k == "class" then
-            class = v
-        elseif k == "role" then
-            role = v
-        elseif k == "instance" then
-            instance = v
+        if k == "class" then class = v
+        elseif k == "role" then role = v
+        elseif k == "instance" then instance = v
         end
         list2[k] = v
     end
