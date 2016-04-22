@@ -97,8 +97,6 @@ WRegion *ioncore_pointer_grab_region() {
 
 static XEvent *p_curr_event = NULL;
 
-XEvent *ioncore_current_pointer_event() { return p_curr_event; }
-
 static void call_button(WBinding *binding, XButtonEvent *ev) {
   if (binding == NULL) return;
 

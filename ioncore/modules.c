@@ -229,14 +229,6 @@ static void do_unload_module(Rb_node mod) {
   free(name);
 }
 
-void ioncore_unload_modules() {
-  Rb_node mod;
-
-  rb_traverse(mod, modules) { do_unload_module(mod); }
-}
-
-/*}}}*/
-
 #else
 
 /*{{{ Static module support */

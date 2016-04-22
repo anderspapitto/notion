@@ -25,10 +25,6 @@ bool rectangle_contains(const WRectangle *g, int x, int y) {
   return (x >= g->x && x < g->x + g->w && y >= g->y && y < g->y + g->h);
 }
 
-void rectangle_debugprint(const WRectangle *g, const char *n) {
-  fprintf(stderr, "%s %d, %d; %d, %d\n", n, g->x, g->y, g->w, g->h);
-}
-
 int rectangle_compare(const WRectangle *g, const WRectangle *h) {
   return ((g->x != h->x ? RECTANGLE_X_DIFF : 0) |
           (g->y != h->y ? RECTANGLE_Y_DIFF : 0) |

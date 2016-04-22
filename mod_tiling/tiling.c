@@ -68,16 +68,6 @@ static bool check_node(WTiling *ws, WSplit *split) {
 
 /*{{{ Dynfun implementations */
 
-static void reparent_mgd(WRegion *sub, WWindow *par) {
-  WFitParams subfp;
-  subfp.g = REGION_GEOM(sub);
-  subfp.mode = REGION_FIT_EXACT;
-  if (!region_fitrep(sub, par, &subfp)) {
-    warn(TR("Error reparenting %s."), region_name(sub));
-    region_detach_manager(sub);
-  }
-}
-
 bool tiling_fitrep(WTiling *ws, WWindow *par, const WFitParams *fp) {
   bool ok = FALSE;
 
@@ -512,10 +502,6 @@ bool tiling_init(WTiling *ws, WWindow *parent, const WFitParams *fp,
 WTiling *create_tiling(WWindow *parent, const WFitParams *fp,
                        WRegionSimpleCreateFn *create_frame_fn, bool ci) {
   CREATEOBJ_IMPL(WTiling, tiling, (p, parent, fp, create_frame_fn, ci));
-}
-
-WTiling *create_tiling_simple(WWindow *parent, const WFitParams *fp) {
-  return create_tiling(parent, fp, NULL, TRUE);
 }
 
 void tiling_deinit(WTiling *ws) {
@@ -1222,19 +1208,6 @@ ExtlTab tiling_get_configuration(WTiling *ws) {
 /*}}}*/
 
 /*{{{ Load */
-
-WSplit *load_splitst(WTiling *ws, const WRectangle *geom, ExtlTab tab) {
-  WSplitST *st;
-
-  if (ws->stdispnode != NULL) {
-    warn(TR("Workspace already has a status display node."));
-    return NULL;
-  }
-
-  st = create_splitst(geom, NULL);
-  ws->stdispnode = st;
-  return (WSplit *)st;
-}
 
 static bool do_attach(WTiling *ws, WRegion *reg, void *p) {
   WSplitRegion *node = create_splitregion(&REGION_GEOM(reg), reg);

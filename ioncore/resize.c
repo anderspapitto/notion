@@ -757,15 +757,6 @@ uint region_min_w(WRegion *reg) {
   return hints.min_width;
 }
 
-void region_convert_root_geom(WRegion *reg, WRectangle *geom) {
-  int rx, ry;
-  if (reg != NULL) {
-    region_rootpos(reg, &rx, &ry);
-    geom->x -= rx;
-    geom->y -= ry;
-  }
-}
-
 void region_absolute_geom_to_parent(WRegion *reg, const WRectangle *rgeom,
                                     WRectangle *pgeom) {
   WRegion *parent = REGION_PARENT_REG(reg);

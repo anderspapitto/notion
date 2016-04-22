@@ -1113,19 +1113,6 @@ void group_do_load(WGroup *ws, ExtlTab tab) {
   }
 }
 
-WRegion *group_loaj(WWindow *par, const WFitParams *fp, ExtlTab tab) {
-  WGroup *ws;
-
-  /* Generic initial name - to be overwritten later. */
-  ws = create_group(par, fp, "Notion GroupCW or GroupWS");
-
-  if (ws == NULL) return NULL;
-
-  group_do_load(ws, tab);
-
-  return (WRegion *)ws;
-}
-
 /*}}}*/
 
 /*{{{ Dynamic function table and class implementation */

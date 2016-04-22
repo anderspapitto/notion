@@ -173,17 +173,6 @@ static WSubmapState *add_sub(WRegion *reg, uint key, uint state) {
 static uint current_kcb, current_state;
 static bool current_submap;
 
-/* Note: state set to AnyModifier for submaps */
-bool ioncore_current_key(uint *kcb, uint *state, bool *sub) {
-  if (current_kcb == 0) return FALSE;
-
-  *kcb = current_kcb;
-  *state = current_state;
-  *sub = current_submap;
-
-  return TRUE;
-}
-
 enum { GRAB_NONE, GRAB_NONE_SUBMAP, GRAB_SUBMAP, GRAB_WAITRELEASE };
 
 static WBinding *lookup_binding_(WRegion *reg, int act, uint state, uint kcb,

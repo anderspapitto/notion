@@ -145,10 +145,6 @@ static void do_holder_remove(WRegion *holder, bool killed) {
   }
 }
 
-void ioncore_grab_holder_remove(WRegion *holder) {
-  do_holder_remove(holder, FALSE);
-}
-
 void ioncore_grab_remove(GrabHandler *func) {
   int i;
   for (i = idx_grab - 1; i >= 0; i--) {
@@ -216,18 +212,6 @@ void ioncore_grab_confine_to(Window confine_to) {
                  confine_to, ioncore_xcursor(IONCORE_CURSOR_DEFAULT),
                  CurrentTime);
   }
-}
-
-WRegion *ioncore_grab_get_holder() {
-  if (ioncore_grab_held()) return grabs[idx_grab - 1].holder;
-  return NULL;
-}
-
-WRegion *ioncore_grab_get_my_holder(GrabHandler *func) {
-  int i;
-  for (i = idx_grab - 1; i >= 0; i--)
-    if (grabs[i].handler == func) return grabs[i].holder;
-  return NULL;
 }
 
 /*}}}*/

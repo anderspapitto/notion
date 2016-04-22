@@ -76,8 +76,3 @@ XIC xwindow_create_xic(Window win) {
 
   return xic;
 }
-
-bool window_create_xic(WWindow *wwin) {
-  if (wwin->xic == NULL) wwin->xic = xwindow_create_xic(wwin->win);
-  return (wwin->xic != NULL);
-}

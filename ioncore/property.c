@@ -106,21 +106,6 @@ void xwindow_set_integer_property(Window win, Atom a, int value) {
 /* WM_STATE
  */
 
-bool xwindow_get_state_property(Window win, int *state) {
-  CARD32 *p = NULL;
-
-  if (xwindow_get_property(win, ioncore_g.atom_wm_state,
-                           ioncore_g.atom_wm_state, 2L, FALSE,
-                           (uchar **)&p) <= 0)
-    return FALSE;
-
-  *state = *p;
-
-  XFree((void *)p);
-
-  return TRUE;
-}
-
 void xwindow_set_state_property(Window win, int state) {
   CARD32 data[2];
 

@@ -36,17 +36,6 @@ int split_size(WSplit *split, int dir) {
   return (dir == SPLIT_HORIZONTAL ? split->geom.w : split->geom.h);
 }
 
-int split_other_size(WSplit *split, int dir) {
-  return (dir == SPLIT_VERTICAL ? split->geom.w : split->geom.h);
-}
-
-int split_pos(WSplit *split, int dir) {
-  return (dir == SPLIT_HORIZONTAL ? split->geom.x : split->geom.y);
-}
-
-int split_other_pos(WSplit *split, int dir) {
-  return (dir == SPLIT_VERTICAL ? split->geom.x : split->geom.y);
-}
 
 /* No, these are not even supposed to be proper/consistent
  * Z \cup {\infty, -\infty} calculation rules.
@@ -302,18 +291,6 @@ static void splitsplit_update_bounds(WSplitSplit *split, bool recursive) {
 void split_update_bounds(WSplit *node, bool recursive) {
   CALL_DYN(split_update_bounds, node, (node, recursive));
 }
-
-void splitsplit_update_geom_from_children(WSplitSplit *node) {
-  if (node->dir == SPLIT_VERTICAL) {
-    ((WSplit *)node)->geom.h = node->tl->geom.h + node->br->geom.h;
-    ((WSplit *)node)->geom.y = node->tl->geom.y;
-  } else if (node->dir == SPLIT_HORIZONTAL) {
-    ((WSplit *)node)->geom.w = node->tl->geom.w + node->br->geom.w;
-    ((WSplit *)node)->geom.x = node->tl->geom.x;
-  }
-}
-
-/*}}}*/
 
 /*{{{ Status display handling helper functions. */
 
@@ -1039,7 +1016,7 @@ static void splitsplit_do_rqsize(WSplitSplit *p, WSplit *node,
     ca->tl -= amount;
   }
 
-  if (((WSplit *)p)->parent == NULL /*|| 
+  if (((WSplit *)p)->parent == NULL /*||
        (ha->tl==0 && ha->br==0 && va->tl==0 && va->br==0)*/) {
     if (((WSplit *)p)->ws_if_root != NULL)
       pg = REGION_GEOM((WTiling *)(((WSplit *)p)->ws_if_root));

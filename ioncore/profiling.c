@@ -11,24 +11,6 @@
 static FILE *fp_trace;
 struct timespec *current_time;
 
-void __cyg_profile_func_enter(void *func, void *caller) {
-  if (fp_trace != NULL) {
-    clock_gettime(CLOCK_REALTIME, current_time);
-    fprintf(fp_trace, "e\t%p\t%p\t%ld.%09lu\n", func, caller,
-            current_time->tv_sec, current_time->tv_nsec);
-    fflush(fp_trace);
-  }
-}
-
-void __cyg_profile_func_exit(void *func, void *caller) {
-  if (fp_trace != NULL) {
-    clock_gettime(CLOCK_REALTIME, current_time);
-    fprintf(fp_trace, "x\t%p\t%p\t%ld.%09lu\n", func, caller,
-            current_time->tv_sec, current_time->tv_nsec);
-    fflush(fp_trace);
-  }
-}
-
 void profileLuaCall(const enum ExtlHookEvent event, const char *name,
                     const char *source, int currentline) {
   if (fp_trace != NULL) {

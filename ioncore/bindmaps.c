@@ -118,10 +118,6 @@ WBindmap *ioncore_alloc_bindmap(const char *name, const StringIntMap *areas) {
   return bm;
 }
 
-WBindmap *ioncore_alloc_bindmap_frame(const char *name) {
-  return ioncore_alloc_bindmap(name, frame_areas);
-}
-
 void ioncore_free_bindmap(const char *name, WBindmap *bm) {
   int found = 0;
   Rb_node node;
@@ -197,20 +193,6 @@ WBindmap *ioncore_create_cycle_bindmap(uint kcb, uint state, ExtlFn cycle,
     b.func = extl_ref_fn(bcycle);
     b.state |= ShiftMask;
     bindmap_add_binding(bindmap, &b);
-  }
-
-  return bindmap;
-}
-
-WBindmap *region_add_cycle_bindmap(WRegion *reg, uint kcb, uint state,
-                                   ExtlFn cycle, ExtlFn bcycle) {
-  WBindmap *bindmap = ioncore_create_cycle_bindmap(kcb, state, cycle, bcycle);
-
-  if (bindmap != NULL) {
-    if (!region_add_bindmap(reg, bindmap)) {
-      bindmap_destroy(bindmap);
-      return NULL;
-    }
   }
 
   return bindmap;

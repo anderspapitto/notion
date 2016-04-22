@@ -563,17 +563,6 @@ WRegion *region_manager_or_parent(WRegion *reg) {
     return (WRegion *)(reg->parent);
 }
 
-WRegion *region_get_manager_chk(WRegion *p, const ClassDescr *descr) {
-  WRegion *mgr = NULL;
-
-  if (p != NULL) {
-    mgr = REGION_MANAGER(p);
-    if (obj_is((Obj *)mgr, descr)) return mgr;
-  }
-
-  return NULL;
-}
-
 /*}}}*/
 
 /*{{{ Stacking and ordering */
@@ -804,10 +793,6 @@ void region_debugprint_parents(const WRegion *reg) {
   REGION_DEBUGPRINT("parent", reg->parent && reg->parent->region.ni.name
                                   ? &reg->parent->region
                                   : NULL);
-}
-
-void region_debugprint_managers(const WRegion *reg) {
-  REGION_DEBUGPRINT("manager", reg->manager);
 }
 
 #undef REGION_DEBUGPRINT

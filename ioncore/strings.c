@@ -122,39 +122,6 @@ int str_nextoff(const char *p, int opos) {
   }
 }
 
-int str_len(const char *p) {
-  if (ioncore_g.enc_sb) return strlen(p);
-
-  if (ioncore_g.enc_utf8) {
-    int len = 0;
-
-    while (*p) {
-      if (((*p) & 0xC0) != 0x80) len++;
-      p++;
-    }
-    return len;
-  }
-
-  assert(ioncore_g.use_mb);
-  {
-    mbstate_t ps;
-    int len = 0, bytes = strlen(p), l;
-    memset(&ps, 0, sizeof(ps));
-
-    while (bytes > 0) {
-      l = mbrlen(p, bytes, &ps);
-      if (l <= 0) {
-        warn(TR("Invalid multibyte string."));
-        break;
-      }
-      len++;
-      bytes -= l;
-      p += l;
-    }
-    return len;
-  }
-}
-
 /*}}}*/
 
 /*{{{ Title shortening */

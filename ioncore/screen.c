@@ -112,10 +112,6 @@ bool screen_init(WScreen *scr, WRootWin *parent, const WFitParams *fp, int id,
   return TRUE;
 }
 
-WScreen *create_screen(WRootWin *parent, const WFitParams *fp, int id) {
-  CREATEOBJ_IMPL(WScreen, screen, (p, parent, fp, id, None));
-}
-
 void screen_deinit(WScreen *scr) {
   UNLINK_ITEM(ioncore_g.screens, scr, next_scr, prev_scr);
 

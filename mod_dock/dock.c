@@ -101,13 +101,6 @@ static bool dock_param_do_set(const WDockParam *param, char *s, int *ret) {
     return changed;
 }
 
-static bool dock_param_extl_table_set(const WDockParam *param, ExtlTab conftab, int *ret) {
-    char *s;
-    if (extl_table_gets_s(conftab, param->key, &s))
-        return dock_param_do_set(param, s, ret);
-    return FALSE;
-}
-
 static bool dock_param_brush_set(const WDockParam *param, GrBrush *brush, int *ret) {
     char *s;
     if (grbrush_get_extra(brush, param->key, 's', &s))
@@ -555,12 +548,6 @@ static void dock_updategr(WDock *dock) {
 static void mplexpos(int pos, int *mpos) {
     int hp = pos & DOCK_HPOS_MASK, vp = pos & DOCK_VPOS_MASK;
     *mpos = MPLEX_STDISP_BL;
-}
-
-static void mplexszplcy(int pos, WSizePolicy *szplcy) {
-    int hp = pos & DOCK_HPOS_MASK, vp = pos & DOCK_VPOS_MASK;
-    WSizePolicy p = SIZEPOLICY_GRAVITY_SOUTHWEST;
-    *szplcy = p;
 }
 
 static void dock_do_set(WDock *dock, ExtlTab conftab, bool resize) {

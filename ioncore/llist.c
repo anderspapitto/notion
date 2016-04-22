@@ -39,10 +39,6 @@ void llist_link_after(WLListNode **list, WLListNode *after, WLListNode *node) {
   }
 }
 
-void llist_link_last(WLListNode **list, WLListNode *node) {
-  LINK_ITEM_LAST(*list, node, next, prev);
-}
-
 WLListNode *llist_index_to_after(WLListNode *list, WLListNode *current,
                                  int index) {
   if (index == LLIST_INDEX_AFTER_CURRENT_ACT) {
