@@ -3,7 +3,7 @@ Notion
 
 Notion Screenshot
 
-[!notion_screenshot](https://i.imgur.com/W7szWlO.png)
+![notion_screenshot](https://i.imgur.com/W7szWlO.png)
 
 Here you can see dzen2 panel and compton/xcompisiting support.
 
