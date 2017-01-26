@@ -1,7 +1,7 @@
 include build/system-inc.mk
 include modulelist.mk
 
-INSTALL_SUBDIRS= $(MODULE_LIST) ioncore notion utils
+INSTALL_SUBDIRS= $(MODULE_LIST) ioncore notion
 SUBDIRS = $(LIBS_SUBDIRS) $(INSTALL_SUBDIRS)
 DOCS = README.md LICENSE 
 TO_REALCLEAN = build/ac/system-ac.mk
