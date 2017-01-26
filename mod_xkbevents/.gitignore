@@ -1,7 +1,0 @@
-*.swp
-exports.c
-exports.h
-exports.o
-mod_xkbevents.o
-mod_xkbevents.lc
-mod_xkbevents.so
