@@ -1,7 +1,3 @@
-##
-## Tu Makefile
-##
-
 # System-specific configuration is in system.mk
 ifeq ($(MAKELEVEL),0)
 TOPDIR=.
@@ -9,12 +5,7 @@ else
 TOPDIR=..
 endif
 
-# System-specific configuration
 include $(TOPDIR)/build/system-inc.mk
-
-######################################
-
-#INCLUDES += $(LIBTU_INCLUDES) $(LUA_INCLUDES)
 
 CFLAGS += $(C98_SOURCE) $(POSIX_SOURCE) $(WARN)
 
@@ -24,11 +15,7 @@ HEADERS=debug.h  errorlog.h  locale.h  minmax.h  obj.h      objp.h       output.
 
 TARGETS=libtu.a 
 
-######################################
-
 include $(TOPDIR)/build/rules.mk
-
-######################################
 
 libtu.a: $(OBJS)
 	$(AR) $(ARFLAGS) $@ $+

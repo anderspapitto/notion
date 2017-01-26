@@ -50,7 +50,6 @@
 #include "bindmaps.h"
 #include "strings.h"
 #include "gr.h"
-#include "xic.h"
 #include "netwm.h"
 #include "focus.h"
 #include "frame.h"
@@ -504,7 +503,6 @@ static bool ioncore_init_x(const char *display, int stflags) {
   ioncore_g.atom_dockapp_hack = XInternAtom(dpy, "_ION_DOCKAPP_HACK", False);
   ioncore_g.atom_mwm_hints = XInternAtom(dpy, "_MOTIF_WM_HINTS", False);
 
-  ioncore_init_xim();
   ioncore_init_bindings();
   ioncore_init_cursors();
 

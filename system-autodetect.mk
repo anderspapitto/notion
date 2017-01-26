@@ -34,7 +34,8 @@ HAS_SYSTEM_ASPRINTF ?= 1
 # monotonic clock at all (which Ion can live with, and usually detect).
 EXTRA_LIBS += -lrt
 
-CC ?= gcc
+#CC ?= gcc
+CC ?= clang
 
 WARN=-W -Wall -pedantic 
 

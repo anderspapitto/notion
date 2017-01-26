@@ -1,12 +1,3 @@
-/*
- * notion/notion/notion.c
- *
- * Copyright (c) the Notion team 2013.
- * Copyright (c) Tuomo Valkonen 1999-2009.
- *
- * See the included file LICENSE for details.
- */
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>

@@ -37,9 +37,7 @@
 /* disable this by default */
 #define CF_WORKSPACE_INDICATOR_TIMEOUT 0
 
-/* Cursors
- */
-
+/* Cursors */
 #define CF_CURSOR_DEFAULT XC_left_ptr
 #define CF_CURSOR_RESIZE XC_sizing
 #define CF_CURSOR_MOVE XC_fleur
