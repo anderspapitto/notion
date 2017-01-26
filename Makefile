@@ -3,7 +3,7 @@ include modulelist.mk
 
 INSTALL_SUBDIRS= $(MODULE_LIST) ioncore notion utils
 SUBDIRS = $(LIBS_SUBDIRS) $(INSTALL_SUBDIRS)
-DOCS = README.md LICENSE CHANGELOG
+DOCS = README.md LICENSE 
 TO_REALCLEAN = build/ac/system-ac.mk
 
 include build/rules.mk
