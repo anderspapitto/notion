@@ -1276,10 +1276,6 @@ static bool extl_get_retvals(lua_State *st, int m, ExtlDoCallParam *param) {
     param->ret_ptrs[param->nret] = ptr;
 #endif
     if (!extl_stack_get(st, -m, *spec, TRUE, &dead, ptr)) {
-      /* This is the only place where we allow nil-objects */
-      /*if(*spec=='o' && lua_isnil(st, -m)){
-          *(Obj**)ptr=NULL;
-      }else*/
       if (dead) {
         extl_warn(TR("Returned dead object."));
         return FALSE;

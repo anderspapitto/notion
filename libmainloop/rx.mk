@@ -1,7 +1,3 @@
-##
-## Rules for re-exporting libmainloop exports.
-##
-
 MAINLOOP_DIR = $(TOPDIR)/libmainloop
 
 MAINLOOP_SOURCES_ = select.c defer.c signal.c hooks.c exec.c

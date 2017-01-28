@@ -55,7 +55,7 @@ AR ?= ar
 ARFLAGS ?= cr
 RANLIB ?= ranlib
 
-INSTALL ?= sh $(TOPDIR)/install-sh -c
+INSTALL ?= install
 INSTALL_STRIP = -s
 INSTALLDIR ?= mkdir -p
 
