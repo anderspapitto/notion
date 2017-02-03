@@ -1,5 +1,5 @@
 include build/system-inc.mk
-include modulelist.mk
+MODULE_LIST = mod_tiling mod_dock mod_sm de mod_xrandr mod_notionflux ioncore
 
 INSTALL_SUBDIRS= $(MODULE_LIST) ioncore notion
 SUBDIRS = $(LIBS_SUBDIRS) $(INSTALL_SUBDIRS)

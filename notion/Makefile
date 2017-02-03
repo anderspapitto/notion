@@ -1,18 +1,8 @@
-##
-## Notion Makefile
-##
-
-# System-specific configuration is in system.mk
 TOPDIR=..
 include $(TOPDIR)/build/system-inc.mk
 
-# List of modules to possibly preload
-include $(TOPDIR)/modulelist.mk
-
-######################################
-
+MODULE_LIST = mod_tiling mod_dock mod_sm de mod_xrandr mod_notionflux ioncore
 EXECUTABLE = notion
-
 SOURCES = notion.c
 
 INCLUDES += $(X11_INCLUDES)
@@ -30,16 +20,10 @@ EXT_OBJS += ../ioncore/ioncore.a
 
 DEFINES += -DETCDIR=\"$(ETCDIR)\" -DSHAREDIR=\"$(SHAREDIR)\" \
            -DEXTRABINDIR=\"$(EXTRABINDIR)\" -DMODULEDIR=\"$(MODULEDIR)\" \
-	   -DLCDIR=\"$(LCDIR)\" -DLOCALEDIR=\"$(LOCALEDIR)\"
+	       -DLCDIR=\"$(LCDIR)\" -DLOCALEDIR=\"$(LOCALEDIR)\"
 
 CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE)
 
-######################################
-
 include $(TOPDIR)/build/rules.mk
 
-######################################
-
-
 _install: executable_install
-
