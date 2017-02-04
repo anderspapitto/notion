@@ -1,11 +1,3 @@
-/*
- * ion/mod_tiling/placement.c
- *
- * Copyright (c) Tuomo Valkonen 1999-2009.
- *
- * See the included file LICENSE for details.
- */
-
 #include <ioncore/common.h>
 #include <ioncore/global.h>
 #include <ioncore/clientwin.h>
@@ -89,8 +81,7 @@ WPHolder *tiling_prepare_manage(WTiling *ws, const WClientWin *cwin,
   target = find_suitable_target(ws);
 
   if (target == NULL) {
-    warn(TR("Ooops... could not find a region to attach client window "
-            "to on workspace %s."),
+    warn("Ooops... could not find a region to attach client window to on workspace %s.",
          region_name((WRegion *)ws));
     return NULL;
   }

@@ -69,7 +69,7 @@ static int parseinst_simple(const char *inststr) {
     if (inst >= 0 && end != NULL && *end == '>') return inst;
   }
 
-  warn(TR("Corrupt instance number %s."), inststr);
+  warn("Corrupt instance number %s.", inststr);
   return -1;
 }
 

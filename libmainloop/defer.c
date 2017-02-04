@@ -70,7 +70,7 @@ static void defer_watch_handler(Watch *w, Obj *UNUSED(obj)) {
 
   free_defer(d);
 
-  D(warn(TR("Object destroyed while deferred actions are still pending.")));
+  D(warn("Object destroyed while deferred actions are still pending."));
 }
 
 static bool already_deferred(Obj *obj, WDeferredAction *action,

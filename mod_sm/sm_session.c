@@ -1,16 +1,3 @@
-/*
- * ion/mod_sm/sm_session.c
- *
- * Copyright (c) Tuomo Valkonen 2004-2009.
- *
- * Based on the code of the 'sm' module for Ion1 by an unknown contributor.
- *
- * This is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation; either version 2.1 of the License, or
- * (at your option) any later version.
- */
-
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -74,7 +61,7 @@ static void sm_ice_watch_fd(IceConn conn, IcePointer UNUSED(client_data),
                             Bool opening, IcePointer *UNUSED(watch_data)) {
   if (opening) {
     if (sm_fd != -1) { /* shouldn't happen */
-      warn(TR("Too many ICE connections."));
+      warn("Too many ICE connections.");
     } else {
       sm_fd = IceConnectionNumber(conn);
       cloexec_braindamage_fix(sm_fd);
@@ -208,7 +195,7 @@ static void sm_save_yourself_phase2(SmcConn conn,
   Bool success;
 
   if (!(success = ioncore_do_snapshot(TRUE)))
-    warn(TR("Failed to save session state"));
+    warn("Failed to save session state");
   else
     sm_set_properties();
 
@@ -224,9 +211,8 @@ static void sm_save_yourself(SmcConn UNUSED(conn),
                              int UNUSED(save_type), Bool UNUSED(shutdown),
                              int UNUSED(interact_style), Bool UNUSED(fast)) {
   if (!SmcRequestSaveYourselfPhase2(sm_conn, sm_save_yourself_phase2, NULL)) {
-    warn(
-        TR("Failed to request save-yourself-phase2 from "
-           "session manager."));
+    warn( "Failed to request save-yourself-phase2 from "
+          "session manager.");
     SmcSaveYourselfDone(sm_conn, False);
     sent_save_done = TRUE;
   } else {
@@ -270,12 +256,12 @@ bool mod_sm_init_session() {
   SmcCallbacks smcall;
 
   if (getenv("SESSION_MANAGER") == 0) {
-    warn(TR("SESSION_MANAGER environment variable not set."));
+    warn("SESSION_MANAGER environment variable not set.");
     return FALSE;
   }
 
   if (IceAddConnectionWatch(&sm_ice_watch_fd, NULL) == 0) {
-    warn(TR("Session Manager: IceAddConnectionWatch failed."));
+    warn("Session Manager: IceAddConnectionWatch failed.");
     return FALSE;
   }
 
@@ -297,7 +283,7 @@ bool mod_sm_init_session() {
                                  SmcShutdownCancelledProcMask | SmcDieProcMask,
                              &smcall, sm_client_id, &new_client_id,
                              sizeof(error_str), error_str)) == NULL) {
-    warn(TR("Unable to connect to the session manager."));
+    warn("Unable to connect to the session manager.");
     return FALSE;
   }
 

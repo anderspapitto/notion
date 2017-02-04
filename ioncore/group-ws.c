@@ -29,8 +29,6 @@
 #include "saveload.h"
 #include "screen-notify.h"
 
-/*{{{ Settings */
-
 void ioncore_groupws_set(ExtlTab tab) {
   char *method = NULL;
   int fpp;
@@ -43,7 +41,7 @@ void ioncore_groupws_set(ExtlTab tab) {
     else if (strcmp(method, "random") == 0)
       ioncore_placement_method = PLACEMENT_RANDOM;
     else
-      warn(TR("Unknown placement method \"%s\"."), method);
+      warn("Unknown placement method \"%s\".", method);
     free(method);
   }
   if (extl_table_gets_i(tab, "float_placement_padding", &fpp))
@@ -58,10 +56,6 @@ void ioncore_groupws_get(ExtlTab t) {
            : (ioncore_placement_method == PLACEMENT_LRUD ? "lrud" : "random")));
   extl_table_sets_i(t, "float_placement_padding", ioncore_placement_padding);
 }
-
-/*}}}*/
-
-/*{{{ Attach stuff */
 
 static bool groupws_attach_framed(WGroupWS *ws, WGroupAttachParams *ap,
                                   WFramedParam *fp, WRegion *reg) {
@@ -92,19 +86,6 @@ bool groupws_handle_drop(WGroupWS *ws, int x, int y, WRegion *dropped) {
   return groupws_attach_framed(ws, &ap, &fp, dropped);
 }
 
-/*EXTL_DOC
- * Attach region \var{reg} on \var{ws}.
- * At least the following fields in \var{t} are supported:
- *
- * \begin{tabularx}{\linewidth}{lX}
- *  \tabhead{Field & Description}
- *  \var{switchto} & Should the region be switched to (boolean)? Optional. \\
- *  \var{geom} & Geometry; \var{x} and \var{y}, if set, indicates top-left of
- *   the frame to be created while \var{width} and \var{height}, if set,
- *indicate
- *   the size of the client window within that frame. Optional.
- * \end{tabularx}
- */
 EXTL_EXPORT_AS(WGroupWS, attach_framed)
 bool groupws_attach_framed_extl(WGroupWS *ws, WRegion *reg, ExtlTab t) {
   WGroupAttachParams ap = GROUPATTACHPARAMS_INIT;
@@ -129,12 +110,7 @@ bool groupws_attach_framed_extl(WGroupWS *ws, WRegion *reg, ExtlTab t) {
   return groupws_attach_framed(ws, &ap, &frp, reg);
 }
 
-/*}}}*/
-
-/*{{{ groupws_prepare_manage */
-
-static WPHolder *groupws_do_prepare_manage(WGroupWS *ws, const WClientWin *cwin,
-                                           const WManageParams *param) {
+static WPHolder *groupws_do_prepare_manage(WGroupWS *ws, const WClientWin *cwin, const WManageParams *param) {
   WGroupAttachParams ap = GROUPATTACHPARAMS_INIT;
   WFramedParam fp = FRAMEDPARAM_INIT;
   WPHolder *ph;
@@ -261,10 +237,6 @@ static WRegion *groupws_managed_disposeroot(WGroupWS *ws, WRegion *reg) {
   return reg;
 }
 
-/*}}}*/
-
-/*{{{ WGroupWS class */
-
 bool groupws_init(WGroupWS *ws, WWindow *parent, const WFitParams *fp) {
   if (!group_init(&(ws->grp), parent, fp, "Notion GroupWS")) return FALSE;
 
@@ -327,22 +299,12 @@ void groupws_set_initial_outputs(WGroupWS *ws, ExtlTab tab) {
 
 static DynFunTab groupws_dynfuntab[] = {
     {(DynFun *)region_prepare_manage, (DynFun *)groupws_prepare_manage},
-
-    {(DynFun *)region_prepare_manage_transient,
-     (DynFun *)groupws_prepare_manage_transient},
-
-    {(DynFun *)region_managed_disposeroot,
-     (DynFun *)groupws_managed_disposeroot},
-
+    {(DynFun *)region_prepare_manage_transient, (DynFun *)groupws_prepare_manage_transient},
+    {(DynFun *)region_managed_disposeroot, (DynFun *)groupws_managed_disposeroot},
     {(DynFun *)region_handle_drop, (DynFun *)groupws_handle_drop},
-
     {region_manage_stdisp, group_manage_stdisp},
-
     {(DynFun *)region_get_configuration, (DynFun *)groupws_get_configuration},
-
     END_DYNFUNTAB};
 
 EXTL_EXPORT
 IMPLCLASS(WGroupWS, WGroup, groupws_deinit, groupws_dynfuntab);
-
-/*}}}*/

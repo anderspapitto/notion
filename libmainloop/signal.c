@@ -1,11 +1,3 @@
-/*
- * ion/libmainloop/signal.c
- *
- * Copyright (c) Tuomo Valkonen 1999-2009.
- *
- * See the included file LICENSE for details.
- */
-
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -37,8 +29,6 @@ WHook *mainloop_sigchld_hook = NULL;
 WHook *mainloop_sigusr2_hook = NULL;
 
 static sigset_t special_sigs;
-
-/*{{{ Timers */
 
 static WTimer *queue = NULL;
 
@@ -147,10 +137,6 @@ static bool mrsh_chld_extl(ExtlFn fn, ChldParams *p) {
     extl_table_sets_b(t, "stopped", TRUE);
     extl_table_sets_i(t, "stopsig", WSTOPSIG(p->code));
   }
-  /*if(WIFCONTINUED(p->code)){
-      extl_table_sets_b(t, "continued", TRUE);
-  }*/
-
   ret = extl_call(fn, "t", NULL, t);
 
   extl_unref_table(t);
@@ -357,37 +343,22 @@ WTimer *create_timer_extl_owned() {
 EXTL_EXPORT
 IMPLCLASS(WTimer, Obj, timer_deinit, NULL);
 
-/*}}}*/
-
-/*{{{ Signal handling */
-
 static void deadly_signal_handler(int signal_num) {
   set_warn_handler(NULL);
-  warn(TR("Caught signal %d. Dying."), signal_num);
+  warn("Caught signal %d. Dying.", signal_num);
   signal(signal_num, SIG_DFL);
-  /*if(ioncore_g.opmode==IONCORE_OPMODE_INIT)
-      kill(getpid(), signal_num);
-  else*/
   kill_sig = signal_num;
 }
 
 static void chld_handler(int UNUSED(signal_num)) {
-#if 0
-    pid_t pid;
-
-    while((pid=waitpid(-1, NULL, WNOHANG|WUNTRACED))>0){
-        /* nothing */
-    }
-#else
   wait_sig = 1;
-#endif
 }
 
 static void usr2_handler(int UNUSED(signal_num)) { usr2_sig = 1; }
 
 static void exit_handler(int signal_num) {
   if (kill_sig > 0) {
-    warn(TR("Got signal %d while %d is still to be handled."), signal_num,
+    warn("Got signal %d while %d is still to be handled.", signal_num,
          kill_sig);
   }
   kill_sig = signal_num;
@@ -483,5 +454,3 @@ void mainloop_trap_signals(const sigset_t *which) {
 
 #undef IGNORE
 #undef DEADLY
-
-/*}}}*/

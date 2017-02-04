@@ -1,11 +1,3 @@
-/*
- * ion/de/style.c
- *
- * Copyright (c) Tuomo Valkonen 1999-2009.
- *
- * See the included file LICENSE for details.
- */
-
 #include <string.h>
 
 #include <libextl/extl.h>
@@ -21,23 +13,18 @@
 #include "private.h"
 #include "style.h"
 
-/*{{{ GC creation */
-
 static void create_normal_gc(DEStyle *style, WRootWin *rootwin) {
   XGCValues gcv;
   ulong gcvmask;
 
-  /* Create normal gc */
   gcv.line_style = LineSolid;
   gcv.line_width = 1;
   gcv.join_style = JoinBevel;
   gcv.cap_style = CapButt;
   gcv.fill_style = FillSolid;
-  gcvmask =
-      (GCLineStyle | GCLineWidth | GCFillStyle | GCJoinStyle | GCCapStyle);
+  gcvmask = (GCLineStyle | GCLineWidth | GCFillStyle | GCJoinStyle | GCCapStyle);
 
-  style->normal_gc =
-      XCreateGC(ioncore_g.dpy, WROOTWIN_ROOT(rootwin), gcvmask, &gcv);
+  style->normal_gc = XCreateGC(ioncore_g.dpy, WROOTWIN_ROOT(rootwin), gcvmask, &gcv);
 }
 
 void destyle_create_tab_gcs(DEStyle *style) {
@@ -101,10 +88,6 @@ void destyle_create_tab_gcs(DEStyle *style) {
   style->tabbrush_data_ok = TRUE;
 }
 
-/*}}}*/
-
-/*{{{ Style lookup */
-
 static DEStyle *styles = NULL;
 
 DEStyle *de_get_style(WRootWin *rootwin, const GrStyleSpec *spec) {
@@ -122,10 +105,6 @@ DEStyle *de_get_style(WRootWin *rootwin, const GrStyleSpec *spec) {
 
   return maxstyle;
 }
-
-/*}}}*/
-
-/*{{{ Style initialisation and deinitialisation */
 
 void destyle_unref(DEStyle *style) {
   style->usecount--;
@@ -259,9 +238,7 @@ void de_deinit_styles() {
   for (style = styles; style != NULL; style = next) {
     next = style->next;
     if (style->usecount > 1) {
-      warn(TR("Style is still in use [%d] but the module "
-              "is being unloaded!"),
-           style->usecount);
+      warn("Style is still in use [%d] but the module is being unloaded!", style->usecount);
     }
     destyle_dump(style);
   }

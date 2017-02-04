@@ -158,7 +158,7 @@ bool clientwin_do_manage_default(WClientWin *cwin, const WManageParams *param) {
   /* Find a suitable screen */
   scr = clientwin_find_suitable_screen(cwin, param);
   if (scr == NULL) {
-    warn(TR("Unable to find a screen for a new client window."));
+    warn("Unable to find a screen for a new client window.");
     return FALSE;
   }
 

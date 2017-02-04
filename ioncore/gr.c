@@ -1,11 +1,3 @@
-/*
- * ion/ioncore/gr.c
- *
- * Copyright (c) Tuomo Valkonen 1999-2009.
- *
- * See the included file LICENSE for details.
- */
-
 #include <string.h>
 
 #include <libtu/objp.h>
@@ -16,8 +8,6 @@
 #include "global.h"
 #include "modules.h"
 #include "gr.h"
-
-/*{{{ Lookup and registration */
 
 INTRSTRUCT(GrEngine);
 
@@ -54,7 +44,6 @@ bool gr_register_engine(const char *engine, GrGetBrushFn *fn) {
 
 void gr_unregister_engine(const char *engine) {
   GrEngine *eng;
-
   for (eng = engines; eng != NULL; eng = eng->next) {
     if (strcmp(eng->name, engine) == 0) break;
   }
@@ -69,7 +58,6 @@ void gr_unregister_engine(const char *engine) {
 
 static bool gr_do_select_engine(const char *engine) {
   GrEngine *eng;
-
   for (eng = engines; eng != NULL; eng = eng->next) {
     if (strcmp(eng->name, engine) == 0) {
       current_engine = eng;
@@ -80,23 +68,13 @@ static bool gr_do_select_engine(const char *engine) {
   return FALSE;
 }
 
-/*EXTL_DOC
- * Future requests for ``brushes'' are to be forwarded to the drawing engine
- * \var{engine}. If no engine of such name is known, a module with that name
- * is attempted to be loaded. This function is only intended to be called from
- * colour scheme etc. configuration files and can not be used to change the
- * look of existing objects; for that use \fnref{gr.read_config}.
- */
 EXTL_EXPORT_AS(gr, select_engine)
 bool gr_select_engine(const char *engine) {
   if (engine == NULL) return FALSE;
-
   if (gr_do_select_engine(engine)) return TRUE;
-
   if (!ioncore_load_module(engine)) return FALSE;
-
   if (!gr_do_select_engine(engine)) {
-    warn(TR("Drawing engine %s is not registered!"), engine);
+    warn("Drawing engine %s is not registered!", engine);
     return FALSE;
   }
 
@@ -111,14 +89,10 @@ GrBrush *gr_get_brush(Window win, WRootWin *rootwin, const char *style) {
 
   ret = (eng->fn)(win, rootwin, style);
 
-  if (ret == NULL) warn(TR("Unable to find brush for style '%s'."), style);
+  if (ret == NULL) warn("Unable to find brush for style '%s'.", style);
 
   return ret;
 }
-
-/*}}}*/
-
-/*{{{ Scoring */
 
 static GrAttr star_id = STRINGID_NONE;
 
@@ -367,17 +341,9 @@ bool gr_stylespec_equals(const GrStyleSpec *s1, const GrStyleSpec *s2) {
   return TRUE;
 }
 
-/*}}}*/
-
-/*{{{ Init, deinit */
-
 bool grbrush_init(GrBrush *UNUSED(brush)) { return TRUE; }
-
 void grbrush_deinit(GrBrush *UNUSED(brush)) {}
-
-void grbrush_release(GrBrush *brush) {
-  CALL_DYN(grbrush_release, brush, (brush));
-}
+void grbrush_release(GrBrush *brush) { CALL_DYN(grbrush_release, brush, (brush)); }
 
 GrBrush *grbrush_get_slave(GrBrush *brush, WRootWin *rootwin,
                            const char *style) {
@@ -387,19 +353,11 @@ GrBrush *grbrush_get_slave(GrBrush *brush, WRootWin *rootwin,
   return slave;
 }
 
-/*}}}*/
-
-/*{{{ Dynfuns/begin/end/replay */
-
 void grbrush_begin(GrBrush *brush, const WRectangle *geom, int flags) {
   CALL_DYN(grbrush_begin, brush, (brush, geom, flags));
 }
 
 void grbrush_end(GrBrush *brush) { CALL_DYN(grbrush_end, brush, (brush)); }
-
-/*}}}*/
-
-/*{{{ Dynfuns/values */
 
 void grbrush_get_font_extents(GrBrush *brush, GrFontExtents *fnte) {
   CALL_DYN(grbrush_get_font_extents, brush, (brush, fnte));
@@ -416,10 +374,6 @@ DYNFUN bool grbrush_get_extra(GrBrush *brush, const char *key, char type,
   return ret;
 }
 
-/*}}}*/
-
-/*{{{ Dynfuns/Borders */
-
 void grbrush_draw_border(GrBrush *brush, const WRectangle *geom) {
   CALL_DYN(grbrush_draw_border, brush, (brush, geom));
 }
@@ -429,12 +383,7 @@ void grbrush_draw_borderline(GrBrush *brush, const WRectangle *geom,
   CALL_DYN(grbrush_draw_borderline, brush, (brush, geom, line));
 }
 
-/*}}}*/
-
-/*{{{ Dynfuns/Strings */
-
-void grbrush_draw_string(GrBrush *brush, int x, int y, const char *str, int len,
-                         bool needfill) {
+void grbrush_draw_string(GrBrush *brush, int x, int y, const char *str, int len, bool needfill) {
   CALL_DYN(grbrush_draw_string, brush, (brush, x, y, str, len, needfill));
 }
 
@@ -444,12 +393,7 @@ uint grbrush_get_text_width(GrBrush *brush, const char *text, uint len) {
   return ret;
 }
 
-/*}}}*/
-
-/*{{{ Dynfuns/Textboxes */
-
-void grbrush_draw_textbox(GrBrush *brush, const WRectangle *geom,
-                          const char *text, bool needfill) {
+void grbrush_draw_textbox(GrBrush *brush, const WRectangle *geom, const char *text, bool needfill) {
   CALL_DYN(grbrush_draw_textbox, brush, (brush, geom, text, needfill));
 }
 
@@ -458,12 +402,7 @@ void grbrush_draw_textboxes(GrBrush *brush, const WRectangle *geom, int n,
   CALL_DYN(grbrush_draw_textboxes, brush, (brush, geom, n, elem, needfill));
 }
 
-/*}}}*/
-
-/*{{{ Dynfuns/Misc */
-
-void grbrush_set_window_shape(GrBrush *brush, bool rough, int n,
-                              const WRectangle *rects) {
+void grbrush_set_window_shape(GrBrush *brush, bool rough, int n, const WRectangle *rects) {
   CALL_DYN(grbrush_set_window_shape, brush, (brush, rough, n, rects));
 }
 
@@ -487,13 +426,6 @@ void grbrush_unset_attr(GrBrush *brush, GrAttr attr) {
   CALL_DYN(grbrush_unset_attr, brush, (brush, attr));
 }
 
-/*}}}*/
-
-/*{{{ ioncore_read_config/refresh */
-
-/*EXTL_DOC
- * Read drawing engine configuration file \file{look.lua}.
- */
 EXTL_EXPORT_AS(gr, read_config)
 void gr_read_config() {
   extl_read_config("look", NULL, TRUE);
@@ -502,14 +434,11 @@ void gr_read_config() {
    * default settings.
    */
   if (engines == NULL) {
-    warn(TR("No drawing engines loaded, trying \"de\"."));
+    warn("No drawing engines loaded, trying \"de\".");
     gr_select_engine("de");
   }
 }
 
-/*EXTL_DOC
- * Refresh objects' brushes to update them to use newly loaded style.
- */
 EXTL_EXPORT_AS(gr, refresh)
 void gr_refresh() {
   WRootWin *rootwin;
@@ -517,12 +446,6 @@ void gr_refresh() {
   FOR_ALL_ROOTWINS(rootwin) { region_updategr((WRegion *)rootwin); }
 }
 
-/*}}}*/
-
-/*{{{ Class implementation */
-
 static DynFunTab grbrush_dynfuntab[] = {END_DYNFUNTAB};
 
 IMPLCLASS(GrBrush, Obj, grbrush_deinit, grbrush_dynfuntab);
-
-/*}}}*/

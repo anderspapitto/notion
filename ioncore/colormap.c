@@ -1,11 +1,3 @@
-/*
- * ion/ioncore/colormap.c
- *
- * Copyright (c) Tuomo Valkonen 1999-2009.
- *
- * See the included file LICENSE for details.
- */
-
 #include <libtu/rb.h>
 #include "common.h"
 #include "global.h"
@@ -15,8 +7,6 @@
 #include "region.h"
 #include "names.h"
 #include "xwindow.h"
-
-/*{{{ Installing colormaps */
 
 void rootwin_install_colormap(WRootWin *rootwin, Colormap cmap) {
   if (cmap == None) cmap = rootwin->default_cmap;
@@ -37,10 +27,6 @@ void clientwin_install_colormap(WClientWin *cwin) {
 
   rootwin_install_colormap(rw, cwin->cmap);
 }
-
-/*}}}*/
-
-/*{{{ Management */
 
 static XContext ctx = None;
 
@@ -71,7 +57,7 @@ static void xwindow_selcmap(Window win) {
 
     *p = 1;
     if (XSaveContext(ioncore_g.dpy, win, ctx, (XPointer)p) != 0) {
-      warn(TR("Unable to store colourmap watch info."));
+      warn("Unable to store colourmap watch info.");
       return;
     }
 
@@ -194,5 +180,3 @@ void ioncore_handle_colormap_notify(const XColormapEvent *ev) {
     handle_all_cmaps(ev);
   }
 }
-
-/*}}}*/

@@ -1,12 +1,3 @@
-/*
- * ion/ioncore/ioncore.c
- *
- * Copyright (c) The Notion Team 2011.
- * Copyright (c) Tuomo Valkonen 1999-2009.
- *
- * See the included file LICENSE for details.
- */
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -16,13 +7,6 @@
 #include <errno.h>
 #include <sys/types.h>
 #include <ctype.h>
-#ifndef CF_NO_LOCALE
-#include <locale.h>
-#include <langinfo.h>
-#endif
-#ifndef CF_NO_GETTEXT
-#include <libintl.h>
-#endif
 #include <stdarg.h>
 #include <X11/extensions/shape.h>
 #include <X11/extensions/Xext.h>
@@ -67,8 +51,6 @@
 #include "../version.h"
 #include "exports.h"
 
-/*{{{ Variables */
-
 WGlobal ioncore_g;
 
 static const char *progname = "notion";
@@ -76,26 +58,11 @@ static const char *progname = "notion";
 static const char ioncore_copy[] =
     "Notion " NOTION_VERSION ", see the README for copyright details.";
 
-static const char ioncore_license[] = DUMMY_TR(
-    "This software is licensed under the GNU Lesser General Public License\n"
-    "(LGPL), version 2.1, extended with terms applying to the use of the\n"
-    "former name of the project, Ion(tm), unless otherwise indicated in\n"
-    "components taken from elsewhere. For details, see the file LICENSE\n"
-    "that you should have received with this software.\n"
-    "\n"
-    "This program is distributed in the hope that it will be useful,\n"
-    "but WITHOUT ANY WARRANTY; without even the implied warranty of\n"
-    "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n");
-
 static const char *ioncore_about = NULL;
 
 WHook *ioncore_post_layout_setup_hook = NULL;
 WHook *ioncore_snapshot_hook = NULL;
 WHook *ioncore_deinit_hook = NULL;
-
-/*}}}*/
-
-/*{{{ warn_nolog */
 
 void ioncore_warn_nolog(const char *str, ...) {
   va_list args;
@@ -113,124 +80,6 @@ void ioncore_warn_nolog(const char *str, ...) {
   va_end(args);
 }
 
-/*}}}*/
-
-/*{{{ init_locale */
-
-#ifndef CF_NO_LOCALE
-
-static bool check_encoding() {
-  int i;
-  char chs[8] = " ";
-  wchar_t wc;
-  const char *langi, *ctype, *a, *b;
-  bool enc_check_ok = FALSE;
-
-  langi = nl_langinfo(CODESET);
-  ctype = setlocale(LC_CTYPE, NULL);
-
-  if (langi == NULL || ctype == NULL) goto integr_err;
-
-  if (strcmp(ctype, "C") == 0 || strcmp(ctype, "POSIX") == 0) return TRUE;
-
-  /* Compare encodings case-insensitively, ignoring dashes (-) */
-  a = langi;
-  b = strchr(ctype, '.');
-  if (b != NULL) {
-    b = b + 1;
-    while (1) {
-      if (*a == '-') {
-        a++;
-        continue;
-      }
-      if (*b == '-') {
-        b++;
-        continue;
-      }
-      if (*b == '\0' || *b == '@') {
-        enc_check_ok = (*a == '\0');
-        break;
-      }
-      if (*a == '\0' || tolower(*a) != tolower(*b)) break;
-      a++;
-      b++;
-    }
-    if (!enc_check_ok) goto integr_err;
-  } else {
-    ioncore_warn_nolog(TR("No encoding given in LC_CTYPE."));
-  }
-
-  if (strcasecmp(langi, "UTF-8") == 0 || strcasecmp(langi, "UTF8") == 0) {
-    ioncore_g.enc_sb = FALSE;
-    ioncore_g.enc_utf8 = TRUE;
-    ioncore_g.use_mb = TRUE;
-    return TRUE;
-  }
-
-  for (i = 0; i < 256; i++) {
-    chs[0] = i;
-    if (mbtowc(&wc, chs, 8) == -1) {
-      /* Doesn't look like a single-byte encoding. */
-      break;
-    }
-  }
-
-  if (i == 256) {
-    /* Seems like a single-byte encoding... */
-    ioncore_g.use_mb = TRUE;
-    return TRUE;
-  }
-
-  if (mbtowc(NULL, NULL, 0) != 0) {
-    warn(TR("Statefull encodings are unsupported."));
-    return FALSE;
-  }
-
-  ioncore_g.enc_sb = FALSE;
-  ioncore_g.use_mb = TRUE;
-
-  return TRUE;
-
-integr_err:
-  warn(TR("Cannot verify locale encoding setting integrity "
-          "(LC_CTYPE=%s, nl_langinfo(CODESET)=%s). "
-          "The LC_CTYPE environment variable should be of the form "
-          "language_REGION.encoding (e.g. en_GB.UTF-8), and encoding "
-          "should match the nl_langinfo value above."),
-       ctype, langi);
-  return FALSE;
-}
-
-static bool init_locale() {
-  const char *p;
-
-  p = setlocale(LC_ALL, "");
-
-  if (p == NULL) {
-    warn("setlocale() call failed.");
-    return FALSE;
-  }
-
-  /*if(strcmp(p, "C")==0 || strcmp(p, "POSIX")==0)
-      return TRUE;*/
-
-  if (!XSupportsLocale()) {
-    warn("XSupportsLocale() failed.");
-  } else {
-    if (check_encoding()) return TRUE;
-  }
-
-  warn("Reverting locale settings to \"C\".");
-
-  if (setlocale(LC_ALL, "C") == NULL) warn("setlocale() call failed.");
-
-  return FALSE;
-}
-
-#endif
-
-#ifndef CF_NO_GETTEXT
-
 #define TEXTDOMAIN "notion"
 
 static bool init_messages(const char *localedir) {
@@ -244,12 +93,9 @@ static bool init_messages(const char *localedir) {
   return TRUE;
 }
 
-#endif
-
 /*}}}*/
 
 /*{{{ ioncore_init */
-
 #define INIT_HOOK_(NM)                             \
   NM = mainloop_register_hook(#NM, create_hook()); \
   if (NM == NULL) return FALSE
@@ -281,10 +127,8 @@ static bool init_hooks() {
   INIT_HOOK(region_do_warp_alt, region_do_warp_default);
   INIT_HOOK(ioncore_exec_environ_hook, ioncore_setup_environ);
 
-  mainloop_sigchld_hook =
-      mainloop_register_hook("ioncore_sigchld_hook", create_hook());
-  mainloop_sigusr2_hook =
-      mainloop_register_hook("ioncore_sigusr2_hook", create_hook());
+  mainloop_sigchld_hook = mainloop_register_hook("ioncore_sigchld_hook", create_hook());
+  mainloop_sigusr2_hook = mainloop_register_hook("ioncore_sigusr2_hook", create_hook());
 
   return TRUE;
 }
@@ -292,18 +136,12 @@ static bool init_hooks() {
 static bool register_classes() {
   int fail = 0;
 
-  fail |= !ioncore_register_regclass(&CLASSDESCR(WClientWin),
-                                     (WRegionLoadCreateFn *)clientwin_load);
-  fail |= !ioncore_register_regclass(&CLASSDESCR(WMPlex),
-                                     (WRegionLoadCreateFn *)mplex_load);
-  fail |= !ioncore_register_regclass(&CLASSDESCR(WFrame),
-                                     (WRegionLoadCreateFn *)frame_load);
-  fail |= !ioncore_register_regclass(&CLASSDESCR(WInfoWin),
-                                     (WRegionLoadCreateFn *)infowin_load);
-  fail |= !ioncore_register_regclass(&CLASSDESCR(WGroupCW),
-                                     (WRegionLoadCreateFn *)groupcw_load);
-  fail |= !ioncore_register_regclass(&CLASSDESCR(WGroupWS),
-                                     (WRegionLoadCreateFn *)groupws_load);
+  fail |= !ioncore_register_regclass(&CLASSDESCR(WClientWin) , (WRegionLoadCreateFn *)clientwin_load);
+  fail |= !ioncore_register_regclass(&CLASSDESCR(WMPlex)     , (WRegionLoadCreateFn *)mplex_load);
+  fail |= !ioncore_register_regclass(&CLASSDESCR(WFrame)     , (WRegionLoadCreateFn *)frame_load);
+  fail |= !ioncore_register_regclass(&CLASSDESCR(WInfoWin)   , (WRegionLoadCreateFn *)infowin_load);
+  fail |= !ioncore_register_regclass(&CLASSDESCR(WGroupCW)   , (WRegionLoadCreateFn *)groupcw_load);
+  fail |= !ioncore_register_regclass(&CLASSDESCR(WGroupWS)   , (WRegionLoadCreateFn *)groupws_load);
 
   return !fail;
 }
@@ -344,9 +182,9 @@ static bool init_global() {
   ioncore_g.workspace_indicator_timeout = CF_WORKSPACE_INDICATOR_TIMEOUT;
   ioncore_g.activity_notification_on_all_screens = FALSE;
 
-  ioncore_g.enc_utf8 = FALSE;
-  ioncore_g.enc_sb = TRUE;
-  ioncore_g.use_mb = FALSE;
+  ioncore_g.enc_utf8 = TRUE;
+  ioncore_g.use_mb = TRUE;
+  ioncore_g.enc_sb = FALSE;
 
   ioncore_g.screen_notify = TRUE;
 
@@ -385,29 +223,13 @@ bool ioncore_init(const char *prog, int argc, char *argv[],
   ioncore_g.argc = argc;
   ioncore_g.argv = argv;
 
-#ifndef CF_NO_LOCALE
-  init_locale();
-#endif
-#ifndef CF_NO_GETTEXT
-  init_messages(localedir);
-#endif
-
-  ioncore_about = scat3(ioncore_copy, "\n\n", TR(ioncore_license));
-
   if (!ioncore_init_bindmaps()) return FALSE;
-
   if (!register_classes()) return FALSE;
-
   if (!init_hooks()) return FALSE;
-
   if (!ioncore_init_module_support()) return FALSE;
 
   return TRUE;
 }
-
-/*}}}*/
-
-/*{{{ ioncore_startup */
 
 static void ioncore_init_session(const char *display) {
   const char *dpyend = NULL;
@@ -457,7 +279,7 @@ static bool ioncore_init_x(const char *display, int stflags) {
   dpy = XOpenDisplay(display);
 
   if (dpy == NULL) {
-    warn(TR("Could not connect to X display '%s'"), XDisplayName(display));
+    warn("Could not connect to X display '%s'"), XDisplayName(display);
     return FALSE;
   }
 
@@ -513,7 +335,7 @@ static bool ioncore_init_x(const char *display, int stflags) {
   for (i = drw; i < nrw; i++) create_rootwin(i);
 
   if (ioncore_g.rootwins == NULL) {
-    if (nrw - drw > 1) warn(TR("Could not find a screen to manage."));
+    if (nrw - drw > 1) warn("Could not find a screen to manage.");
     return FALSE;
   }
 
@@ -550,7 +372,7 @@ bool ioncore_startup(const char *display, const char *cfgfile, int stflags) {
   WRootWin *rootwin;
   sigset_t inittrap;
 
-  LOG(INFO, GENERAL, TR("Starting Notion"));
+  LOG(INFO, GENERAL, "Starting Notion");
 
   /* Don't trap termination signals just yet. */
   sigemptyset(&inittrap);

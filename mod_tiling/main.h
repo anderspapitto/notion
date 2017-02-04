@@ -1,11 +1,3 @@
-/*
- * ion/mod_tiling/main.h
- *
- * Copyright (c) Tuomo Valkonen 1999-2009. 
- *
- * See the included file LICENSE for details.
- */
-
 #ifndef ION_MOD_TILING_MAIN_H
 #define ION_MOD_TILING_MAIN_H
 
@@ -20,4 +12,4 @@ extern WBindmap *mod_tiling_frame_bindmap;
 
 extern int mod_tiling_raise_delay;
 
-#endif /* ION_MOD_TILING_MAIN_H */
+#endif

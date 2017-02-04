@@ -1,11 +1,3 @@
-/*
- * ion/mod_tiling/tiling.c
- *
- * Copyright (c) Tuomo Valkonen 1999-2009.
- *
- * See the included file LICENSE for details.
- */
-
 #include <string.h>
 
 #include <X11/Xatom.h>
@@ -40,8 +32,6 @@
 #include "split-stdisp.h"
 #include "main.h"
 
-/*{{{ Some helper routines */
-
 static WSplitRegion *get_node_check(WTiling *ws, WRegion *reg) {
   WSplitRegion *node;
 
@@ -58,28 +48,20 @@ static bool check_node(WTiling *ws, WSplit *split) {
   if (split->parent) return check_node(ws, (WSplit *)split->parent);
 
   if ((split->ws_if_root != (void *)ws)) {
-    warn(TR("Split not on workspace."));
+    warn("Split not on workspace.");
     return FALSE;
   }
   return TRUE;
 }
-
-/*}}}*/
-
-/*{{{ Dynfun implementations */
 
 bool tiling_fitrep(WTiling *ws, WWindow *par, const WFitParams *fp) {
   bool ok = FALSE;
 
   if (par != NULL) {
     if (!region_same_rootwin((WRegion *)ws, (WRegion *)par)) return FALSE;
-
     region_unset_parent((WRegion *)ws);
-
     XReparentWindow(ioncore_g.dpy, ws->dummywin, par->win, fp->g.x, fp->g.y);
-
     region_set_parent((WRegion *)ws, par);
-
     if (ws->split_tree != NULL) split_reparent(ws->split_tree, par);
   }
 
@@ -280,7 +262,7 @@ static void tiling_create_stdispnode(WTiling *ws, WRegion *stdisp, int corner,
   stdispnode = create_splitst(&dg, stdisp);
 
   if (stdispnode == NULL) {
-    warn(TR("Unable to create a node for status display."));
+    warn("Unable to create a node for status display.");
     return;
   }
 
@@ -293,7 +275,7 @@ static void tiling_create_stdispnode(WTiling *ws, WRegion *stdisp, int corner,
                                                         : SPLIT_HORIZONTAL));
 
   if (split == NULL) {
-    warn(TR("Unable to create new split for status display."));
+    warn("Unable to create new split for status display.");
     stdispnode->regnode.reg = NULL;
     destroy_obj((Obj *)stdispnode);
     return;
@@ -594,7 +576,7 @@ void tiling_managed_remove(WTiling *ws, WRegion *reg) {
         tiling_managed_add(ws, other);
         reused = TRUE;
       } else {
-        warn(TR("Tiling in useless state."));
+        warn("Tiling in useless state.");
       }
     }
 
@@ -645,10 +627,6 @@ WPHolder *tiling_get_rescue_pholder_for(WTiling *ws, WRegion *mgd) {
 
   return ph;
 }
-
-/*}}}*/
-
-/*{{{ Navigation */
 
 static void navi_to_primn(WRegionNavi nh, WPrimn *hprimn, WPrimn *vprimn,
                           WPrimn choice) {
@@ -746,10 +724,6 @@ WRegion *tiling_navi_first(WTiling *ws, WRegionNavi nh, WRegionNaviData *data) {
   return region_navi_cont(&ws->reg, reg, data);
 }
 
-/*}}}*/
-
-/*{{{ Split/unsplit */
-
 static bool get_split_dir_primn(const char *str, int *dir, int *primn) {
   WPrimn hprimn, vprimn;
   WRegionNavi nh;
@@ -765,7 +739,7 @@ static bool get_split_dir_primn(const char *str, int *dir, int *primn) {
     *dir = SPLIT_HORIZONTAL;
     *primn = hprimn;
   } else {
-    warn(TR("Invalid direction"));
+    warn("Invalid direction");
     return FALSE;
   }
 
@@ -793,7 +767,7 @@ static WFrame *tiling_do_split(WTiling *ws, WSplit *node, const char *dirstr,
   WSplitRegion *nnode;
 
   if (node == NULL || ws->split_tree == NULL) {
-    warn(TR("Invalid node."));
+    warn("Invalid node.");
     return NULL;
   }
 
@@ -810,7 +784,7 @@ static WFrame *tiling_do_split(WTiling *ws, WSplit *node, const char *dirstr,
   }
 
   if (nnode == NULL) {
-    warn(TR("Unable to split."));
+    warn("Unable to split.");
     return NULL;
   }
 
@@ -833,12 +807,6 @@ static WFrame *tiling_do_split(WTiling *ws, WSplit *node, const char *dirstr,
   return newframe;
 }
 
-/*EXTL_DOC
- * Create a new frame on \var{ws} \codestr{above}, \codestr{below}
- * \codestr{left} of, or \codestr{right} of \var{node} as indicated
- *  by \var{dirstr}. If \var{dirstr} is  prefixed with
- * \codestr{floating:} a floating split is created.
- */
 EXTL_EXPORT_MEMBER
 WFrame *tiling_split(WTiling *ws, WSplit *node, const char *dirstr) {
   if (!check_node(ws, node)) return NULL;
@@ -846,23 +814,11 @@ WFrame *tiling_split(WTiling *ws, WSplit *node, const char *dirstr) {
   return tiling_do_split(ws, node, dirstr, SPLIT_MINS, SPLIT_MINS);
 }
 
-/*EXTL_DOC
- * Same as \fnref{WTiling.split} at the root of the split tree.
- */
 EXTL_EXPORT_MEMBER
 WFrame *tiling_split_top(WTiling *ws, const char *dirstr) {
   return tiling_do_split(ws, ws->split_tree, dirstr, SPLIT_MINS, SPLIT_MINS);
 }
 
-/*EXTL_DOC
- * Split \var{frame} creating a new frame to direction \var{dirstr}
- * (one of \codestr{left}, \codestr{right}, \codestr{top} or
- * \codestr{bottom}) of \var{frame}.
- * If \var{attach_current} is set, the region currently displayed in
- * \var{frame}, if any, is moved to thenew frame.
- * If \var{dirstr} is prefixed with \codestr{floating:}, a floating
- * split is created.
- */
 EXTL_EXPORT_MEMBER
 WFrame *tiling_split_at(WTiling *ws, WFrame *frame, const char *dirstr,
                         bool attach_current) {
@@ -891,10 +847,6 @@ WFrame *tiling_split_at(WTiling *ws, WFrame *frame, const char *dirstr,
   return newframe;
 }
 
-/*EXTL_DOC
- * Try to relocate regions managed by \var{reg} to another frame
- * and, if possible, destroy it.
- */
 EXTL_EXPORT_MEMBER
 void tiling_unsplit_at(WTiling *ws, WRegion *reg) {
   WPHolder *ph;
@@ -911,10 +863,6 @@ void tiling_unsplit_at(WTiling *ws, WRegion *reg) {
   region_defer_rqdispose(reg);
 }
 
-/*}}}*/
-
-/*{{{ Navigation etc. exports */
-
 WRegion *tiling_current(WTiling *ws) {
   WSplitRegion *node = NULL;
   if (ws->split_tree != NULL) {
@@ -924,54 +872,26 @@ WRegion *tiling_current(WTiling *ws) {
   return (node ? node->reg : NULL);
 }
 
-/*EXTL_DOC
- * Iterate over managed regions of \var{ws} until \var{iterfn} returns
- * \code{false}.
- * The function is called in protected mode.
- * This routine returns \code{true} if it reaches the end of list
- * without this happening.
- */
 EXTL_SAFE
 EXTL_EXPORT_MEMBER
 bool tiling_managed_i(WTiling *ws, ExtlFn iterfn) {
   PtrListIterTmp tmp;
-
   ptrlist_iter_init(&tmp, ws->managed_list);
-
   return extl_iter_objlist_(iterfn, (ObjIterator *)ptrlist_iter, &tmp);
 }
 
-/*EXTL_DOC
- * Returns the root of the split tree.
- */
 EXTL_SAFE
 EXTL_EXPORT_MEMBER
 WSplit *tiling_split_tree(WTiling *ws) { return ws->split_tree; }
 
-/*EXTL_DOC
- * Return the most previously active region next to \var{reg} in
- * direction \var{dirstr} (\codestr{left}, \codestr{right}, \codestr{up},
- * or \codestr{down}). The region \var{reg}
- * must be managed by \var{ws}. If \var{any} is not set, the status display
- * is not considered.
- */
 EXTL_SAFE
 EXTL_EXPORT_MEMBER
-WRegion *tiling_nextto(WTiling *ws, WRegion *reg, const char *dirstr,
-                       bool any) {
+WRegion *tiling_nextto(WTiling *ws, WRegion *reg, const char *dirstr, bool any) {
   WRegionNavi nh;
-
   if (!ioncore_string_to_navi(dirstr, &nh)) return NULL;
-
   return tiling_do_navi_next(ws, reg, nh, FALSE, any);
 }
 
-/*EXTL_DOC
- * Return the most previously active region on \var{ws} with no
- * other regions next to it in  direction \var{dirstr}
- * (\codestr{left}, \codestr{right}, \codestr{up}, or \codestr{down}).
- * If \var{any} is not set, the status display is not considered.
- */
 EXTL_SAFE
 EXTL_EXPORT_MEMBER
 WRegion *tiling_farthest(WTiling *ws, const char *dirstr, bool any) {
@@ -982,20 +902,16 @@ WRegion *tiling_farthest(WTiling *ws, const char *dirstr, bool any) {
   return tiling_do_navi_first(ws, nh, any);
 }
 
-/*EXTL_DOC
- * For region \var{reg} managed by \var{ws} return the \type{WSplit}
- * a leaf of which \var{reg} is.
- */
 EXTL_SAFE
 EXTL_EXPORT_MEMBER
 WSplitRegion *tiling_node_of(WTiling *ws, WRegion *reg) {
   if (reg == NULL) {
-    warn(TR("Nil parameter."));
+    warn("Nil parameter.");
     return NULL;
   }
 
   if (REGION_MANAGER(reg) != (WRegion *)ws) {
-    warn(TR("Manager doesn't match."));
+    warn("Manager doesn't match.");
     return NULL;
   }
 
@@ -1028,8 +944,7 @@ static WSplitSplit *get_at_split(WTiling *ws, WRegion *reg) {
 
   if (node == (WSplit *)ws->stdispnode) {
     warn(
-        TR("The status display is not a valid parameter for "
-           "this routine."));
+        "The status display is not a valid parameter for this routine.");
     return NULL;
   }
 
@@ -1043,9 +958,6 @@ static WSplitSplit *get_at_split(WTiling *ws, WRegion *reg) {
   return split;
 }
 
-/*EXTL_DOC
- * Flip \var{ws} at \var{reg} or root if nil.
- */
 EXTL_EXPORT_MEMBER
 bool iowns_flip_at(WTiling *ws, WRegion *reg) {
   WSplitSplit *split = get_at_split(ws, reg);
@@ -1058,9 +970,6 @@ bool iowns_flip_at(WTiling *ws, WRegion *reg) {
   }
 }
 
-/*EXTL_DOC
- * Transpose \var{ws} at \var{reg} or root if nil.
- */
 EXTL_EXPORT_MEMBER
 bool iowns_transpose_at(WTiling *ws, WRegion *reg) {
   WSplitSplit *split = get_at_split(ws, reg);
@@ -1072,10 +981,6 @@ bool iowns_transpose_at(WTiling *ws, WRegion *reg) {
     return TRUE;
   }
 }
-
-/*}}}*/
-
-/*{{{ Floating toggle */
 
 static void replace(WSplitSplit *split, WSplitSplit *nsplit) {
   WSplitInner *psplit = split->isplit.split.parent;
@@ -1108,9 +1013,7 @@ WSplitSplit *tiling_set_floating(WTiling *ws, WSplitSplit *split, int sp) {
     ns = (WSplitSplit *)create_splitfloat(g, ws, split->dir);
   } else {
     if (OBJ_IS(split->tl, WSplitST) || OBJ_IS(split->br, WSplitST)) {
-      warn(
-          TR("Refusing to float split directly containing the "
-             "status display."));
+      warn( "Refusing to float split directly containing the status display.");
       return NULL;
     }
     ns = create_splitsplit(g, split->dir);
@@ -1125,11 +1028,6 @@ WSplitSplit *tiling_set_floating(WTiling *ws, WSplitSplit *split, int sp) {
   return ns;
 }
 
-/*EXTL_DOC
- * Toggle floating of a split's sides at \var{split} as indicated by the
- * parameter \var{how} (\codestr{set}, \codestr{unset}, or \codestr{toggle}).
- * A split of the appropriate is returned, if there was a change.
- */
 EXTL_EXPORT_AS(WTiling, set_floating)
 WSplitSplit *tiling_set_floating_extl(WTiling *ws, WSplitSplit *split,
                                       const char *how) {
@@ -1137,16 +1035,8 @@ WSplitSplit *tiling_set_floating_extl(WTiling *ws, WSplitSplit *split,
   return tiling_set_floating(ws, split, libtu_string_to_setparam(how));
 }
 
-/*EXTL_DOC
- * Toggle floating of the sides of a split containin \var{reg} as indicated
- * by the parameters \var{how} (\codestr{set}, \codestr{unset}, or
- * \codestr{toggle}) and \var{dirstr} (\codestr{left}, \codestr{right},
- * \codestr{up}, or \codestr{down}). The new status is returned
- * (and \code{false} also on error).
- */
 EXTL_EXPORT_AS(WTiling, set_floating_at)
-bool tiling_set_floating_at_extl(WTiling *ws, WRegion *reg, const char *how,
-                                 const char *dirstr) {
+bool tiling_set_floating_at_extl(WTiling *ws, WRegion *reg, const char *how, const char *dirstr) {
   WPrimn hprimn = PRIMN_ANY, vprimn = PRIMN_ANY;
   WSplitSplit *split, *nsplit;
   WSplit *node;
@@ -1165,7 +1055,7 @@ bool tiling_set_floating_at_extl(WTiling *ws, WRegion *reg, const char *how,
   while (TRUE) {
     split = OBJ_CAST(node->parent, WSplitSplit);
     if (split == NULL) {
-      warn(TR("No suitable split here."));
+      warn("No suitable split here.");
       return FALSE;
     }
 
@@ -1185,10 +1075,6 @@ bool tiling_set_floating_at_extl(WTiling *ws, WRegion *reg, const char *how,
   return OBJ_IS((Obj *)(nsplit == NULL ? split : nsplit), WSplitFloat);
 }
 
-/*}}}*/
-
-/*{{{ Save */
-
 ExtlTab tiling_get_configuration(WTiling *ws) {
   ExtlTab tab, split_tree = extl_table_none();
 
@@ -1196,7 +1082,7 @@ ExtlTab tiling_get_configuration(WTiling *ws) {
 
   if (ws->split_tree != NULL) {
     if (!split_get_config(ws->split_tree, &split_tree))
-      warn(TR("Could not get split tree."));
+      warn("Could not get split tree.");
   }
 
   extl_table_sets_t(tab, "split_tree", split_tree);
@@ -1204,10 +1090,6 @@ ExtlTab tiling_get_configuration(WTiling *ws) {
 
   return tab;
 }
-
-/*}}}*/
-
-/*{{{ Load */
 
 static bool do_attach(WTiling *ws, WRegion *reg, void *p) {
   WSplitRegion *node = create_splitregion(&REGION_GEOM(reg), reg);
@@ -1233,7 +1115,7 @@ WSplit *load_splitregion(WTiling *ws, const WRectangle *geom, ExtlTab tab) {
   ExtlTab rt;
 
   if (!extl_table_gets_t(tab, "regparams", &rt)) {
-    warn(TR("Missing region parameters."));
+    warn("Missing region parameters.");
     return NULL;
   }
 
@@ -1274,7 +1156,7 @@ WSplit *load_splitsplit(WTiling *ws, const WRectangle *geom, ExtlTab tab) {
   } else if (strcmp(dir_str, "horizontal") == 0) {
     dir = SPLIT_HORIZONTAL;
   } else {
-    warn(TR("Invalid direction."));
+    warn("Invalid direction.");
     free(dir_str);
     return NULL;
   }
@@ -1346,7 +1228,7 @@ WSplit *tiling_load_node_default(WTiling *ws, const WRectangle *geom,
   extl_table_gets_s(tab, "type", &typestr);
 
   if (typestr == NULL) {
-    warn(TR("No split type given."));
+    warn("No split type given.");
     return NULL;
   }
 
@@ -1359,7 +1241,7 @@ WSplit *tiling_load_node_default(WTiling *ws, const WRectangle *geom,
   else if (strcmp(typestr, "WSplitST") == 0)
     node = NULL; /*load_splitst(ws, geom, tab);*/
   else
-    warn(TR("Unknown split type."));
+    warn("Unknown split type.");
 
   free(typestr);
 
@@ -1392,7 +1274,7 @@ WRegion *tiling_load(WWindow *par, const WFitParams *fp, ExtlTab tab) {
   }
 
   if (ws->split_tree == NULL) {
-    warn(TR("The workspace is empty."));
+    warn("The workspace is empty.");
     destroy_obj((Obj *)ws);
     return NULL;
   }

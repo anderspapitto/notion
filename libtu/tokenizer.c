@@ -1,12 +1,3 @@
-/*
- * libtu/tokenizer.c
- *
- * Copyright (c) Tuomo Valkonen 1999-2002.
- *
- * You may distribute and modify this library under the terms of either
- * the Clarified Artistic License or the GNU LGPL, version 2.1 or later.
- */
-
 #include <errno.h>
 #include <stdio.h>
 #include <ctype.h>
@@ -527,7 +518,7 @@ void tokz_warn_error(const Tokenizer *tokz, int line, int e) {
   if (e < 0)
     tokz_warn(tokz, line, "%s", strerror(-e));
   else
-    tokz_warn(tokz, line, "%s", TR(errors[e]));
+    tokz_warn(tokz, line, "%s", errors[e]);
 }
 
 bool tokz_get_token(Tokenizer *tokz, Token *tok) {

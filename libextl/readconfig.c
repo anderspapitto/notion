@@ -1,14 +1,3 @@
-/*
- * libextl/readconfig.c
- *
- * Copyright (c) Tuomo Valkonen 1999-2005.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- */
-
 #include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -24,8 +13,6 @@ typedef struct {
   ExtlTab tab;
   int status;
 } TryCallParam;
-
-/*{{{ Path setup */
 
 static char *userdir = NULL;
 static char *sessiondir = NULL;
@@ -69,7 +56,7 @@ bool extl_set_userdirs(const char *appname) {
   home = getenv("HOME");
 
   if (home == NULL) {
-    extl_warn(TR("$HOME not set"));
+    extl_warn("$HOME not set");
   } else {
     libtu_asprintf(&userdir, "%s/.%s", home, appname);
     if (userdir != NULL) fails -= extl_add_searchdir(userdir);
@@ -93,8 +80,7 @@ bool extl_set_sessiondir(const char *session) {
     libtu_asprintf(&tmp, "%s/%s", userdir, session);
   } else {
     extl_warn(
-        TR("User directory not set. "
-           "Unable to set session directory."));
+        "User directory not set. Unable to set session directory.");
     return FALSE;
   }
 
@@ -108,14 +94,8 @@ bool extl_set_sessiondir(const char *session) {
 }
 
 const char *extl_userdir() { return userdir; }
-
 const char *extl_sessiondir() { return sessiondir; }
-
 const char *extl_searchpath() { return scriptpath; }
-
-/*}}}*/
-
-/*{{{ try_etcpath, do_include, etc. */
 
 static int do_try(const char *dir, const char *file, ExtlTryConfigFn *tryfn,
                   void *tryfnparam) {
@@ -199,7 +179,7 @@ static int try_lookup(const char *file, char **ptr) {
 static int try_load(const char *file, TryCallParam *param) {
   if (access(file, F_OK) != 0) return EXTL_TRYCONFIG_NOTFOUND;
 
-  if (param->status == 1) extl_warn(TR("Falling back to %s."), file);
+  if (param->status == 1) extl_warn("Falling back to %s.", file);
 
   if (!extl_loadfile(file, &(param->fn))) {
     param->status = 1;
@@ -211,25 +191,17 @@ static int try_load(const char *file, TryCallParam *param) {
 
 static int try_call(const char *file, TryCallParam *param) {
   int ret = try_load(file, param);
-
   if (ret != EXTL_TRYCONFIG_OK) return ret;
-
   ret = extl_call(param->fn, NULL, NULL);
-
   extl_unref_fn(param->fn);
-
   return (ret ? EXTL_TRYCONFIG_OK : EXTL_TRYCONFIG_CALL_FAILED);
 }
 
 static int try_read_savefile(const char *file, TryCallParam *param) {
   int ret = try_load(file, param);
-
   if (ret != EXTL_TRYCONFIG_OK) return ret;
-
   ret = extl_call(param->fn, NULL, "t", &(param->tab));
-
   extl_unref_fn(param->fn);
-
   return (ret ? EXTL_TRYCONFIG_OK : EXTL_TRYCONFIG_CALL_FAILED);
 }
 
@@ -281,10 +253,6 @@ int extl_try_config(const char *fname, const char *cfdir,
   return ret;
 }
 
-/*EXTL_DOC
- * Lookup script \var{file}. If \var{try_in_dir} is set, it is tried
- * before the standard search path.
- */
 EXTL_EXPORT
 char *extl_lookup_script(const char *file, const char *sp) {
   const char *files[] = {NULL, NULL};
@@ -301,7 +269,7 @@ char *extl_lookup_script(const char *file, const char *sp) {
 }
 
 static int warn_notfound(const char *file, void *UNUSED(param)) {
-  warn(TR("Tried: '%s'"), file);
+  warn("Tried: '%s'", file);
 
   return EXTL_TRYCONFIG_NOTFOUND;
 }
@@ -318,7 +286,7 @@ bool extl_read_config(const char *file, const char *sp, bool warn_nx) {
                            EXTL_COMPILED_EXTENSION, EXTL_EXTENSION);
 
   if (retval == EXTL_TRYCONFIG_NOTFOUND && warn_nx) {
-    extl_warn(TR("Unable to find '%s.%s' or '%s.%s' on search path..."), file,
+    extl_warn("Unable to find '%s.%s' or '%s.%s' on search path...", file,
               EXTL_COMPILED_EXTENSION, file, EXTL_EXTENSION);
     extl_try_config(file, sp, (ExtlTryConfigFn *)warn_notfound, NULL,
                     EXTL_COMPILED_EXTENSION, EXTL_EXTENSION);
@@ -342,19 +310,12 @@ bool extl_read_savefile(const char *basename, ExtlTab *tabret) {
   return (retval == EXTL_TRYCONFIG_OK);
 }
 
-/*EXTL_DOC
- * Read a savefile.
- */
 EXTL_EXPORT_AS(extl, read_savefile)
 ExtlTab extl_extl_read_savefile(const char *basename) {
   ExtlTab tab;
   if (!extl_read_savefile(basename, &tab)) return extl_table_none();
   return tab;
 }
-
-/*}}}*/
-
-/*{{{ extl_get_savefile */
 
 static bool ensuredir(char *f) {
   char *p;
@@ -379,10 +340,6 @@ static bool ensuredir(char *f) {
   return FALSE;
 }
 
-/*EXTL_DOC
- * Get a file name to save (session) data in. The string \var{basename}
- * should contain no path or extension components.
- */
 EXTL_EXPORT
 char *extl_get_savefile(const char *basename) {
   char *res = NULL;
@@ -390,7 +347,7 @@ char *extl_get_savefile(const char *basename) {
   if (sessiondir == NULL) return NULL;
 
   if (!ensuredir(sessiondir)) {
-    extl_warn(TR("Unable to create session directory \"%s\"."), sessiondir);
+    extl_warn("Unable to create session directory \"%s\".", sessiondir);
     return NULL;
   }
 
@@ -399,10 +356,6 @@ char *extl_get_savefile(const char *basename) {
   return res;
 }
 
-/*EXTL_DOC
- * Write \var{tab} in file with basename \var{basename} in the
- * session directory.
- */
 EXTL_EXPORT
 bool extl_write_savefile(const char *basename, ExtlTab tab) {
   bool ret = FALSE;
@@ -415,5 +368,3 @@ bool extl_write_savefile(const char *basename, ExtlTab tab) {
 
   return ret;
 }
-
-/*}}}*/

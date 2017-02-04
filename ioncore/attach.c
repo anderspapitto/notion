@@ -1,11 +1,3 @@
-/*
- * ion/ioncore/attach.c
- *
- * Copyright (c) Tuomo Valkonen 1999-2009.
- *
- * See the included file LICENSE for details.
- */
-
 #include <string.h>
 #include <limits.h>
 
@@ -20,8 +12,6 @@
 #include "names.h"
 #include "focus.h"
 #include "screen-notify.h"
-
-/*{{{ Helper */
 
 static WRegion *doit_new(WRegion *mgr, WWindow *par, const WFitParams *fp,
                          WRegionDoAttachFn *cont, void *cont_param,
@@ -46,7 +36,7 @@ static WRegion *doit_reparent(WRegion *mgr, WWindow *par, const WFitParams *fp,
   WScreen *old_scr = region_screen_of(reg);
 
   if (!region_ancestor_check(mgr, reg)) {
-    warn(TR("Attempt to make region %s manage its ancestor %s."),
+    warn("Attempt to make region %s manage its ancestor %s.",
          region_name(mgr), region_name(reg));
     return NULL;
   }
@@ -59,9 +49,6 @@ static WRegion *doit_reparent(WRegion *mgr, WWindow *par, const WFitParams *fp,
   }
 
   if (fp->mode & REGION_FIT_WHATEVER) {
-    /* fp->g is not final; substitute size with current to avoid
-     * useless resizing.
-     */
     fp2.mode = fp->mode;
     fp2.g.x = fp->g.x;
     fp2.g.y = fp->g.y;
@@ -71,7 +58,7 @@ static WRegion *doit_reparent(WRegion *mgr, WWindow *par, const WFitParams *fp,
   }
 
   if (!region_fitrep(reg, par, fp)) {
-    warn(TR("Unable to reparent."));
+    warn("Unable to reparent.");
     return NULL;
   }
 
@@ -84,9 +71,7 @@ static WRegion *doit_reparent(WRegion *mgr, WWindow *par, const WFitParams *fp,
   if (!cont(mgr, reg, cont_param)) {
     WScreen *scr = region_screen_of(reg);
 
-    warn(
-        TR("Unexpected attach error: "
-           "trying to recover by attaching to screen."));
+    warn( "Unexpected attach error: trying to recover by attaching to screen.");
 
     if (scr != NULL) {
       /* Try to attach to screen, to have `reg` attached at least
@@ -101,7 +86,7 @@ static WRegion *doit_reparent(WRegion *mgr, WWindow *par, const WFitParams *fp,
       if (mplex_attach_simple(&scr->mplex, reg, flags) != NULL) return NULL;
     }
 
-    warn(TR("Failed recovery."));
+    warn("Failed recovery.");
 
     return NULL;
   }
@@ -195,5 +180,3 @@ void region_postdetach_dispose(WRegion *reg, WRegion *disposeroot) {
   if (disposeroot != reg && region_ancestor_check(reg, disposeroot))
     region_dispose(disposeroot);
 }
-
-/*}}}*/

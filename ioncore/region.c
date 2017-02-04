@@ -1,11 +1,3 @@
-/*
- * ion/ioncore/region.c
- *
- * Copyright (c) Tuomo Valkonen 1999-2009.
- *
- * See the included file LICENSE for details.
- */
-
 #include <string.h>
 
 #include <X11/Xatom.h>
@@ -37,11 +29,9 @@ WHook *region_notify_hook = NULL;
 
 static void region_notify_change_(WRegion *reg, WRegionNotify how);
 
-/*{{{ Init & deinit */
-
 void region_init(WRegion *reg, WWindow *par, const WFitParams *fp) {
   if (fp->g.w < 0 || fp->g.h < 0)
-    warn(TR("Creating region with negative width or height!"));
+    warn("Creating region with negative width or height!");
 
   reg->geom = fp->g;
   reg->flags = 0;
@@ -79,7 +69,6 @@ static void destroy_children(WRegion *reg) {
   WRegion *sub, *prev = NULL;
   bool complained = FALSE;
 
-  /* destroy children */
   while (1) {
     sub = reg->children;
     if (sub == NULL) break;
@@ -87,8 +76,7 @@ static void destroy_children(WRegion *reg) {
     assert(sub != prev);
     if (ioncore_g.opmode != IONCORE_OPMODE_DEINIT && !complained &&
         OBJ_IS(reg, WClientWin)) {
-      warn(TR("Destroying object \"%s\" with client windows as "
-              "children."),
+      warn("Destroying object \"%s\" with client windows as children.",
            region_name(reg));
       complained = TRUE;
     }
@@ -108,7 +96,6 @@ void region_deinit(WRegion *reg) {
   }
 
   assert(reg->submapstat == NULL);
-  /*region_free_submapstat(reg);*/
   region_detach_manager(reg);
   region_unset_return(reg);
   region_unset_parent(reg);
@@ -123,10 +110,6 @@ void region_deinit(WRegion *reg) {
     ioncore_g.focus_next = NULL;
   }
 }
-
-/*}}}*/
-
-/*{{{ Dynfuns */
 
 bool region_fitrep(WRegion *reg, WWindow *par, const WFitParams *fp) {
   bool ret = FALSE;
@@ -166,8 +149,6 @@ void region_do_set_focus(WRegion *reg, bool warp) {
   CALL_DYN(region_do_set_focus, reg, (reg, warp));
 }
 
-/*{{{ Manager region dynfuns */
-
 static bool region_managed_prepare_focus_default(WRegion *mgr, WRegion *reg,
                                                  int flags,
                                                  WPrepareFocusResult *res) {
@@ -194,10 +175,6 @@ void region_managed_remove(WRegion *mgr, WRegion *reg) {
   CALL_DYN(region_managed_remove, mgr, (mgr, reg));
 }
 
-/*EXTL_DOC
- * Return the object, if any, that is considered ``currently active''
- * within the objects managed by \var{mplex}.
- */
 EXTL_SAFE
 EXTL_EXPORT_MEMBER
 WRegion *region_current(WRegion *mgr) {
@@ -210,21 +187,10 @@ void region_child_removed(WRegion *reg, WRegion *sub) {
   CALL_DYN(region_child_removed, reg, (reg, sub));
 }
 
-/*}}}*/
-
-/*{{{ Dynfun defaults */
-
 void region_updategr_default(WRegion *reg) {
   WRegion *sub = NULL;
-
   FOR_ALL_CHILDREN(reg, sub) { region_updategr(sub); }
 }
-
-/*}}}*/
-
-/*}}}*/
-
-/*{{{ Goto */
 
 bool region_prepare_focus(WRegion *reg, int flags, WPrepareFocusResult *res) {
   if (TRUE /* !REGION_IS_ACTIVE(reg) ||
@@ -237,14 +203,11 @@ bool region_prepare_focus(WRegion *reg, int flags, WPrepareFocusResult *res) {
       return region_managed_prepare_focus(mgr, reg, flags, res);
     } else if (par != NULL) {
       if (!region_prepare_focus(par, flags, res)) return FALSE;
-      /* Just focus reg, if it has no manager, and parent can be
-       * focused.
-       */
+      /* Just focus reg, if it has no manager, and parent can be focused. */
     } else if (!REGION_IS_MAPPED(reg)) {
       region_map(reg);
     }
   }
-
   res->reg = reg;
   res->flags = flags;
   return TRUE;
@@ -264,40 +227,19 @@ bool region_goto_flags(WRegion *reg, int flags) {
   return ret;
 }
 
-/*EXTL_DOC
- * Attempt to display \var{reg}, save region activity status and then
- * warp to (or simply set focus to if warping is disabled) \var{reg}.
- *
- * Note that this function is asynchronous; the region will not
- * actually have received the focus when this function returns.
- */
 EXTL_EXPORT_MEMBER
 bool region_goto_focus(WRegion *reg) {
   return region_goto_flags(reg, REGION_GOTO_FOCUS);
 }
 
-/*EXTL_DOC
- * Deprecated in favour of \fnref{WRegion.goto_focus} because 'goto' is a
- * keyword since Lua 5.2.
- */
 EXTL_EXPORT_MEMBER
 bool region_goto(WRegion *reg) { return region_goto_focus(reg); }
 
-/*
- * Kept for backwards compatibility
- */
 EXTL_EXPORT_MEMBER
 bool region_goto_(WRegion *reg) { return region_goto_focus(reg); }
 
-/*
- * Kept for backwards compatibility
- */
 EXTL_EXPORT_MEMBER
 bool region_display(WRegion *reg) { return region_goto_focus(reg); }
-
-/*}}}*/
-
-/*{{{ Fit/reparent */
 
 void region_fit(WRegion *reg, const WRectangle *geom, WRegionFitMode mode) {
   WFitParams fp;
@@ -315,25 +257,10 @@ bool region_reparent(WRegion *reg, WWindow *par, const WRectangle *geom,
   return region_fitrep(reg, par, &fp);
 }
 
-/*}}}*/
-
-/*{{{ Close */
-
 static void region_rqclose_default(WRegion *reg, bool relocate) {
   if (relocate || region_may_dispose(reg)) region_defer_rqdispose(reg);
 }
 
-/*EXTL_DOC
- * Attempt to close/destroy \var{reg}. Whether this operation works
- * depends on whether the particular type of region in question has
- * implemented the feature and, in case of client windows, whether
- * the client supports the \code{WM_DELETE} protocol (see also
- * \fnref{WClientWin.kill}). The region will not be destroyed when
- * this function returns. To find out if and when it is destroyed,
- * use the \codestr{deinit} notification. If \var{relocate} is not set,
- * and \var{reg} manages other regions, it will not be closed. Otherwise
- * the managed regions will be attempted to be relocated.
- */
 EXTL_EXPORT_MEMBER
 void region_rqclose(WRegion *reg, bool relocate) {
   CALL_DYN(region_rqclose, reg, (reg, relocate));
@@ -351,13 +278,6 @@ static WRegion *region_rqclose_propagate_default(WRegion *reg,
   }
 }
 
-/*EXTL_DOC
- * Recursively attempt to close a region or one of the regions managed by
- * it. If \var{sub} is set, it will be used as the managed region, otherwise
- * \fnref{WRegion.current}\code{(reg)}. The object to be closed is
- * returned, or NULL if nothing can be closed. For further details, see
- * notes for \fnref{WRegion.rqclose}.
- */
 EXTL_EXPORT_MEMBER
 WRegion *region_rqclose_propagate(WRegion *reg, WRegion *maybe_sub) {
   WRegion *ret = NULL;
@@ -367,25 +287,22 @@ WRegion *region_rqclose_propagate(WRegion *reg, WRegion *maybe_sub) {
 
 bool region_may_dispose_default(WRegion *reg) {
   bool res = region_rescue_needed(reg);
-
   if (res) {
     const char *name = region_name(reg);
-    warn(TR("Can not destroy %s: contains client windows."),
-         (name != NULL ? name : TR("(unknown)")));
+    warn("Can not destroy %s: contains client windows.", (name != NULL ? name : "(unknown)"));
   }
 
   return !res;
 }
 
 bool region_may_dispose(WRegion *reg) {
-  bool ret = TRUE;
-  CALL_DYN_RET(ret, bool, region_may_dispose, reg, (reg));
-  return ret;
+    bool ret = TRUE;
+    CALL_DYN_RET(ret, bool, region_may_dispose, reg, (reg));
+    return ret;
 }
 
-static WRegion *region_managed_disposeroot_default(WRegion *UNUSED(mgr),
-                                                   WRegion *reg) {
-  return reg;
+static WRegion *region_managed_disposeroot_default(WRegion *UNUSED(mgr), WRegion *reg) {
+    return reg;
 }
 
 WRegion *region_managed_disposeroot(WRegion *mgr, WRegion *reg) {
@@ -419,7 +336,7 @@ bool region_dispose_(WRegion *reg, bool not_simple) {
 
   if (rescue) {
     if (!region_rescue(reg, NULL, 0)) {
-      warn(TR("Failed to rescue some client windows - not closing."));
+      warn("Failed to rescue some client windows - not closing.");
       return FALSE;
     }
   }
@@ -442,44 +359,27 @@ void region_defer_rqdispose(WRegion *reg) {
   mainloop_defer_action((Obj *)reg, (WDeferredAction *)region_rqdispose);
 }
 
-/*}}}*/
-
-/*{{{ Manager/parent stuff */
-
-/* Routine to call to unmanage a region */
 void region_detach_manager(WRegion *reg) {
   WRegion *mgr = REGION_MANAGER(reg);
-
   if (mgr == NULL) return;
-
   region_managed_remove(mgr, reg);
-
   assert(REGION_MANAGER(reg) == NULL);
 }
 
 void region_unset_manager_pseudoactivity(WRegion *reg) {
   WRegion *mgr = reg->manager, *par = REGION_PARENT_REG(reg);
-
   if (mgr == NULL || mgr == par || !REGION_IS_PSEUDOACTIVE(mgr)) return;
-
   mgr->flags &= ~REGION_PSEUDOACTIVE;
-
   region_notify_change(mgr, ioncore_g.notifies.pseudoinactivated);
-
   region_unset_manager_pseudoactivity(mgr);
 }
 
 void region_set_manager_pseudoactivity(WRegion *reg) {
   WRegion *mgr = reg->manager, *par = REGION_PARENT_REG(reg);
-
   if (!REGION_IS_ACTIVE(reg) && !REGION_IS_PSEUDOACTIVE(reg)) return;
-
   if (mgr == NULL || mgr == par || REGION_IS_PSEUDOACTIVE(mgr)) return;
-
   mgr->flags |= REGION_PSEUDOACTIVE;
-
   region_notify_change(mgr, ioncore_g.notifies.pseudoactivated);
-
   region_set_manager_pseudoactivity(mgr);
 }
 
@@ -489,18 +389,12 @@ void region_set_manager_pseudoactivity(WRegion *reg) {
  */
 void region_unset_manager(WRegion *reg, WRegion *mgr) {
   if (reg->manager != mgr) return;
-
   region_notify_change_(reg, ioncore_g.notifies.unset_manager);
-
   region_unset_manager_pseudoactivity(reg);
-
   reg->manager = NULL;
-
   /* Reset status, as it is set by manager */
   reg->flags &= ~REGION_SKIP_FOCUS;
-
   if (region_is_activity_r(reg)) region_clear_mgd_activity(mgr);
-
   region_unset_return(reg);
 }
 
@@ -510,13 +404,9 @@ void region_unset_manager(WRegion *reg, WRegion *mgr) {
  */
 void region_set_manager(WRegion *reg, WRegion *mgr) {
   assert(reg->manager == NULL);
-
   reg->manager = mgr;
-
   region_set_manager_pseudoactivity(reg);
-
   if (region_is_activity_r(reg)) region_mark_mgd_activity(mgr);
-
   region_notify_change_(reg, ioncore_g.notifies.set_manager);
 }
 
@@ -528,9 +418,7 @@ void region_set_parent(WRegion *reg, WWindow *parent) {
 
 void region_unset_parent(WRegion *reg) {
   WRegion *p = REGION_PARENT_REG(reg);
-
   if (p == NULL || p == reg) return;
-
   UNLINK_ITEM(p->children, reg, p_next, p_prev);
   reg->parent = NULL;
 
@@ -542,16 +430,10 @@ void region_unset_parent(WRegion *reg) {
   region_child_removed(p, reg);
 }
 
-/*EXTL_DOC
- * Returns the region that manages \var{reg}.
- */
 EXTL_SAFE
 EXTL_EXPORT_MEMBER
 WRegion *region_manager(WRegion *reg) { return reg->manager; }
 
-/*EXTL_DOC
- * Returns the parent region of \var{reg}.
- */
 EXTL_SAFE
 EXTL_EXPORT_MEMBER
 WWindow *region_parent(WRegion *reg) { return reg->parent; }
@@ -563,12 +445,7 @@ WRegion *region_manager_or_parent(WRegion *reg) {
     return (WRegion *)(reg->parent);
 }
 
-/*}}}*/
-
-/*{{{ Stacking and ordering */
-
-static void region_stacking_default(WRegion *reg, Window *bottomret,
-                                    Window *topret) {
+static void region_stacking_default(WRegion *reg, Window *bottomret, Window *topret) {
   Window win = region_xwindow(reg);
   *bottomret = win;
   *topret = win;
@@ -597,10 +474,6 @@ bool region_rqorder(WRegion *reg, WRegionOrder order) {
     return region_managed_rqorder(mgr, reg, order);
 }
 
-/*EXTL_DOC
- * Request ordering. Currently supported values for \var{ord}
- * are \codestr{front} and \codestr{back}.
- */
 EXTL_EXPORT_AS(WRegion, rqorder)
 bool region_rqorder_extl(WRegion *reg, const char *ord) {
   WRegionOrder order;
@@ -616,13 +489,6 @@ bool region_rqorder_extl(WRegion *reg, const char *ord) {
   return region_rqorder(reg, order);
 }
 
-/*}}}*/
-
-/*{{{ Misc. */
-
-/*EXTL_DOC
- * Returns the root window \var{reg} is on.
- */
 EXTL_SAFE
 EXTL_EXPORT_MEMBER
 WRootWin *region_rootwin_of(const WRegion *reg) {
@@ -633,9 +499,6 @@ WRootWin *region_rootwin_of(const WRegion *reg) {
   return rw;
 }
 
-/*EXTL_DOC
- * Returns the screen \var{reg} is on.
- */
 EXTL_SAFE
 EXTL_EXPORT_MEMBER
 WScreen *region_screen_of(WRegion *reg) {
@@ -654,9 +517,6 @@ bool region_same_rootwin(const WRegion *reg1, const WRegion *reg2) {
   return (reg1->rootwin == reg2->rootwin);
 }
 
-/*EXTL_DOC
- * Is \var{reg} visible/is it and all it's ancestors mapped?
- */
 EXTL_SAFE
 EXTL_EXPORT_AS(WRegion, is_mapped)
 bool region_is_fully_mapped(WRegion *reg) {
@@ -724,10 +584,6 @@ void region_notify_change(WRegion *reg, WRegionNotify how) {
   region_notify_change_(reg, how);
 }
 
-/*EXTL_DOC
- * Returns the geometry of \var{reg} within its parent; a table with fields
- * \var{x}, \var{y}, \var{w} and \var{h}.
- */
 EXTL_SAFE
 EXTL_EXPORT_MEMBER
 ExtlTab region_geom(WRegion *reg) {
@@ -759,10 +615,6 @@ void ioncore_region_notify(WRegion *reg, WRegionNotify how) {
     xwindow_set_text_property(((WWindow *)reg)->win, XA_WM_NAME, p, 1);
   }
 }
-
-/*}}}*/
-
-/*{{{ Debug printers */
 
 #define REGION_DEBUGPRINT(what, next)                            \
   do {                                                           \
@@ -797,45 +649,22 @@ void region_debugprint_parents(const WRegion *reg) {
 
 #undef REGION_DEBUGPRINT
 
-/*}}}*/
-
-/*{{{ Dynamic function table and class implementation */
-
 static DynFunTab region_dynfuntab[] = {
     {region_managed_rqgeom, region_managed_rqgeom_allow},
-
     {region_managed_rqgeom_absolute, region_managed_rqgeom_absolute_default},
-
     {region_updategr, region_updategr_default},
-
-    {(DynFun *)region_rescue_clientwins,
-     (DynFun *)region_rescue_child_clientwins},
-
+    {(DynFun *)region_rescue_clientwins, (DynFun *)region_rescue_child_clientwins},
     {(DynFun *)region_may_dispose, (DynFun *)region_may_dispose_default},
-
     {(DynFun *)region_prepare_manage, (DynFun *)region_prepare_manage_default},
-
-    {(DynFun *)region_prepare_manage_transient,
-     (DynFun *)region_prepare_manage_transient_default},
-
-    {(DynFun *)region_managed_prepare_focus,
-     (DynFun *)region_managed_prepare_focus_default},
-
-    {(DynFun *)region_managed_disposeroot,
-     (DynFun *)region_managed_disposeroot_default},
-
-    {(DynFun *)region_rqclose_propagate,
-     (DynFun *)region_rqclose_propagate_default},
-
+    {(DynFun *)region_prepare_manage_transient, (DynFun *)region_prepare_manage_transient_default},
+    {(DynFun *)region_managed_prepare_focus, (DynFun *)region_managed_prepare_focus_default},
+    {(DynFun *)region_managed_disposeroot, (DynFun *)region_managed_disposeroot_default},
+    {(DynFun *)region_rqclose_propagate, (DynFun *)region_rqclose_propagate_default},
     {(DynFun *)region_rqclose, (DynFun *)region_rqclose_default},
-
     {(DynFun *)region_displayname, (DynFun *)region_name},
-
     {region_stacking, region_stacking_default},
-
-    END_DYNFUNTAB};
+    END_DYNFUNTAB
+};
 
 EXTL_EXPORT
 IMPLCLASS(WRegion, Obj, region_deinit, region_dynfuntab);
-
-/*}}}*/

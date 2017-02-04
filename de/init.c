@@ -1,11 +1,3 @@
-/*
- * ion/de/init.c
- *
- * Copyright (c) Tuomo Valkonen 1999-2009.
- *
- * See the included file LICENSE for details.
- */
-
 #include <string.h>
 
 #include <libextl/readconfig.h>
@@ -24,10 +16,7 @@
 #include "init.h"
 #include "exports.h"
 
-/*{{{ Style specifications */
-
-static bool get_spec(ExtlTab tab, const char *name, GrStyleSpec *spec,
-                     char **pat_ret) {
+static bool get_spec(ExtlTab tab, const char *name, GrStyleSpec *spec, char **pat_ret) {
   char *str;
   bool res;
 
@@ -43,10 +32,6 @@ static bool get_spec(ExtlTab tab, const char *name, GrStyleSpec *spec,
   return res;
 }
 
-/*}}}*/
-
-/*{{{ Borders */
-
 #define CF_BORDER_VAL_SANITY_CHECK 16
 
 void de_get_border_val(uint *val, ExtlTab tab, const char *what) {
@@ -54,7 +39,7 @@ void de_get_border_val(uint *val, ExtlTab tab, const char *what) {
 
   if (extl_table_gets_i(tab, what, &g)) {
     if (g > CF_BORDER_VAL_SANITY_CHECK || g < 0)
-      warn(TR("Border attribute %s sanity check failed."), what);
+      warn("Border attribute %s sanity check failed.", what);
     else
       *val = g;
   }
@@ -74,7 +59,7 @@ void de_get_border_style(uint *ret, ExtlTab tab) {
   else if (strcmp(style, "ridge") == 0)
     *ret = DEBORDER_RIDGE;
   else
-    warn(TR("Unknown border style \"%s\"."), style);
+    warn("Unknown border style \"%s\".", style);
 
   free(style);
 }
@@ -91,7 +76,7 @@ void de_get_border_sides(uint *ret, ExtlTab tab) {
   else if (strcmp(style, "lr") == 0)
     *ret = DEBORDER_LR;
   else
-    warn(TR("Unknown border side configuration \"%s\"."), style);
+    warn("Unknown border side configuration \"%s\".", style);
 
   free(style);
 }
@@ -120,7 +105,7 @@ static bool de_get_colour_(WRootWin *rootwin, DEColour *ret, ExtlTab tab,
     } else {
       set = de_alloc_colour(rootwin, ret, name);
 
-      if (!set) warn(TR("Unable to allocate colour \"%s\"."), name);
+      if (!set) warn("Unable to allocate colour \"%s\".", name);
     }
     free(name);
   }
@@ -193,7 +178,7 @@ void de_get_extra_cgrps(WRootWin *rootwin, DEStyle *style, ExtlTab tab) {
     continue;
 
   err:
-    warn(TR("Corrupt substyle table %d."), i);
+    warn("Corrupt substyle table %d.", i);
     nfailed++;
   }
 
@@ -204,8 +189,6 @@ void de_get_extra_cgrps(WRootWin *rootwin, DEStyle *style, ExtlTab tab) {
 
   style->n_extra_cgrps = n - nfailed;
 }
-
-/*}}}*/
 
 void de_get_text_align(int *alignret, ExtlTab tab) {
   char *align = NULL;
@@ -219,12 +202,10 @@ void de_get_text_align(int *alignret, ExtlTab tab) {
   else if (strcmp(align, "center") == 0)
     *alignret = DEALIGN_CENTER;
   else
-    warn(TR("Unknown text alignment \"%s\"."), align);
+    warn("Unknown text alignment \"%s\".", align);
 
   free(align);
 }
-
-/*{{{ Extras filter/copy */
 
 static const char *const known_values[] = {
     "based_on",          "font",           "shadow_pixels",
@@ -252,14 +233,9 @@ static bool filter_extras_iter_fn(ExtlAny k, ExtlAny v, void *p) {
 
 static void filter_extras(ExtlTab *tgt, ExtlTab src) {
   /* Copy any unknown string-keyed values from src to tgt,
-   * possibly creating tgt.
-   */
+   * possibly creating tgt. */
   extl_table_iter(src, filter_extras_iter_fn, tgt);
 }
-
-/*}}}*/
-
-/*{{{ de_defstyle */
 
 void de_get_nonfont(WRootWin *rootwin, DEStyle *style, ExtlTab tab) {
   DEStyle *based_on = style->based_on;
@@ -331,8 +307,7 @@ bool de_defstyle_rootwin(WRootWin *rootwin, const char *name, ExtlTab tab) {
       uint nb = based_on->n_extra_cgrps;
       uint ns = style->n_extra_cgrps;
       /* Nothing else is using based_on: optimise and move
-       * extra colour groups here, so that based_on can be freed.
-       */
+       * extra colour groups here, so that based_on can be freed. */
 
       if (nb > 0) {
         DEColourGroup *cgs = ALLOC_N(DEColourGroup, nb + ns);

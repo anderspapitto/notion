@@ -162,7 +162,7 @@ static void screen_managed_activity(WScreen *scr) {
 
   if (iw->brush == NULL) goto unnotify;
 
-  notstr = scopy(TR("act: "));
+  notstr = scopy("act: ");
 
   if (notstr == NULL) goto unnotify;
 

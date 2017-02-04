@@ -318,23 +318,15 @@ void ioncore_x_change_property(int win, int atom, int atom_type, int format,
   uchar *p;
 
   if (n < 0 || !get_mode(mode, &m)) {
-    warn(TR("Invalid arguments."));
+    warn("Invalid arguments.");
     return;
   }
 
   switch (format) {
-    case 8:
-      GET(char);
-      break;
-    case 16:
-      GET(short);
-      break;
-    case 32:
-      GET(long);
-      break;
-    default:
-      warn(TR("Invalid arguments."));
-      return;
+    case 8: GET(char); break;
+    case 16: GET(short); break;
+    case 32: GET(long); break;
+    default: warn("Invalid arguments."); return;
   }
 
   XChangeProperty(ioncore_g.dpy, win, atom, atom_type, format, m, p, n);

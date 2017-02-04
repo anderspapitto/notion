@@ -1,11 +1,3 @@
-/*
- * ion/ioncore/saveload.c
- *
- * Copyright (c) Tuomo Valkonen 1999-2009.
- *
- * See the included file LICENSE for details.
- */
-
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
@@ -28,8 +20,6 @@
 static bool loading_layout = FALSE;
 static bool layout_load_error = FALSE;
 
-/*{{{ Session management module support */
-
 static SMAddCallback *add_cb;
 static SMCfgCallback *cfg_cb;
 
@@ -42,10 +32,6 @@ void ioncore_get_sm_callbacks(SMAddCallback **add, SMCfgCallback **cfg) {
   *add = add_cb;
   *cfg = cfg_cb;
 }
-
-/*}}}*/
-
-/*{{{ Load support functions */
 
 static WPHolder **current_ph_p = NULL;
 
@@ -75,7 +61,7 @@ WRegion *create_region_load(WWindow *par, const WFitParams *fp, ExtlTab tab,
   if (info != NULL) fn = info->lc_fn;
 
   if (fn == NULL) {
-    warn(TR("Unknown class \"%s\", cannot create region."), objclass);
+    warn("Unknown class \"%s\", cannot create region.", objclass);
     layout_load_error = loading_layout;
     return NULL;
   }
@@ -100,10 +86,6 @@ WRegion *create_region_load(WWindow *par, const WFitParams *fp, ExtlTab tab,
 
   return reg;
 }
-
-/*}}}*/
-
-/*{{{ Save support functions */
 
 bool region_supports_save(WRegion *reg) {
   return HAS_DYN(reg, region_get_configuration);
@@ -135,37 +117,14 @@ ExtlTab region_get_configuration(WRegion *reg) {
   return tab;
 }
 
-/*EXTL_DOC
- * Get configuration tree. If \var{clientwins} is unset, client windows
- * are filtered out.
- */
 EXTL_EXPORT_AS(WRegion, get_configuration)
 ExtlTab region_get_configuration_extl(WRegion *reg, bool clientwins) {
   ExtlTab tab;
-
   get_config_clientwins = clientwins;
-
   tab = region_get_configuration(reg);
-
   get_config_clientwins = TRUE;
-
   return tab;
 }
-
-/*}}}*/
-
-/*{{{ save_workspaces, load_workspaces */
-
-static const char backup_msg[] = DUMMY_TR(
-    "There were errors loading layout. Backing up current layout savefile as\n"
-    "%s.\n"
-    "If you are _not_ running under a session manager and wish to restore "
-    "your\n"
-    "old layout, copy this backup file over the layout savefile found in the\n"
-    "same directory while Ion is not running and after having fixed your "
-    "other\n"
-    "configuration files that are causing this problem. (Maybe a missing\n"
-    "module?)");
 
 bool ioncore_init_layout() {
   ExtlTab tab;
@@ -205,21 +164,20 @@ bool ioncore_init_layout() {
     strftime(tm + 20, 15, "%Y%m%d%H%M%S", localtime(&t));
     backup = extl_get_savefile(tm);
     if (backup == NULL) {
-      warn(TR("Unable to get file for layout backup."));
+      warn("Unable to get file for layout backup.");
       return FALSE;
     }
     if (access(backup, F_OK) == 0) {
-      warn(TR("Backup file %s already exists."), backup);
+      warn("Backup file %s already exists.", backup);
       free(backup);
       return FALSE;
     }
-    warn(TR(backup_msg), backup);
-    if (!extl_serialize(backup, tab)) warn(TR("Failed backup."));
+    if (!extl_serialize(backup, tab)) warn("Failed backup.");
     free(backup);
   }
 
   if (n == 0) {
-    warn(TR("Unable to initialise layout on any screen."));
+    warn("Unable to initialise layout on any screen.");
     return FALSE;
   } else {
     return TRUE;
@@ -242,7 +200,7 @@ bool ioncore_save_layout() {
     scrtab = region_get_configuration((WRegion *)scr);
 
     if (scrtab == extl_table_none()) {
-      warn(TR("Unable to get configuration for screen %d."), screen_id(scr));
+      warn("Unable to get configuration for screen %d.", screen_id(scr));
     } else {
       extl_table_seti_t(tab, screen_id(scr), scrtab);
       extl_unref_table(scrtab);
@@ -253,7 +211,7 @@ bool ioncore_save_layout() {
 
   extl_unref_table(tab);
 
-  if (!ret) warn(TR("Unable to save layout."));
+  if (!ret) warn("Unable to save layout.");
 
   return ret;
 }

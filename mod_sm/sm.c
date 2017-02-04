@@ -1,11 +1,3 @@
-/*
- * ion/mod_sm/sm.c
- *
- * Copyright (c) Tuomo Valkonen 2004-2009.
- *
- * See the included file LICENSE for details.
- */
-
 #include <stdlib.h>
 #include <string.h>
 
@@ -27,15 +19,9 @@
 #include "sm_session.h"
 #include "exports.h"
 
-/*{{{ Module information */
-
 #include "../version.h"
 
 char mod_sm_ion_api_version[] = NOTION_API_VERSION;
-
-/*}}}*/
-
-/*{{{ Manage callback */
 
 static bool sm_do_manage(WClientWin *cwin, const WManageParams *param) {
   WPHolder *ph;
@@ -52,10 +38,6 @@ static bool sm_do_manage(WClientWin *cwin, const WManageParams *param) {
 
   return ret;
 }
-
-/*}}}*/
-
-/*{{{ Init/deinit */
 
 static void mod_sm_set_sessiondir() {
   const char *smdir = NULL, *id = NULL;
@@ -90,18 +72,14 @@ static void mod_sm_set_sessiondir() {
     free(tmp);
   }
 
-  if (!ok) warn(TR("Failed to set session directory."));
+  if (!ok) warn("Failed to set session directory.");
 }
 
 void mod_sm_deinit() {
   ioncore_set_smhook(NULL);
-
   hook_remove(clientwin_do_manage_alt, (WHookDummy *)sm_do_manage);
-
   ioncore_set_sm_callbacks(NULL, NULL);
-
   mod_sm_unregister_exports();
-
   mod_sm_close();
 }
 
@@ -126,5 +104,3 @@ err:
   mod_sm_deinit();
   return FALSE;
 }
-
-/*}}}*/

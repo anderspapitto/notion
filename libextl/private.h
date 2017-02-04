@@ -43,11 +43,7 @@
 #define extl_warn warn
 #define extl_warn_err_obj(NM) warn_err_obj(NM)
 
-/*#define extl_warn(FMT, ...)
-    ({fprintf(stderr, FMT, __VA_ARGS__); fputc('\n', stderr);})*/
-/*#define extl_warn_obj_err(O) perror(O) */
-
-/* 
+/*
  * Level2 type checking
  */
 
@@ -65,11 +61,6 @@ extern bool extl_obj_error(int ndx, const char *got, const char *wanted);
      : extl_obj_error(NDX, OBJ_TYPESTR(IN[NDX].o), #TYPE))
 
 #define EXTL_DEFCLASS(C) INTRCLASS(C)
-
-
-/*
- * Objects.
- */
 
 typedef Watch ExtlProxy;
 
@@ -93,24 +84,5 @@ typedef Watch ExtlProxy;
 #define EXTL_DESTROY_OWNED_OBJ(OBJ) destroy_obj(OBJ)
 
 extern void extl_uncache(Obj *obj);
-
-/*
-static void obj_dest_handler(Watch *watch, Obj *obj)
-{
-    extl_uncache(obj);
-    obj->flags&=~OBJ_EXTL_CACHED;
-}
-*/
-
-/* 
- * Miscellaneous.
- */
-
-/* Translate string X to locale. */
-/*#define TR(X) X */
-
-/* Debugging. */
-/*#define D(X) */
-
 
 #endif /* LIBEXTL_PRIVATE_H */

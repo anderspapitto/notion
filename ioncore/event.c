@@ -1,11 +1,3 @@
-/*
- * ion/ioncore/event.c
- *
- * Copyright (c) Tuomo Valkonen 1999-2009.
- *
- * See the included file LICENSE for details.
- */
-
 #include <X11/Xmd.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -24,13 +16,7 @@
 #include "exec.h"
 #include "ioncore.h"
 
-/*{{{ Hooks */
-
 WHook *ioncore_handle_event_alt = NULL;
-
-/*}}}*/
-
-/*{{{ Signal check */
 
 static void check_signals() {
   int kill_sig = mainloop_check_signals();
@@ -52,10 +38,6 @@ static void check_signals() {
     }
   }
 }
-
-/*}}}*/
-
-/*{{{ Timestamp stuff */
 
 #define CHKEV(E, T)       \
   case E:                 \
@@ -97,12 +79,11 @@ Time ioncore_get_timestamp() {
 
     dummy = XInternAtom(ioncore_g.dpy, "_ION_TIMEREQUEST", False);
     if (dummy == None) {
-      warn(TR("Time request from X server failed."));
+      warn("Time request from X server failed.");
       return 0;
     }
     /* TODO: use some other window that should also function as a
-     * NET_WM support check window.
-     */
+     * NET_WM support check window. */
     XChangeProperty(ioncore_g.dpy, ioncore_g.rootwins->dummy_win, dummy, dummy,
                     8, PropModeAppend, (unsigned char *)"", 0);
     ioncore_get_event(&ev, PropertyChangeMask);
@@ -111,10 +92,6 @@ Time ioncore_get_timestamp() {
 
   return last_timestamp;
 }
-
-/*}}}*/
-
-/*{{{ Event reading */
 
 void ioncore_get_event(XEvent *ev, long mask) {
   fd_set rfds;
@@ -134,10 +111,6 @@ void ioncore_get_event(XEvent *ev, long mask) {
     select(ioncore_g.conn + 1, &rfds, NULL, NULL, NULL);
   }
 }
-
-/*}}}*/
-
-/*{{{ Flush */
 
 static void skip_enterwindow() {
   XEvent ev;
@@ -170,10 +143,6 @@ void ioncore_flushfocus() {
   if (warp) skip_enterwindow();
 }
 
-/*}}}*/
-
-/*{{{ X connection FD handler */
-
 void ioncore_x_connection_handler(int UNUSED(conn), void *UNUSED(unused)) {
   XEvent ev;
 
@@ -182,10 +151,6 @@ void ioncore_x_connection_handler(int UNUSED(conn), void *UNUSED(unused)) {
 
   hook_call_alt_p(ioncore_handle_event_alt, &ev, NULL);
 }
-
-/*}}}*/
-
-/*{{{ Mainloop */
 
 void ioncore_mainloop() {
   mainloop_trap_signals(NULL);
@@ -213,5 +178,3 @@ void ioncore_mainloop() {
     ioncore_x_connection_handler(ioncore_g.conn, NULL);
   }
 }
-
-/*}}}*/

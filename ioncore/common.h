@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/common.h
  *
- * Copyright (c) Tuomo Valkonen 1999-2009. 
+ * Copyright (c) Tuomo Valkonen 1999-2009.
  *
  * See the included file LICENSE for details.
  */
@@ -17,7 +17,6 @@
 #include <libtu/misc.h>
 #include <libtu/dlist.h>
 #include <libtu/obj.h>
-#include <libtu/locale.h>
 #include <libtu/debug.h>
 
 #include <libextl/extl.h>

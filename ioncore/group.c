@@ -144,7 +144,7 @@ bool group_fitrep(WGroup *ws, WWindow *par, const WFitParams *fp) {
     }
 
     if (!region_fitrep(st->reg, par, &fp2)) {
-      warn(TR("Error reparenting %s."), region_name(st->reg));
+      warn("Error reparenting %s.", region_name(st->reg));
       region_detach_manager(st->reg);
     }
   }
@@ -592,7 +592,7 @@ WRegion *group_do_attach(WGroup *ws,
   WFitParams fp;
 
   if (ws->bottom != NULL && param->bottom) {
-    warn(TR("'bottom' already set."));
+    warn("'bottom' already set.");
     return NULL;
   }
 
@@ -676,11 +676,6 @@ void groupattachparams_get(WGroupAttachParams *par, ExtlTab tab,
   }
 }
 
-/*EXTL_DOC
- * Attach and reparent existing region \var{reg} to \var{ws}.
- * The table \var{param} may contain the fields \var{index} and
- * \var{switchto} that are interpreted as for \fnref{WMPlex.attach_new}.
- */
 EXTL_EXPORT_MEMBER
 WRegion *group_attach(WGroup *ws, WRegion *reg, ExtlTab param) {
   WGroupAttachParams par = GROUPATTACHPARAMS_INIT;
@@ -696,26 +691,6 @@ WRegion *group_attach(WGroup *ws, WRegion *reg, ExtlTab param) {
   return group_do_attach(ws, &par, &data);
 }
 
-/*EXTL_DOC
- * Create a new region to be managed by \var{ws}. At least the following
- * fields in \var{param} are understood:
- *
- * \begin{tabularx}{\linewidth}{lX}
- *  \tabhead{Field & Description}
- *  \var{type} & (string) Class of the object to be created. Mandatory. \\
- *  \var{name} & (string) Name of the object to be created. \\
- *  \var{switchto} & (boolean) Should the region be switched to? \\
- *  \var{level} & (integer) Stacking level; default is 1. \\
- *  \var{modal} & (boolean) Make object modal; ignored if level is set. \\
- *  \var{sizepolicy} & (string) Size policy; see Section \ref{sec:sizepolicies}.
- *\\
- *  \var{bottom} & (boolean) Mark the attached region as the
- *                 ``bottom'' of \var{ws}. \\
- * \end{tabularx}
- *
- * In addition parameters to the region to be created are passed in this
- * same table.
- */
 EXTL_EXPORT_MEMBER
 WRegion *group_attach_new(WGroup *ws, ExtlTab param) {
   WGroupAttachParams par = GROUPATTACHPARAMS_INIT;
@@ -728,10 +703,6 @@ WRegion *group_attach_new(WGroup *ws, ExtlTab param) {
 
   return group_do_attach(ws, &par, &data);
 }
-
-/*}}}*/
-
-/*{{{ Status display support */
 
 static int stdisp_szplcy(const WMPlexSTDispInfo *di, WRegion *stdisp) {
   int pos = di->pos;
@@ -779,7 +750,6 @@ void group_manage_stdisp(WGroup *ws, WRegion *stdisp,
   }
 
   /* No. */
-
   szplcy = stdisp_szplcy(di, stdisp) | SIZEPOLICY_SHRUNK;
 
   if (ws->managed_stdisp != NULL && ws->managed_stdisp->reg == stdisp) {
@@ -810,12 +780,7 @@ static void group_remanage_stdisp(WGroup *ws) {
   }
 }
 
-/*}}}*/
-
-/*{{{ Geometry requests */
-
-void group_managed_rqgeom(WGroup *ws, WRegion *reg, const WRQGeomParams *rq,
-                          WRectangle *geomret) {
+void group_managed_rqgeom(WGroup *ws, WRegion *reg, const WRQGeomParams *rq, WRectangle *geomret) {
   WFitParams fp;
   WStacking *st;
 
@@ -849,10 +814,6 @@ void group_managed_rqgeom_absolute(WGroup *grp, WRegion *sub,
     region_managed_rqgeom((WRegion *)grp, sub, &rq2, geomret);
   }
 }
-
-/*}}}*/
-
-/*{{{ Navigation */
 
 static WStacking *nxt(WGroup *ws, WStacking *st, bool wrap) {
   return (st->mgr_next != NULL ? st->mgr_next
@@ -939,15 +900,6 @@ static WRegion *group_navi_next(WGroup *ws, WRegion *reg, WRegionNavi nh,
   return region_navi_cont(&ws->reg, (st != NULL ? st->reg : NULL), data);
 }
 
-/*}}}*/
-
-/*{{{ Stacking */
-
-/*
- * Note: Managed objects are considered to be stacked separately from the
- * group, slightly violating expectations.
- */
-
 void group_stacking(WGroup *ws, Window *bottomret, Window *topret) {
   Window win = region_xwindow((WRegion *)ws);
 
@@ -988,17 +940,6 @@ bool group_managed_rqorder(WGroup *grp, WRegion *reg, WRegionOrder order) {
   return TRUE;
 }
 
-/*}}}*/
-
-/*{{{ Misc. */
-
-/*EXTL_DOC
- * Iterate over managed regions of \var{ws} until \var{iterfn} returns
- * \code{false}.
- * The function is called in protected mode.
- * This routine returns \code{true} if it reaches the end of list
- * without this happening.
- */
 EXTL_SAFE
 EXTL_EXPORT_MEMBER
 bool group_managed_i(WGroup *ws, ExtlFn iterfn) {
@@ -1023,20 +964,12 @@ void group_size_hints(WGroup *ws, WSizeHints *hints_ret) {
 
 Window group_xwindow(const WGroup *ws) { return ws->dummywin; }
 
-/*EXTL_DOC
- * Returns the group of \var{reg}, if \var{reg} is its bottom,
- * and \var{reg} itself otherwise.
- */
 EXTL_EXPORT_MEMBER
 WRegion *region_groupleader_of(WRegion *reg) {
   WGroup *grp = REGION_MANAGER_CHK(reg, WGroup);
 
   return ((grp != NULL && group_bottom(grp) == reg) ? (WRegion *)grp : reg);
 }
-
-/*}}}*/
-
-/*{{{ Save/load */
 
 ExtlTab group_get_configuration(WGroup *ws) {
   ExtlTab tab, mgds, subtab, g;
@@ -1052,7 +985,6 @@ ExtlTab group_get_configuration(WGroup *ws) {
   extl_table_sets_t(tab, "managed", mgds);
 
   /* TODO: stacking order messed up */
-
   FOR_ALL_NODES_IN_GROUP(ws, st, tmp) {
     if (st->reg == NULL) continue;
 
@@ -1113,10 +1045,6 @@ void group_do_load(WGroup *ws, ExtlTab tab) {
   }
 }
 
-/*}}}*/
-
-/*{{{ Dynamic function table and class implementation */
-
 static DynFunTab group_dynfuntab[] = {
     {(DynFun *)region_fitrep, (DynFun *)group_fitrep},
     {region_map, group_map},
@@ -1147,5 +1075,3 @@ static DynFunTab group_dynfuntab[] = {
 
 EXTL_EXPORT
 IMPLCLASS(WGroup, WRegion, group_deinit, group_dynfuntab);
-
-/*}}}*/

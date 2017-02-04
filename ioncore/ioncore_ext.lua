@@ -82,19 +82,3 @@ export(ioncore,
 
 -- Mark ourselves loaded.
 package.loaded["ioncore"]=true
-
-
-
-local function dummy_gettext_hack()
-    -- Extra translations for context menus etc. I don't want extra
-    -- TR calls in the configuration files, or parsing the string 
-    -- parameters to kpress etc. for translations.
-    TR("Frame")
-    TR("Screen")
-    TR("Workspace")
-    TR("Tiling")
-    TR("Tiled frame")
-    TR("Floating frame")
-    TR("Context menu:")
-    TR("Main menu:")
-end

@@ -31,7 +31,7 @@ WRegion *region_navi_next(WRegion *reg, WRegion *mgd, WRegionNavi nh,
 
 bool ioncore_string_to_navi(const char *str, WRegionNavi *nh) {
   if (str == NULL) {
-    warn(TR("Invalid parameter."));
+    warn("Invalid parameter.");
     return FALSE;
   }
 
@@ -54,7 +54,7 @@ bool ioncore_string_to_navi(const char *str, WRegionNavi *nh) {
              !strcmp(str, "down")) {
     *nh = REGION_NAVI_BOTTOM;
   } else {
-    warn(TR("Invalid direction parameter."));
+    warn("Invalid direction parameter.");
     return FALSE;
   }
 

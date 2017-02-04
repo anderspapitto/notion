@@ -1,13 +1,4 @@
-/*
- * ion/ioncore/detach.c
- *
- * Copyright (c) Tuomo Valkonen 1999-2009.
- *
- * See the included file LICENSE for details.
- */
-
 #include <string.h>
-
 #include <libtu/objp.h>
 #include <libtu/setparam.h>
 #include <libtu/minmax.h>
@@ -164,7 +155,7 @@ bool ioncore_detach(WRegion *reg, int sp) {
 
     if (ph != NULL) {
       if (!pholder_attach_mcfgoto(ph, PHOLDER_ATTACH_SWITCHTO, reg)) {
-        warn(TR("Failed to reattach."));
+        warn("Failed to reattach.");
         return TRUE;
       }
       region_unset_return(reg);
@@ -174,19 +165,6 @@ bool ioncore_detach(WRegion *reg, int sp) {
   }
 }
 
-/*EXTL_DOC
- * Detach or reattach \var{reg} or any group it is the leader of
- * (see \fnref{WRegion.groupleader_of}), depending on whether \var{how}
- * is \codestr{set}, \codestr{unset} or \codestr{toggle}. If this
- * region is not a window, it is put into a frame.
- *
- * Detaching a region means having it managed by its nearest ancestor
- * \type{WGroup}. Reattaching means having it managed where it used
- * to be managed, if a ``return placeholder'' exists.
- *
- * Additionally, setting \var{how} to \codestr{forget}, can be used to
- * clear this return placeholder of the group leader of \var{reg}.
- */
 EXTL_EXPORT_AS(ioncore, detach)
 bool ioncore_detach_extl(WRegion *reg, const char *how) {
   if (how == NULL) how = "set";
@@ -215,12 +193,6 @@ void do_unsqueeze(WRegion *reg) {
   ioncore_detach(reg, SETPARAM_SET);
 }
 
-/*EXTL_DOC
- * Try to detach \var{reg} if it fits poorly in its
- * current location. This function does not do anything,
- * unless \var{override} is set or the \var{unsqueeze} option
- * of \fnref{ioncore.set} is set.
- */
 EXTL_EXPORT
 void ioncore_unsqueeze(WRegion *reg, bool override) {
   if (ioncore_g.unsqueeze_enabled || override) do_unsqueeze(reg);

@@ -9,7 +9,6 @@
 #include <fcntl.h>
 
 #include <libtu/util.h>
-#include <libtu/optparser.h>
 #include <libtu/errorlog.h>
 #include <libtu/prefix.h>
 #include <libextl/readconfig.h>
@@ -26,40 +25,6 @@
 #define P_tmpdir "/tmp"
 #endif
 
-/* Options. Getopt is not used because getopt_long is quite gnu-specific
- * and they don't know of '-display foo' -style args anyway.
- * Instead, I've reinvented the wheel in libtu :(.
- */
-static OptParserOpt ion_opts[] = {
-    {OPT_ID('d'), "display", OPT_ARG, "host:dpy.scr",
-     DUMMY_TR("X display to use")},
-
-    {'c', "conffile", OPT_ARG, "config_file", DUMMY_TR("Configuration file")},
-
-    {'s', "searchdir", OPT_ARG, "dir",
-     DUMMY_TR("Add directory to search path")},
-
-    {OPT_ID('o'), "oneroot", 0, NULL, DUMMY_TR("Manage default screen only")},
-
-    {OPT_ID('s'), "session", OPT_ARG, "session_name",
-     DUMMY_TR("Name of session (affects savefiles)")},
-
-    {OPT_ID('S'), "smclientid", OPT_ARG, "client_id",
-     DUMMY_TR("Session manager client ID")},
-
-    {OPT_ID('N'), "noerrorlog", 0, NULL,
-     DUMMY_TR(
-         "Do not create startup error log and display it "
-         "with xmessage.")},
-
-    {'h', "help", 0, NULL, DUMMY_TR("Show this help")},
-
-    {'V', "version", 0, NULL, DUMMY_TR("Show program version")},
-
-    {OPT_ID('a'), "about", 0, NULL, DUMMY_TR("Show about text")},
-
-    END_OPTPARSEROPTS};
-
 void check_new_user_help() {
   const char *userdir = extl_userdir();
   char *oldbeard = NULL;
@@ -67,7 +32,7 @@ void check_new_user_help() {
   bool ret;
 
   if (userdir == NULL) {
-    warn(TR("Could not get user configuration file directory."));
+    warn("Could not get user configuration file directory.");
     return;
   }
 
@@ -79,8 +44,6 @@ void check_new_user_help() {
     free(oldbeard);
     return;
   }
-
-  libtu_asprintf(&tmp, TR("%s/welcome.txt"), SHAREDIR);
 
   if (tmp != NULL) {
     if (access(tmp, F_OK) == 0)
@@ -106,15 +69,6 @@ void check_new_user_help() {
   }
 
   free(oldbeard);
-}
-
-static void help() {
-  int i;
-  printf(TR("Usage: %s [options]\n\n"), libtu_progname());
-  for (i = 0; ion_opts[i].descr != NULL; i++)
-    ion_opts[i].descr = TR(ion_opts[i].descr);
-  optparser_printhelp(OPTP_MIDLONG, ion_opts);
-  printf("\n");
 }
 
 int main(int argc, char *argv[]) {
@@ -149,47 +103,6 @@ int main(int argc, char *argv[]) {
   prefix_wrap_simple(extl_add_searchdir, LCDIR);
   extl_set_userdirs(CF_EXECUTABLE);
 
-  optparser_init(argc, argv, OPTP_MIDLONG, ion_opts);
-
-  while ((opt = optparser_get_opt())) {
-    switch (opt) {
-      case OPT_ID('d'):
-        display = optparser_get_arg();
-        break;
-      case 'c':
-        cfgfile = optparser_get_arg();
-        break;
-      case 's':
-        extl_add_searchdir(optparser_get_arg());
-        break;
-      case OPT_ID('S'):
-        ioncore_g.sm_client_id = optparser_get_arg();
-        break;
-      case OPT_ID('o'):
-        stflags |= IONCORE_STARTUP_ONEROOT;
-        break;
-      case OPT_ID('s'):
-        extl_set_sessiondir(optparser_get_arg());
-        break;
-      case OPT_ID('N'):
-        noerrorlog = TRUE;
-        break;
-      case 'h':
-        help();
-        return EXIT_SUCCESS;
-      case 'V':
-        printf("%s\n", ION_VERSION);
-        return EXIT_SUCCESS;
-      case OPT_ID('a'):
-        printf("%s\n", ioncore_aboutmsg());
-        return EXIT_SUCCESS;
-      default:
-        warn(TR("Invalid command line."));
-        help();
-        return EXIT_FAILURE;
-    }
-  }
-
   if (!noerrorlog) {
     /* We may have to pass the file to xmessage so just using tmpfile()
      * isn't sufficient.
@@ -205,7 +118,7 @@ int main(int argc, char *argv[]) {
         efnam = NULL;
       } else {
         cloexec_braindamage_fix(fileno(ef));
-        fprintf(ef, TR("Notion startup error log:\n"));
+        fprintf(ef, "Notion startup error log:\n");
         errorlog_begin_file(&el, ef);
       }
     }
@@ -214,7 +127,7 @@ int main(int argc, char *argv[]) {
   if (ioncore_startup(display, cfgfile, stflags)) may_continue = TRUE;
 
   if (!may_continue)
-    warn(TR("Refusing to start due to encountered errors."));
+    warn("Refusing to start due to encountered errors.");
   else
     check_new_user_help();
 

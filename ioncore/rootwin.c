@@ -1,11 +1,3 @@
-/*
- * ion/ioncore/rootwin.c
- *
- * Copyright (c) Tuomo Valkonen 1999-2009.
- *
- * See the included file LICENSE for details.
- */
-
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -37,8 +29,6 @@
 #include "saveload.h"
 #include "netwm.h"
 #include "xwindow.h"
-
-/*{{{ Error handling */
 
 static bool redirect_error = FALSE;
 static bool ignore_badwindow = TRUE;
@@ -86,10 +76,6 @@ static int my_error_handler(Display *dpy, XErrorEvent *ev) {
 
   return 0;
 }
-
-/*}}}*/
-
-/*{{{ Init/deinit */
 
 static void scan_initial_windows(WRootWin *rootwin) {
   Window dummy_root, dummy_parent, *wins = NULL;
@@ -142,9 +128,8 @@ void rootwin_manage_initial_windows(WRootWin *rootwin) {
 }
 
 static void create_wm_windows(WRootWin *rootwin) {
-  rootwin->dummy_win =
-      XCreateWindow(ioncore_g.dpy, WROOTWIN_ROOT(rootwin), 0, 0, 1, 1, 0,
-                    CopyFromParent, InputOnly, CopyFromParent, 0, NULL);
+  rootwin->dummy_win = XCreateWindow(ioncore_g.dpy, WROOTWIN_ROOT(rootwin), 0, 0, 1, 1, 0,
+                                     CopyFromParent, InputOnly, CopyFromParent, 0, NULL);
 
   XSelectInput(ioncore_g.dpy, rootwin->dummy_win, PropertyChangeMask);
 }
@@ -188,7 +173,7 @@ static bool rootwin_init(WRootWin *rootwin, int xscr) {
   XSetErrorHandler(my_error_handler);
 
   if (redirect_error) {
-    warn(TR("Unable to redirect root window events for screen %d."), xscr);
+    warn("Unable to redirect root window events for screen %d.", xscr);
     return FALSE;
   }
 
@@ -210,10 +195,8 @@ static bool rootwin_init(WRootWin *rootwin, int xscr) {
     return FALSE;
   }
 
-  ((WWindow *)rootwin)->event_mask =
-      IONCORE_EVENTMASK_ROOT | IONCORE_EVENTMASK_SCREEN;
-  ((WRegion *)rootwin)->flags |=
-      REGION_BINDINGS_ARE_GRABBED | REGION_PLEASE_WARP;
+  ((WWindow *)rootwin)->event_mask = IONCORE_EVENTMASK_ROOT | IONCORE_EVENTMASK_SCREEN;
+  ((WRegion *)rootwin)->flags |= REGION_BINDINGS_ARE_GRABBED | REGION_PLEASE_WARP;
   ((WRegion *)rootwin)->rootwin = rootwin;
 
   REGION_MARK_MAPPED(rootwin);
@@ -247,19 +230,11 @@ void rootwin_deinit(WRootWin *rw) {
   }
 
   UNLINK_ITEM(*(WRegion **)&ioncore_g.rootwins, (WRegion *)rw, p_next, p_prev);
-
   XSelectInput(ioncore_g.dpy, WROOTWIN_ROOT(rw), 0);
-
   XFreeGC(ioncore_g.dpy, rw->xor_gc);
-
   rw->scr.mplex.win.win = None;
-
   screen_deinit(&rw->scr);
 }
-
-/*}}}*/
-
-/*{{{ region dynfun implementations */
 
 static bool rootwin_fitrep(WRootWin *rootwin, WWindow *par,
                            const WFitParams *fp) {
@@ -275,13 +250,6 @@ static void rootwin_unmap(WRootWin *rootwin) {
   D(warn("Attempt to unmap a root window -- impossible."));
 }
 
-/*}}}*/
-
-/*{{{ Misc */
-
-/*EXTL_DOC
- * Returns previously active screen on root window \var{rootwin}.
- */
 EXTL_SAFE
 EXTL_EXPORT_MEMBER
 WScreen *rootwin_current_scr(WRootWin *rootwin) {
@@ -297,10 +265,6 @@ WScreen *rootwin_current_scr(WRootWin *rootwin) {
   return (fb ? fb : &rootwin->scr);
 }
 
-/*}}}*/
-
-/*{{{ Dynamic function table and class implementation */
-
 static DynFunTab rootwin_dynfuntab[] = {
     {region_map, rootwin_map},
     {region_unmap, rootwin_unmap},
@@ -309,5 +273,3 @@ static DynFunTab rootwin_dynfuntab[] = {
 
 EXTL_EXPORT
 IMPLCLASS(WRootWin, WScreen, rootwin_deinit, rootwin_dynfuntab);
-
-/*}}}*/

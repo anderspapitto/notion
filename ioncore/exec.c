@@ -92,30 +92,15 @@ int ioncore_do_exec_on(WRegion *reg, const char *cmd, const char *wd,
                                errh);
 }
 
-/*EXTL_DOC
- * Run \var{cmd} with the environment variable DISPLAY set to point to the
- * X display the WM is running on. No specific screen is set unlike with
- * \fnref{WRootWin.exec_on}. The PID of the (shell executing the) new
- * process is returned.
- */
 EXTL_SAFE
 EXTL_EXPORT
 int ioncore_exec(const char *cmd) {
   return ioncore_do_exec_on(NULL, cmd, NULL, extl_fn_none());
 }
 
-/*EXTL_DOC
- * Run \var{cmd} in directory \var{wd} with a read pipe connected to its
- * stdout and stderr.
- * When data is received through one of these pipes, \var{h} or \var{errh}
- * is called with that data. When the pipe is closed, the handler is called
- * with \code{nil} argument. The PID of the new process is returned, or
- * -1 on error.
- */
 EXTL_SAFE
 EXTL_EXPORT
-int ioncore_popen_bgread(const char *cmd, ExtlFn h, ExtlFn errh,
-                         const char *wd) {
+int ioncore_popen_bgread(const char *cmd, ExtlFn h, ExtlFn errh, const char *wd) {
   WExecP p;
 
   p.target = NULL;
@@ -124,10 +109,6 @@ int ioncore_popen_bgread(const char *cmd, ExtlFn h, ExtlFn errh,
 
   return mainloop_popen_bgread(cmd, setup_exec, (void *)&p, h, errh);
 }
-
-/*}}}*/
-
-/*{{{ Exit, restart, snapshot */
 
 static void (*smhook)(int what);
 
@@ -152,10 +133,12 @@ bool ioncore_do_snapshot(bool save_layout) {
 }
 
 void ioncore_emergency_snapshot() {
-  if (smhook != NULL)
-    warn(TR("Not saving state: running under session manager."));
-  else
-    ioncore_do_snapshot(TRUE);
+    if (smhook != NULL){
+        warn("Not saving state: running under session manager.");
+    }
+    else{
+        ioncore_do_snapshot(TRUE);
+    }
 }
 
 static char *other = NULL;
@@ -176,10 +159,6 @@ void ioncore_do_restart() {
   die_err_obj(ioncore_g.argv[0]);
 }
 
-/*EXTL_DOC
- * Causes the window manager to simply exit without saving
- * state/session.
- */
 EXTL_EXPORT
 void ioncore_resign() {
   if (smhook != NULL) {
@@ -189,9 +168,6 @@ void ioncore_resign() {
   }
 }
 
-/*EXTL_DOC
- * End session saving it first.
- */
 EXTL_EXPORT
 void ioncore_shutdown() {
   if (smhook != NULL) {
@@ -202,9 +178,6 @@ void ioncore_shutdown() {
   }
 }
 
-/*EXTL_DOC
- * Restart, saving session first.
- */
 EXTL_EXPORT
 void ioncore_restart() {
   set_other(NULL);
@@ -217,9 +190,6 @@ void ioncore_restart() {
   }
 }
 
-/*EXTL_DOC
- * Attempt to restart another window manager \var{cmd}.
- */
 EXTL_EXPORT
 void ioncore_restart_other(const char *cmd) {
   set_other(cmd);
@@ -232,9 +202,6 @@ void ioncore_restart_other(const char *cmd) {
   }
 }
 
-/*EXTL_DOC
- * Save session.
- */
 EXTL_EXPORT
 void ioncore_snapshot() {
   if (smhook != NULL)
@@ -242,5 +209,3 @@ void ioncore_snapshot() {
   else
     ioncore_do_snapshot(TRUE);
 }
-
-/*}}}*/

@@ -1,11 +1,3 @@
-/*
- * ion/ioncore/screen.c
- *
- * Copyright (c) Tuomo Valkonen 1999-2009.
- *
- * See the included file LICENSE for details.
- */
-
 #include <string.h>
 
 #include <libtu/objp.h>
@@ -284,9 +276,7 @@ static WRegion *screen_managed_disposeroot(WScreen *scr, WRegion *reg) {
     }
 
     if (onmxlist && !others) {
-      warn(
-          TR("Only workspace on only screen may not be "
-             "destroyed/detached."));
+      warn("Only workspace on only screen may not be destroyed/detached.");
       return NULL;
     }
   }
@@ -320,13 +310,9 @@ bool screen_set_managed_offset_extl(WScreen *scr, ExtlTab offset) {
 
   return TRUE;
 err:
-  warn(TR("Invalid offset."));
+  warn("Invalid offset.");
   return FALSE;
 }
-
-/*}}}*/
-
-/*{{{ Save/load */
 
 ExtlTab screen_get_configuration(WScreen *scr) {
   return mplex_get_configuration(&scr->mplex);
@@ -346,7 +332,7 @@ static bool create_initial_ws(WScreen *scr) {
   }
 
   if (reg == NULL) {
-    warn(TR("Unable to create a workspace on screen %d."), scr->id);
+    warn("Unable to create a workspace on screen %d.", scr->id);
     return FALSE;
   }
 
@@ -355,15 +341,9 @@ static bool create_initial_ws(WScreen *scr) {
 
 bool screen_init_layout(WScreen *scr, ExtlTab tab) {
   if (tab == extl_table_none()) return create_initial_ws(scr);
-
   mplex_load_contents(&scr->mplex, tab);
-
   return TRUE;
 }
-
-/*}}}*/
-
-/*{{{ Dynamic function table and class implementation */
 
 static DynFunTab screen_dynfuntab[] = {
     {region_map, screen_map},
@@ -381,5 +361,3 @@ static DynFunTab screen_dynfuntab[] = {
     END_DYNFUNTAB};
 EXTL_EXPORT
 IMPLCLASS(WScreen, WMPlex, screen_deinit, screen_dynfuntab);
-
-/*}}}*/

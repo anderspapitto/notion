@@ -215,6 +215,6 @@ XFontSet de_create_font_set(const char *fontname) {
   if (fs) return fs;
 
   /* The final fallback... */
-  warn(TR("Could not load font %s"), fontname);
+  warn("Could not load font %s", fontname);
   return de_create_font_in_current_locale("-*-*-*-*-*-*-*-*-*-*-*-*-*-*");
 }

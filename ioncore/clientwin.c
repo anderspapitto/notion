@@ -1,11 +1,3 @@
-/*
- * ion/ioncore/clientwin.c
- *
- * Copyright (c) Tuomo Valkonen 1999-2009.
- *
- * See the included file LICENSE for details.
- */
-
 #include <string.h>
 #include <limits.h>
 #include <ctype.h>
@@ -344,17 +336,17 @@ WClientWin *clientwin_get_transient_for(const WClientWin *cwin) {
   tfor = XWINDOW_REGION_OF_T(tforwin, WClientWin);
 
   if (tfor == cwin) {
-    warn(TR("The transient_for hint for \"%s\" points to itself."),
+    warn("The transient_for hint for \"%s\" points to itself.",
          region_name((WRegion *)cwin));
   } else if (tfor == NULL) {
     if (xwindow_region_of(tforwin) != NULL) {
-      warn(TR("Client window \"%s\" has broken transient_for hint. "
-              "(\"Extended WM hints\" multi-parent brain damage?)"),
+      warn("Client window \"%s\" has broken transient_for hint. "
+           "(\"Extended WM hints\" multi-parent brain damage?)",
            region_name((WRegion *)cwin));
     }
   } else if (!region_same_rootwin((WRegion *)cwin, (WRegion *)tfor)) {
-    warn(TR("The transient_for window for \"%s\" is not on the same "
-            "screen."),
+    warn("The transient_for window for \"%s\" is not on the same "
+         "screen.",
          region_name((WRegion *)cwin));
   } else {
     return tfor;
@@ -371,7 +363,7 @@ static bool postmanage_check(WClientWin *cwin, XWindowAttributes *attr) {
 
   if (XGetWindowAttributes(ioncore_g.dpy, cwin->win, attr)) return TRUE;
 
-  warn(TR("Window %#x disappeared."), cwin->win);
+  warn("Window %#x disappeared.", cwin->win);
 
   return FALSE;
 }
@@ -419,7 +411,7 @@ WClientWin *ioncore_manage_clientwin(Window win, bool maprq) {
   xwindow_unmanaged_selectinput(win, StructureNotifyMask);
 
   if (!XGetWindowAttributes(ioncore_g.dpy, win, &attr)) {
-    if (maprq) warn(TR("Window %#x disappeared."), win);
+    if (maprq) warn("Window %#x disappeared.", win);
     goto fail2;
   }
 
@@ -436,7 +428,7 @@ WClientWin *ioncore_manage_clientwin(Window win, bool maprq) {
       XWindowAttributes icon_attr;
 
       if (!XGetWindowAttributes(ioncore_g.dpy, icon_win, &icon_attr)) {
-        if (maprq) warn(TR("Window %#x disappeared."), win);
+        if (maprq) warn("Window %#x disappeared.", win);
         XFree((void *)hints);
         goto fail2;
       }
@@ -502,7 +494,7 @@ WClientWin *ioncore_manage_clientwin(Window win, bool maprq) {
   }
 
   if (rootwin == NULL) {
-    warn(TR("Unable to find a matching root window!"));
+    warn("Unable to find a matching root window!");
     goto fail2;
   }
 
@@ -544,7 +536,7 @@ WClientWin *ioncore_manage_clientwin(Window win, bool maprq) {
   if (!hook_call_alt(clientwin_do_manage_alt, &mrshpm,
                      (WHookMarshall *)do_manage_mrsh,
                      (WHookMarshallExtl *)do_manage_mrsh_extl)) {
-    warn(TR("Unable to manage client window %#x."), win);
+    warn("Unable to manage client window %#x.", win);
     goto failure;
   }
 
@@ -595,7 +587,7 @@ void clientwin_tfor_changed(WClientWin *cwin) {
     warn("WM_TRANSIENT_FOR changed for \"%s\".",
          region_name((WRegion*)cwin));
 #else
-  warn(TR("Changes is WM_TRANSIENT_FOR property are unsupported."));
+  warn("Changes is WM_TRANSIENT_FOR property are unsupported.");
 #endif
 }
 
@@ -739,7 +731,7 @@ void clientwin_rqclose(WClientWin *cwin, bool UNUSED(relocate_ignored)) {
     send_clientmsg(cwin->win, ioncore_g.atom_wm_delete,
                    ioncore_get_timestamp());
   } else {
-    warn(TR("Client does not support the WM_DELETE protocol."));
+    warn("Client does not support the WM_DELETE protocol.");
   }
 }
 
@@ -1258,7 +1250,7 @@ WRegion *clientwin_load(WWindow *par, const WFitParams *fp, ExtlTab tab) {
   /* Found it! */
 
   if (!XGetWindowAttributes(ioncore_g.dpy, win, &attr)) {
-    warn(TR("Window %#x disappeared."), win);
+    warn("Window %#x disappeared.", win);
     return NULL;
   }
 
@@ -1266,7 +1258,7 @@ WRegion *clientwin_load(WWindow *par, const WFitParams *fp, ExtlTab tab) {
 
   if (attr.override_redirect || (ioncore_g.opmode == IONCORE_OPMODE_INIT &&
                                  attr.map_state != IsViewable)) {
-    warn(TR("Saved client window does not want to be managed."));
+    warn("Saved client window does not want to be managed.");
     return NULL;
   }
 
@@ -1294,34 +1286,19 @@ WRegion *clientwin_load(WWindow *par, const WFitParams *fp, ExtlTab tab) {
 
 static DynFunTab clientwin_dynfuntab[] = {
     {(DynFun *)region_fitrep, (DynFun *)clientwin_fitrep},
-
     {region_map, clientwin_map},
-
     {region_unmap, clientwin_unmap},
-
     {region_do_set_focus, clientwin_do_set_focus},
-
     {region_notify_rootpos, clientwin_notify_rootpos},
-
     {region_restack, clientwin_restack},
-
     {region_stacking, clientwin_stacking},
-
     {(DynFun *)region_xwindow, (DynFun *)clientwin_x_window},
-
     {region_activated, clientwin_activated},
-
     {region_size_hints, clientwin_size_hints},
-
     {(DynFun *)region_orientation, (DynFun *)clientwin_orientation},
-
     {(DynFun *)region_rqclose, (DynFun *)clientwin_rqclose},
-
     {(DynFun *)region_get_configuration, (DynFun *)clientwin_get_configuration},
-
     END_DYNFUNTAB};
 
 EXTL_EXPORT
 IMPLCLASS(WClientWin, WRegion, clientwin_deinit, clientwin_dynfuntab);
-
-/*}}}*/

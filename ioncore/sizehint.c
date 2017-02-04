@@ -1,11 +1,3 @@
-/*
- * ion/ioncore/sizehint.c
- *
- * Copyright (c) Tuomo Valkonen 1999-2009.
- *
- * See the included file LICENSE for details.
- */
-
 #include <string.h>
 #include <libtu/minmax.h>
 
@@ -15,8 +7,6 @@
 #include "resize.h"
 #include "sizehint.h"
 #include "rootwin.h"
-
-/*{{{ xsizehints_correct */
 
 static void do_correct_aspect(int max_w, int max_h, int ax, int ay, int *wret,
                               int *hret) {
@@ -93,10 +83,6 @@ void sizehints_correct(const WSizeHints *hints, int *wp, int *hp, bool min,
   *hp = h;
 }
 
-/*}}}*/
-
-/*{{{ X size hints sanity adjustment */
-
 void xsizehints_sanity_adjust(XSizeHints *hints) {
   if (!(hints->flags & PMinSize)) {
     if (hints->flags & PBaseSize) {
@@ -125,7 +111,7 @@ void xsizehints_sanity_adjust(XSizeHints *hints) {
 
   if (hints->flags & PResizeInc) {
     if (hints->width_inc <= 0 || hints->height_inc <= 0) {
-      warn(TR("Invalid client-supplied width/height increment."));
+      warn("Invalid client-supplied width/height increment.");
       hints->flags &= ~PResizeInc;
     }
   }
@@ -133,17 +119,13 @@ void xsizehints_sanity_adjust(XSizeHints *hints) {
   if (hints->flags & PAspect) {
     if (hints->min_aspect.x <= 0 || hints->min_aspect.y <= 0 ||
         hints->min_aspect.x <= 0 || hints->min_aspect.y <= 0) {
-      warn(TR("Invalid client-supplied aspect-ratio."));
+      warn("Invalid client-supplied aspect-ratio.");
       hints->flags &= ~PAspect;
     }
   }
 
   if (!(hints->flags & PWinGravity)) hints->win_gravity = ForgetGravity;
 }
-
-/*}}}*/
-
-/*{{{ xsizehints_adjust_for */
 
 void sizehints_adjust_for(WSizeHints *hints, WRegion *reg) {
   WSizeHints tmp_hints;
@@ -168,10 +150,6 @@ void sizehints_adjust_for(WSizeHints *hints, WRegion *reg) {
     hints->max_set = FALSE;
   }
 }
-
-/*}}}*/
-
-/*{{{ account_gravity */
 
 int xgravity_deltax(int gravity, int left, int right) {
   int woff = left + right;
@@ -203,19 +181,13 @@ int xgravity_deltay(int gravity, int top, int bottom) {
     /* */
   } else if (gravity == SouthWestGravity || gravity == SouthGravity ||
              gravity == SouthEastGravity) {
-    /* geom->y=geom->y+geom->h-(geom->h+hoff) */
     return -hoff;
   } else if (gravity == CenterGravity || gravity == WestGravity ||
              gravity == EastGravity) {
-    /* geom->y=geom->y+geom->h/2-(geom->h+hoff)/2 */
     return -hoff / 2;
   }
   return 0;
 }
-
-/*}}}*/
-
-/*{{{ Init */
 
 void xsizehints_to_sizehints(const XSizeHints *xh, WSizeHints *hints) {
   hints->max_width = xh->max_width;
@@ -247,5 +219,3 @@ void sizehints_clear(WSizeHints *hints) {
   hints->aspect_set = 0;
   hints->no_constrain = 0;
 }
-
-/*}}}*/

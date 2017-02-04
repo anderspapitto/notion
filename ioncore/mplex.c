@@ -1424,7 +1424,7 @@ WRegion *mplex_set_stdisp_extl(WMPlex *mplex, ExtlTab t) {
   if (extl_table_gets_s(t, "pos", &s)) {
     din.pos = stringintmap_value(pos_map, s, -1);
     if (din.pos < 0) {
-      warn(TR("Invalid position setting."));
+      warn("Invalid position setting.");
       return NULL;
     }
   }
@@ -1458,7 +1458,7 @@ WRegion *mplex_set_stdisp_extl(WMPlex *mplex, ExtlTab t) {
   } else if (strcmp(s, "keep") == 0) {
     stdisp = (WRegion *)(mplex->stdispwatch.obj);
   } else if (strcmp(s, "remove") != 0) {
-    warn(TR("Invalid action setting."));
+    warn("Invalid action setting.");
     return FALSE;
   }
 

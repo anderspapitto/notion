@@ -1,12 +1,3 @@
-/*
- * notion/mainloop/exec.c
- *
- * Copyright (c) the Notion team 2013.
- * Copyright (c) Tuomo Valkonen 1999-2009.
- *
- * See the included file LICENSE for details.
- */
-
 #include <limits.h>
 #include <sys/types.h>
 #include <sys/signal.h>
@@ -26,8 +17,6 @@
 
 #include "select.h"
 #include "exec.h"
-
-/*{{{ Exec/spawn/fork */
 
 #define SHELL_PATH "/bin/sh"
 #define SHELL_NAME "sh"
@@ -170,10 +159,6 @@ pid_t mainloop_spawn(const char *cmd) {
   return mainloop_do_spawn(cmd, NULL, NULL, NULL, NULL, NULL);
 }
 
-/*}}}*/
-
-/*{{{ popen_bgread */
-
 #define BL 1024
 
 bool mainloop_process_pipe_extlfn(int fd, ExtlFn fn) {
@@ -184,7 +169,7 @@ bool mainloop_process_pipe_extlfn(int fd, ExtlFn fn) {
   if (n < 0) {
     if (errno == EAGAIN || errno == EINTR) return TRUE;
     n = 0;
-    warn_err_obj(TR("reading a pipe"));
+    warn_err_obj("reading a pipe");
     return FALSE;
   } else if (n > 0) {
     buf[n] = '\0';
@@ -244,10 +229,4 @@ err:
   return -1;
 }
 
-/*}}}*/
-
-/*{{{ Misc. */
-
 void cloexec_braindamage_fix(int fd) { fcntl(fd, F_SETFD, FD_CLOEXEC); }
-
-/*}}}*/

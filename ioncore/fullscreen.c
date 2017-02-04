@@ -25,7 +25,7 @@ bool region_fullscreen_scr(WRegion *reg, WScreen *scr, bool switchto) {
     }
 
     ret = (mplex_attach_simple((WMPlex *)scr, reg, swf) != NULL);
-    if (!ret) warn(TR("Failed to enter full screen mode."));
+    if (!ret) warn("Failed to enter full screen mode.");
 
     if (!ret && newph) destroy_obj((Obj *)ph);
     else if (!region_do_set_return(reg, ph)) destroy_obj((Obj *)ph);
@@ -51,9 +51,7 @@ bool region_leave_fullscreen(WRegion *reg, bool switchto) {
     if (ph == NULL) return FALSE;
 
     if (!pholder_attach_mcfgoto(ph, swf, reg)) {
-        warn(
-            TR("Failed to return from full screen mode; remaining manager "
-               "or parent from previous location refused to manage us."));
+        warn( "Failed to return from full screen mode; remaining manager or parent from previous location refused to manage us.");
         return FALSE;
     }
 

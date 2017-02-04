@@ -60,12 +60,12 @@ bool mod_tiling_mkbottom(WRegion *reg) {
   WRegionAttachData data;
 
   if (grp == NULL) {
-    warn(TR("Not member of a group"));
+    warn("Not member of a group");
     return FALSE;
   }
 
   if (group_bottom(grp) != NULL) {
-    warn(TR("Manager group already has bottom"));
+    warn("Manager group already has bottom");
     return FALSE;
   }
 
@@ -104,7 +104,7 @@ bool mod_tiling_untile(WTiling *tiling) {
   WRegion *reg, *reg2;
 
   if (grp == NULL) {
-    warn(TR("Not member of a group"));
+    warn("Not member of a group");
     return FALSE;
   }
 
@@ -134,7 +134,7 @@ bool mod_tiling_untile(WTiling *tiling) {
 
     reg2 = group_do_attach(grp, &param, &data);
 
-    if (reg2 == NULL) warn(TR("Unable to move a region from tiling to group."));
+    if (reg2 == NULL) warn("Unable to move a region from tiling to group.");
   }
 
   tiling->batchop = FALSE;

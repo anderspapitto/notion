@@ -1,15 +1,5 @@
-/*
- * ion/ioncore/frame-pointer.c
- *
- * Copyright (c) Tuomo Valkonen 1999-2009.
- *
- * See the included file LICENSE for details.
- */
-
 #include <string.h>
-
 #include <libtu/objp.h>
-
 #include "common.h"
 #include "global.h"
 #include "pointer.h"
@@ -33,8 +23,6 @@
 static int p_tab_x = 0, p_tab_y = 0, p_tabnum = -1;
 static WInfoWin *tabdrag_infowin = NULL;
 
-/*{{{ Frame press */
-
 static WRegion *sub_at_tab(WFrame *frame) {
   return mplex_mx_nth((WMPlex *)frame, p_tabnum);
 }
@@ -47,11 +35,8 @@ int frame_press(WFrame *frame, XButtonEvent *ev, WRegion **reg_ret) {
 
   window_p_resize_prepare((WWindow *)frame, ev);
 
-  /* Check tab */
-
   frame_bar_geom(frame, &g);
 
-  /* Borders act like tabs at top of the parent region */
   if (REGION_GEOM(frame).y == 0) {
     g.h += g.y;
     g.y = 0;
@@ -85,18 +70,10 @@ int frame_press(WFrame *frame, XButtonEvent *ev, WRegion **reg_ret) {
     }
   }
 
-  /* Check border */
-
   frame_border_inner_geom(frame, &g);
-
   if (rectangle_contains(&g, ev->x, ev->y)) return FRAME_AREA_CLIENT;
-
   return FRAME_AREA_BORDER;
 }
-
-/*}}}*/
-
-/*{{{ Tab drag */
 
 static ExtlExportedFn *tabdrag_safe_fns[] = {
     (ExtlExportedFn *)&mplex_switch_nth, (ExtlExportedFn *)&mplex_switch_next,
@@ -212,8 +189,6 @@ static WRegion *fnd(Window root, int x, int y) {
     }
 
     w = XWINDOW_REGION_OF_T(win, WWindow);
-    /*x=dstx;
-    y=dsty;*/
   }
 
   return reg;
@@ -233,8 +208,7 @@ static bool drop_ok(WRegion *mgr, WRegion *reg) {
   return TRUE;
 
 err:
-  warn(TR("Attempt to make region %s manage its ancestor %s."),
-       region_name(mgr), region_name(reg));
+  warn("Attempt to make region %s manage its ancestor %s.", region_name(mgr), region_name(reg));
   return FALSE;
 }
 
@@ -279,11 +253,6 @@ static void p_tabdrag_end(WFrame *frame, XButtonEvent *ev) {
     frame_draw_bar(frame, TRUE);
 }
 
-/*EXTL_DOC
- * Start dragging the tab that the user pressed on with the pointing device.
- * This function should only be used by binding it to \emph{mpress} or
- * \emph{mdrag} action with area \codestr{tab}.
- */
 EXTL_EXPORT_MEMBER
 void frame_p_tabdrag(WFrame *frame) {
   if (p_tabnum < 0) return;
@@ -294,19 +263,9 @@ void frame_p_tabdrag(WFrame *frame) {
       tabdrag_kbd_handler, (GrabKilledHandler *)tabdrag_killed);
 }
 
-/*}}}*/
-
-/*{{{ switch_tab */
-
-/*EXTL_DOC
- * Display the region corresponding to the tab that the user pressed on.
- * This function should only be used by binding it to a mouse action.
- */
 EXTL_EXPORT_MEMBER
 void frame_p_switch_tab(WFrame *frame) {
   if (ioncore_pointer_grab_region() != (WRegion *)frame) return;
 
   mplex_switch_nth((WMPlex *)frame, p_tabnum);
 }
-
-/*}}}*/

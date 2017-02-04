@@ -1,11 +1,3 @@
-/*
- * ion/ioncore/strings.c
- *
- * Copyright (c) Tuomo Valkonen 1999-2009.
- *
- * See the included file LICENSE for details.
- */
-
 #include <libtu/output.h>
 #include <libtu/misc.h>
 #include <string.h>
@@ -14,8 +6,6 @@
 #include "common.h"
 #include "global.h"
 #include "strings.h"
-
-/*{{{ String scanning */
 
 wchar_t str_wchar_at(char *p, int max) {
   wchar_t wc;
@@ -85,7 +75,7 @@ int str_prevoff(const char *p, int pos) {
     while (1) {
       l = mbrlen(p + prev, pos - prev, &ps);
       if (l < 0) {
-        warn(TR("Invalid multibyte string."));
+        warn("Invalid multibyte string.");
         return 0;
       }
       if (prev + l >= pos) return pos - prev;
@@ -115,16 +105,12 @@ int str_nextoff(const char *p, int opos) {
 
     l = mbrlen(p + opos, strlen(p + opos), &ps);
     if (l < 0) {
-      warn(TR("Invalid multibyte string."));
+      warn("Invalid multibyte string.");
       return 0;
     }
     return l;
   }
 }
-
-/*}}}*/
-
-/*{{{ Title shortening */
 
 INTRSTRUCT(SR);
 
@@ -137,32 +123,6 @@ DECLSTRUCT(SR) {
 
 static SR *shortenrules = NULL;
 
-/*EXTL_DOC
- * Add a rule describing how too long titles should be shortened to fit in tabs.
- * The regular expression \var{rx} (POSIX, not Lua!) is used to match titles
- * and when \var{rx} matches, \var{rule} is attempted to use as a replacement
- * for title. If \var{always} is set, the rule is used even if no shortening
- * is necessary.
- *
- * Similarly to sed's 's' command, \var{rule} may contain characters that are
- * inserted in the resulting string and specials as follows:
- *
- * \begin{tabularx}{\linewidth}{lX}
- *  \tabhead{Special & Description}
- *  \$0 &          Place the original string here. \\
- *  \$1 to \$9 & Insert n:th capture here (as usual,captures are surrounded
- *                 by parentheses in the regex). \\
- *  \$| &          Alternative shortening separator. The shortening described
- *                 before the first this kind of separator is tried first and
- *                 if it fails to make the string short enough, the next is
- *                  tried, and so on. \\
- *  \$< &         Remove characters on the left of this marker to shorten the
- *                 string. \\
- *  \$> &         Remove characters on the right of this marker to shorten the
- *                 string. Only the first \$< or \$> within an alternative
- *                 shortening is used. \\
- * \end{tabularx}
- */
 EXTL_EXPORT
 bool ioncore_defshortening(const char *rx, const char *rule, bool always) {
   SR *si;
@@ -181,7 +141,7 @@ bool ioncore_defshortening(const char *rx, const char *rule, bool always) {
   if (ret != 0) {
     errbuf[0] = '\0';
     regerror(ret, &(si->re), errbuf, ERRBUF_SIZE);
-    warn(TR("Error compiling regular expression: %s"), errbuf);
+    warn("Error compiling regular expression: %s", errbuf);
     goto fail2;
   }
 

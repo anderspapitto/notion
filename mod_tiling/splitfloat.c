@@ -1,11 +1,3 @@
-/*
- * ion/mod_tiling/splitext.c
- *
- * Copyright (c) Tuomo Valkonen 1999-2009.
- *
- * See the included file LICENSE for details.
- */
-
 #include <string.h>
 #include <limits.h>
 #include <libtu/objp.h>
@@ -559,7 +551,7 @@ static void splitfloat_do_rqsize(WSplitFloat *split, WSplit *node,
     ca->tl -= amount;
   }
 
-  if (((WSplit *)p)->parent == NULL /*|| 
+  if (((WSplit *)p)->parent == NULL /*||
        (ha->tl==0 && ha->br==0 && va->tl==0 && va->br==0)*/) {
     pg = ((WSplit *)p)->geom;
   } else {
@@ -682,7 +674,7 @@ WSplit *load_splitfloat(WTiling *ws, const WRectangle *geom, ExtlTab tab) {
   } else if (strcmp(dir_str, "horizontal") == 0) {
     dir = SPLIT_HORIZONTAL;
   } else {
-    warn(TR("Invalid direction."));
+    warn("Invalid direction.");
     free(dir_str);
     return NULL;
   }
@@ -798,7 +790,7 @@ WSplitRegion *splittree_split_floating(WSplit *node, int dir, int primn,
     split_do_rqgeom_(node, &ng, TRUE, TRUE, &rg, TRUE);
     rs = (dir == SPLIT_VERTICAL ? rg.h : rg.w);
     if (rs < mins) {
-      warn(TR("Unable to split: not enough free space."));
+      warn("Unable to split: not enough free space.");
       destroy_obj((Obj *)sf);
       return NULL;
     }

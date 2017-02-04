@@ -1,11 +1,3 @@
-/*
- * ion/mod_tiling/split-stdisp.c
- *
- * Copyright (c) Tuomo Valkonen 1999-2009.
- *
- * See the included file LICENSE for details.
- */
-
 #include <libtu/minmax.h>
 #include <ioncore/common.h>
 #include <ioncore/mplex.h>
@@ -503,16 +495,10 @@ static bool do_try_unsink_stdisp_orth(WSplitSplit *a, WSplitSplit *p,
         else /*stdisp==p->tl*/
           rot_rs_rotate_right(a, p, (WSplit *)stdisp);
       } else { /*p==a->br*/
-#if 0
-                /* abnormal cases. */
-                warn(TR("Status display in bad split configuration."));
-                return FALSE;
-#else
         if ((WSplit *)stdisp == p->br)
           rot_rs_rotate_left(a, p, (WSplit *)stdisp);
         else /*stdisp==p->tl*/
           rot_rs_flip_left(a, p);
-#endif
       }
     }
   } else { /*STDISP_GROWS_B_TO_T || STDISP_GROWS_R_TO_L*/
@@ -526,16 +512,10 @@ static bool do_try_unsink_stdisp_orth(WSplitSplit *a, WSplitSplit *p,
 
     if (doit) {
       if ((WSplit *)p == a->tl) {
-#if 0
-                /* abnormal cases. */
-                warn(TR("Status display in bad split configuration."));
-                return FALSE;
-#else
         if ((WSplit *)stdisp == p->br)
           rot_rs_flip_right(a, p);
         else /*stdisp==p->tl*/
           rot_rs_rotate_right(a, p, (WSplit *)stdisp);
-#endif
       } else { /*p==a->br*/
         if ((WSplit *)stdisp == p->br)
           rot_rs_rotate_left(a, p, (WSplit *)stdisp);
@@ -563,7 +543,7 @@ static bool do_try_unsink_stdisp_para(WSplitSplit *a, WSplitSplit *p,
   } else if (a->br == (WSplit *)p && p->br == (WSplit *)stdisp) {
     rot_para_left(a, p, (WSplit *)stdisp);
   } else {
-    warn(TR("Status display badly located in split tree."));
+    warn("Status display badly located in split tree.");
     return FALSE;
   }
 

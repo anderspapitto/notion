@@ -1,11 +1,3 @@
-/*
- * ion/mod_tiling/split.c
- *
- * Copyright (c) Tuomo Valkonen 1999-2009.
- *
- * See the included file LICENSE for details.
- */
-
 #include <limits.h>
 #include <string.h>
 #include <X11/Xmd.h>
@@ -30,8 +22,6 @@
 
 static Rb_node split_of_map = NULL;
 
-/*{{{ Geometry helper functions */
-
 int split_size(WSplit *split, int dir) {
   return (dir == SPLIT_HORIZONTAL ? split->geom.w : split->geom.h);
 }
@@ -40,7 +30,6 @@ int split_size(WSplit *split, int dir) {
 /* No, these are not even supposed to be proper/consistent
  * Z \cup {\infty, -\infty} calculation rules.
  */
-
 static int infadd(int x, int y) {
   if (x == INT_MAX || y == INT_MAX)
     return INT_MAX;
@@ -64,17 +53,11 @@ static void bound(int *what, int min, int max) {
     *what = max;
 }
 
-/*}}}*/
-
-/*{{{ Functions to get and set a region's containing node */
-
 #define node_of_reg splittree_node_of
 
 WSplitRegion *splittree_node_of(WRegion *reg) {
   Rb_node node = NULL;
   int found = 0;
-
-  /*assert(REGION_MANAGER_CHK(reg, WTiling)!=NULL);*/
 
   if (split_of_map != NULL) {
     node = rb_find_pkey_n(split_of_map, reg, &found);
@@ -90,8 +73,6 @@ bool splittree_set_node_of(WRegion *reg, WSplitRegion *split) {
   Rb_node node = NULL;
   int found;
 
-  /*assert(REGION_MANAGER_CHK(reg, WTiling)!=NULL);*/
-
   if (split_of_map == NULL) {
     if (split == NULL) return TRUE;
     split_of_map = make_rb();
@@ -104,10 +85,6 @@ bool splittree_set_node_of(WRegion *reg, WSplitRegion *split) {
   return (rb_insertp(split_of_map, reg, split) != NULL);
 }
 
-/*}}}*/
-
-/*{{{ Primn */
-
 WPrimn primn_invert(WPrimn primn) {
   return (primn == PRIMN_TL ? PRIMN_BR
                             : (primn == PRIMN_BR ? PRIMN_TL : primn));
@@ -116,10 +93,6 @@ WPrimn primn_invert(WPrimn primn) {
 WPrimn primn_none2any(WPrimn primn) {
   return (primn == PRIMN_NONE ? PRIMN_ANY : primn);
 }
-
-/*}}}*/
-
-/*{{{ Create */
 
 bool split_init(WSplit *split, const WRectangle *geom) {
   split->parent = NULL;
@@ -174,10 +147,6 @@ WSplitST *create_splitst(const WRectangle *geom, WRegion *reg) {
   CREATEOBJ_IMPL(WSplitST, splitst, (p, geom, reg));
 }
 
-/*}}}*/
-
-/*{{{ Deinit */
-
 void split_deinit(WSplit *split) { assert(split->parent == NULL); }
 
 void splitinner_deinit(WSplitInner *split) { split_deinit(&(split->split)); }
@@ -206,12 +175,7 @@ void splitregion_deinit(WSplitRegion *split) {
 
 void splitst_deinit(WSplitST *split) { splitregion_deinit(&(split->regnode)); }
 
-/*}}}*/
-
-/*{{{ Size bounds management */
-
-static void splitregion_update_bounds(WSplitRegion *node,
-                                      bool UNUSED(recursive)) {
+static void splitregion_update_bounds(WSplitRegion *node, bool UNUSED(recursive)) {
   WSizeHints hints;
   WSplit *snode = (WSplit *)node;
 
@@ -291,8 +255,6 @@ static void splitsplit_update_bounds(WSplitSplit *split, bool recursive) {
 void split_update_bounds(WSplit *node, bool recursive) {
   CALL_DYN(split_update_bounds, node, (node, recursive));
 }
-
-/*{{{ Status display handling helper functions. */
 
 static WSplitST *saw_stdisp = NULL;
 
@@ -375,17 +337,13 @@ static WSplit *dodge_stdisp(WSplit *node, bool keep_within) {
 
   do {
     if (!split_try_unsink_stdisp(stdispp, FALSE, TRUE)) {
-      warn(TR("Unable to move the status display out of way."));
+      warn("Unable to move the status display out of way.");
       return NULL;
     }
   } while (stdispp->tl != node && stdispp->br != node);
 
   return node;
 }
-
-/*}}}*/
-
-/*{{{ Low-level resize code; from root to leaf */
 
 static void split_do_resize_default(WSplit *node, const WRectangle *ng,
                                     WPrimn UNUSED(hprimn),
@@ -1135,7 +1093,7 @@ void splittree_rqgeom(WSplit *sub, int flags, const WRectangle *geom_,
     WSplitST *sub_as_stdisp = (WSplitST *)sub;
 
     if (flags & REGION_RQGEOM_TRYONLY) {
-      warn(TR("REGION_RQGEOM_TRYONLY unsupported for status display."));
+      warn("REGION_RQGEOM_TRYONLY unsupported for status display.");
       *geomret = sub->geom;
       return;
     }
@@ -1262,7 +1220,7 @@ WSplitRegion *splittree_split(WSplit *node, int dir, WPrimn primn, int minsize,
   if (node == NULL) return NULL;
 
   if (OBJ_IS(node, WSplitST)) {
-    warn(TR("Splitting the status display is not allowed."));
+    warn("Splitting the status display is not allowed.");
     return NULL;
   }
 
@@ -1286,7 +1244,7 @@ WSplitRegion *splittree_split(WSplit *node, int dir, WPrimn primn, int minsize,
     split_do_rqgeom_(node, &ng, TRUE, TRUE, &rg, TRUE);
     rs = (dir == SPLIT_VERTICAL ? rg.h : rg.w);
     if (rs < minsize + objmin) {
-      warn(TR("Unable to split: not enough free space."));
+      warn("Unable to split: not enough free space.");
       return NULL;
     }
     split_do_rqgeom_(node, &ng, TRUE, TRUE, &rg, FALSE);
@@ -1877,16 +1835,9 @@ const char *splitsplit_dir(WSplitSplit *split) {
   return (split->dir == SPLIT_VERTICAL ? "vertical" : "horizontal");
 }
 
-/*EXTL_DOC
- * Returns the region contained in \var{node}.
- */
 EXTL_SAFE
 EXTL_EXPORT_MEMBER
 WRegion *splitregion_reg(WSplitRegion *node) { return node->reg; }
-
-/*}}}*/
-
-/*{{{ Save support */
 
 ExtlTab split_base_config(WSplit *node) {
   ExtlTab t = extl_create_table();
@@ -1900,7 +1851,7 @@ static bool splitregion_get_config(WSplitRegion *node, ExtlTab *ret) {
   if (node->reg == NULL) return FALSE;
 
   if (!region_supports_save(node->reg)) {
-    warn(TR("Unable to get configuration for %s."), region_name(node->reg));
+    warn("Unable to get configuration for %s."), region_name(node->reg);
     return FALSE;
   }
 
@@ -2035,5 +1986,3 @@ IMPLCLASS(WSplitRegion, WSplit, splitregion_deinit, splitregion_dynfuntab);
 
 EXTL_EXPORT
 IMPLCLASS(WSplitST, WSplitRegion, splitst_deinit, splitst_dynfuntab);
-
-/*}}}*/

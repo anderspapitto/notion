@@ -1,15 +1,3 @@
-/*
- * libextl/luaextl.c
- *
- * Copyright (c) The Notion Team 2011
- * Copyright (c) Tuomo Valkonen 1999-2005.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- */
-
 #include <time.h>
 #include <errno.h>
 #include <stdlib.h>
@@ -54,8 +42,6 @@ static void flushtrace();
 #define flushtrace()
 #endif
 
-/*{{{ Safer rawget/set/getn */
-
 #define CHECK_TABLE(ST, INDEX) luaL_checktype(ST, INDEX, LUA_TTABLE)
 
 static int lua_objlen_check(lua_State *st, int index) {
@@ -87,10 +73,6 @@ static void lua_rawgeti_check(lua_State *st, int index, int n) {
   lua_rawgeti(st, index, n);
 }
 
-/*}}}*/
-
-/*{{{ A cpcall wrapper */
-
 typedef bool ExtlCPCallFn(lua_State *st, void *ptr);
 
 typedef struct {
@@ -104,7 +86,7 @@ static int extl_docpcall(lua_State *st) {
 
   /* Should be enough for most things */
   if (!lua_checkstack(st, 8)) {
-    extl_warn(TR("Lua stack full."));
+    extl_warn("Lua stack full.");
     return 0;
   }
 
@@ -135,17 +117,13 @@ static bool extl_cpcall(lua_State *st, ExtlCPCallFn *fn, void *ptr) {
   } else if (err == LUA_ERRMEM) {
     extl_warn("%s", strerror(ENOMEM));
   } else if (err != 0) {
-    extl_warn(TR("Unknown Lua error."));
+    extl_warn("Unknown Lua error.");
   }
 
   lua_settop(st, oldtop);
 
   return param.retval;
 }
-
-/*}}}*/
-
-/*{{{ Obj userdata handling -- unsafe */
 
 static int owned_cache_ref = LUA_NOREF;
 
@@ -441,13 +419,13 @@ static int extl_stack_trace(lua_State *st) {
   int lvl = 0;
   int n_skip = 0;
 
-  lua_pushstring(st, TR("Stack trace:"));
+  lua_pushstring(st, "Stack trace:");
 
   for (; lua_getstack(st, lvl, &ar); lvl++) {
     bool is_c = FALSE;
 
     if (lua_getinfo(st, "Sln", &ar) == 0) {
-      lua_pushfstring(st, TR("\n(Unable to get debug info for level %d)"), lvl);
+      lua_pushfstring(st, "\n(Unable to get debug info for level %d)"), lvl;
       lua_concat(st, 2);
       continue;
     }
@@ -462,7 +440,7 @@ static int extl_stack_trace(lua_State *st) {
       n_skip = 0;
     } else {
       if (n_skip == 0) {
-        lua_pushstring(st, TR("\n  [Skipping unnamed C functions.]"));
+        lua_pushstring(st, "\n  [Skipping unnamed C functions.]");
         /*lua_pushstring(st, "\n...skipping...");*/
         lua_concat(st, 2);
       }
@@ -506,7 +484,7 @@ int extl_collect_errors(lua_State *st) {
   errorlog_end(&el);
   errorlog_deinit(&el);
 
-  if (err != 0) extl_warn(TR("Internal error."));
+  if (err != 0) extl_warn("Internal error.");
 
   return 1;
 }
@@ -521,7 +499,7 @@ bool extl_init() {
   l_st = luaL_newstate();
 
   if (l_st == NULL) {
-    extl_warn(TR("Unable to initialize Lua."));
+    extl_warn("Unable to initialize Lua.");
     return FALSE;
   }
 
@@ -1261,8 +1239,7 @@ static bool extl_get_retvals(lua_State *st, int m, ExtlDoCallParam *param) {
 #else
   if (m > MAX_PARAMS) {
     extl_warn(
-        TR("Too many return values. Use a C compiler that has "
-           "va_copy to support more."));
+        "Too many return values. Use a C compiler that has va_copy to support more.");
     return FALSE;
   }
 #endif
@@ -1277,11 +1254,10 @@ static bool extl_get_retvals(lua_State *st, int m, ExtlDoCallParam *param) {
 #endif
     if (!extl_stack_get(st, -m, *spec, TRUE, &dead, ptr)) {
       if (dead) {
-        extl_warn(TR("Returned dead object."));
+        extl_warn("Returned dead object.");
         return FALSE;
       } else {
-        extl_warn(TR("Invalid return value (expected '%c', "
-                     "got lua type \"%s\")."),
+        extl_warn("Invalid return value (expected '%c', got lua type \"%s\").",
                   *spec, lua_typename(st, lua_type(st, -m)));
         return FALSE;
       }
@@ -1311,7 +1287,7 @@ static bool extl_dodo_call_vararg(lua_State *st, ExtlDoCallParam *param) {
   if (param->spec != NULL) n = strlen(param->spec);
 
   if (!lua_checkstack(st, n + 8)) {
-    extl_warn(TR("Stack full."));
+    extl_warn("Stack full.");
     return FALSE;
   }
 
@@ -1598,7 +1574,7 @@ static int extl_l1_call_handler2(lua_State *st) {
   D(fprintf(stderr, "%s called\n", spec->name));
 
   if (!lua_checkstack(st, MAX_PARAMS + 1)) {
-    extl_warn(TR("Stack full."));
+    extl_warn("Stack full.");
     return 0;
   }
 
@@ -1609,10 +1585,9 @@ static int extl_l1_call_handler2(lua_State *st) {
     if (!extl_stack_get(st, i + 1, spec->ispec[i], FALSE, &dead,
                         (void *)&(param->ip[i]))) {
       if (dead) {
-        extl_warn(TR("Argument %d to %s is a dead object."), i + 1, spec->name);
+        extl_warn("Argument %d to %s is a dead object.", i + 1, spec->name);
       } else {
-        extl_warn(TR("Argument %d to %s is of invalid type. "
-                     "(Argument template is '%s', got lua type %s)."),
+        extl_warn("Argument %d to %s is of invalid type. (Argument template is '%s', got lua type %s).",
                   i + 1, spec->name, spec->ispec,
                   lua_typename(st, lua_type(st, i + 1)));
       }
@@ -1667,12 +1642,12 @@ static int extl_l1_call_handler(lua_State *st) {
   param.spec = (ExtlExportedFnSpec *)lua_touserdata(st, lua_upvalueindex(1));
 
   if (param.spec == NULL) {
-    extl_warn(TR("L1 call handler upvalues corrupt."));
+    extl_warn("L1 call handler upvalues corrupt.");
     return 0;
   }
 
   if (!param.spec->registered) {
-    extl_warn(TR("Called function has been unregistered."));
+    extl_warn("Called function has been unregistered.");
     return 0;
   }
 
@@ -1683,8 +1658,7 @@ static int extl_l1_call_handler(lua_State *st) {
   }
 
   if (!extl_check_protected(param.spec)) {
-    extl_warn(TR("Ignoring call to unsafe function \"%s\" in "
-                 "restricted mode."),
+    extl_warn("Ignoring call to unsafe function \"%s\" in restricted mode.",
               param.spec->name);
     return 0;
   }
@@ -1791,8 +1765,7 @@ static bool extl_do_register_function(lua_State *st, RegData *data) {
 
   if ((spec->ispec != NULL && strlen(spec->ispec) > MAX_PARAMS) ||
       (spec->ospec != NULL && strlen(spec->ospec) > MAX_PARAMS)) {
-    extl_warn(TR("Function '%s' has more parameters than the level 1 "
-                 "call handler can handle"),
+    extl_warn("Function '%s' has more parameters than the level 1 call handler can handle",
               spec->name);
     return FALSE;
   }
@@ -2168,7 +2141,7 @@ static bool ser(lua_State *st, FILE *f, int lvl) {
       break;
     case LUA_TTABLE:
       if (lvl + 1 >= EXTL_MAX_SERIALISE_DEPTH) {
-        extl_warn(TR("Maximal serialisation depth reached."));
+        extl_warn("Maximal serialisation depth reached.");
         fprintf(f, "nil");
         lua_pop(st, 1);
         return FALSE;
@@ -2189,7 +2162,7 @@ static bool ser(lua_State *st, FILE *f, int lvl) {
       fprintf(f, "}");
       break;
     default:
-      extl_warn(TR("Unable to serialize type %s."),
+      extl_warn("Unable to serialize type %s.",
                 lua_typename(st, lua_type(st, -1)));
   }
   lua_pop(st, 1);
@@ -2227,7 +2200,7 @@ extern bool extl_serialize(const char *file, ExtlTab tab) {
     return FALSE;
   }
 
-  fprintf(d.f, TR("-- This file has been generated by %s. Do not edit.\n"),
+  fprintf(d.f, "-- This file has been generated by %s. Do not edit.\n",
           libtu_progname());
   fprintf(d.f, "return ");
 

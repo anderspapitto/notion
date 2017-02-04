@@ -1,12 +1,3 @@
-/*
- * libtu/optparser.c
- *
- * Copyright (c) Tuomo Valkonen 1999-2004.
- *
- * You may distribute and modify this library under the terms of either
- * the Clarified Artistic License or the GNU LGPL, version 2.1 or later.
- */
-
 #include <string.h>
 #include <stdlib.h>
 
@@ -229,27 +220,27 @@ void optparser_print_error() {
   switch (o_error) {
     case E_OPT_INVALID_OPTION:
     case E_OPT_INVALID_CHAIN_OPTION:
-      warn_opt(TR("Invalid option"));
+      warn_opt("Invalid option");
       break;
 
     case E_OPT_SYNTAX_ERROR:
-      warn_arg(TR("Syntax error while parsing"));
+      warn_arg("Syntax error while parsing");
       break;
 
     case E_OPT_MISSING_ARGUMENT:
-      warn_opt(TR("Missing argument to"));
+      warn_opt("Missing argument to");
       break;
 
     case E_OPT_UNEXPECTED_ARGUMENT:
-      warn_opt(TR("No argument expected:"));
+      warn_opt("No argument expected:");
       break;
 
     case OPT_ID_ARGUMENT:
-      warn(TR("Unexpected argument"));
+      warn("Unexpected argument");
       break;
 
     default:
-      warn(TR("(unknown error)"));
+      warn("(unknown error)");
   }
 
   o_tmp = NULL;

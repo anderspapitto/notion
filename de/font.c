@@ -1,12 +1,3 @@
-/*
- * notion/de/font.c
- *
- * Copyright (c) the Notion team 2013.
- * Copyright (c) Tuomo Valkonen 1999-2009.
- *
- * See the included file LICENSE for details.
- */
-
 #include <string.h>
 
 #include <libtu/objp.h>
@@ -16,8 +7,6 @@
 #include "fontset.h"
 #include "brush.h"
 #include "precompose.h"
-
-/*{{{ UTF-8 processing */
 
 #define UTF_DATA 0x3F
 #define UTF_2_DATA 0x1F
@@ -69,10 +58,6 @@ static void toucs(const char *str_, int len, XChar2b **str16, int *len16) {
   }
 }
 
-/*}}}*/
-
-/*{{{ Load/free */
-
 static DEFont *fonts = NULL;
 
 static bool iso10646_font(const char *fontname) {
@@ -116,9 +101,9 @@ DEFont *de_load_font(const char *fontname) {
     fontset = de_create_font_set(fontname);
     if (fontset != NULL) {
       if (XContextDependentDrawing(fontset)) {
-        warn(TR("Fontset for font pattern '%s' implements context "
-                "dependent drawing, which is unsupported. Expect "
-                "clutter."),
+        warn("Fontset for font pattern '%s' implements context "
+             "dependent drawing, which is unsupported. Expect "
+             "clutter.",
              fontname);
       }
     }
@@ -130,10 +115,10 @@ DEFont *de_load_font(const char *fontname) {
   if (fontstruct == NULL && fontset == NULL) {
     if (strcmp(fontname, default_fontname) != 0) {
       DEFont *fnt;
-      LOG(WARN, FONT, TR("Could not load font \"%s\", trying \"%s\""), fontname,
+      LOG(WARN, FONT, "Could not load font \"%s\", trying \"%s\"", fontname,
           default_fontname);
       fnt = de_load_font(default_fontname);
-      if (fnt == NULL) LOG(WARN, FONT, TR("Failed to load fallback font."));
+      if (fnt == NULL) LOG(WARN, FONT, "Failed to load fallback font.");
       return fnt;
     }
     return NULL;
@@ -149,7 +134,7 @@ DEFont *de_load_font(const char *fontname) {
 
     if(font==NULL){
         if(strcmp(fontname, CF_FALLBACK_FONT_NAME)!=0){
-            warn(TR("Could not load font \"%s\", trying \"%s\""),
+            warn("Could not load font \"%s\", trying \"%s\"",
              fontname, CF_FALLBACK_FONT_NAME);
             return de_load_font(CF_FALLBACK_FONT_NAME);
         }
@@ -165,7 +150,7 @@ DEFont *de_load_font(const char *fontname) {
   fnt->fontset = fontset;
   fnt->fontstruct = fontstruct;
 #else
-    fnt->font=font;
+  fnt->font=font;
 #endif
   fnt->pattern = scopy(fontname);
   fnt->next = NULL;
@@ -207,13 +192,12 @@ bool de_load_font_for_style(DEStyle *style, const char *fontname) {
 void de_free_font(DEFont *font) {
   if (--font->refcount != 0) return;
 #ifndef HAVE_X11_XFT
-
   if (font->fontset != NULL) XFreeFontSet(ioncore_g.dpy, font->fontset);
   if (font->fontstruct != NULL) XFreeFont(ioncore_g.dpy, font->fontstruct);
   if (font->pattern != NULL) free(font->pattern);
 #else /* HAVE_X11_XFT */
-    if(font->font!=NULL)
-        XftFontClose(ioncore_g.dpy, font->font);
+  if(font->font!=NULL)
+      XftFontClose(ioncore_g.dpy, font->font);
 #endif /* HAVE_X11_XFT */
 
   UNLINK_ITEM(fonts, font, next, prev);

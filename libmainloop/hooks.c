@@ -1,11 +1,3 @@
-/*
- * ion/mainloop/hooks.c
- *
- * Copyright (c) Tuomo Valkonen 1999-2009.
- *
- * See the included file LICENSE for details.
- */
-
 #include <libtu/types.h>
 #include <libtu/misc.h>
 #include <libtu/dlist.h>
@@ -176,7 +168,7 @@ bool hook_add_extl(WHook *hk, ExtlFn efn) {
   WHookItem *item;
 
   if (efn == extl_fn_none()) {
-    warn(TR("No function given."));
+    warn("No function given.");
     return FALSE;
   }
 

@@ -26,8 +26,6 @@
 #include "bindmaps.h"
 #include "ioncore.h"
 
-/*{{{ parse_keybut */
-
 #define MOD5_NDX 7
 
 static StringIntMap state_map[] = {
@@ -95,12 +93,12 @@ bool ioncore_parse_keybut(const char *str, uint *mod_ret, uint *ksb_ret,
 
     if (!button && keysym != NoSymbol) {
       if (*ksb_ret != NoSymbol) {
-        warn_obj(str, TR("Insane key combination."));
+        warn_obj(str, "Insane key combination.");
         break;
       }
       if (XKeysymToKeycode(ioncore_g.dpy, keysym) == 0) {
         ioncore_warn_nolog("%s: %s", str,
-                           TR("Could not convert keysym to keycode."));
+                           "Could not convert keysym to keycode.");
         break;
       }
       *ksb_ret = keysym;
@@ -111,26 +109,26 @@ bool ioncore_parse_keybut(const char *str, uint *mod_ret, uint *ksb_ret,
         i = stringintmap_ndx(button_map, p);
 
         if (i < 0) {
-          warn(TR("Unknown button \"%s\"."), p);
+          warn("Unknown button \"%s\".", p);
           break;
         }
 
         if (!button || *ksb_ret != NoSymbol) {
-          warn_obj(str, TR("Insane button combination."));
+          warn_obj(str, "Insane button combination.");
           break;
         }
         *ksb_ret = button_map[i].value;
       } else {
         if (*mod_ret == AnyModifier) {
           if (!init_any) {
-            warn_obj(str, TR("Insane modifier combination."));
+            warn_obj(str, "Insane modifier combination.");
             break;
           } else {
             *mod_ret = state_map[i].value;
           }
         } else {
           if (*mod_ret != 0 && state_map[i].value == AnyModifier) {
-            warn_obj(str, TR("Insane modifier combination."));
+            warn_obj(str, "Insane modifier combination.");
             break;
           } else {
             *mod_ret |= state_map[i].value;
@@ -163,7 +161,7 @@ static bool do_action(WBindmap *bindmap, const char *str, ExtlFn func, uint act,
   WBinding binding;
 
   if (wr && mod == 0) {
-    warn(TR("Can not wait on modifiers when no modifiers set in \"%s\"."), str);
+    warn("Can not wait on modifiers when no modifiers set in \"%s\".", str);
     wr = FALSE;
   }
 
@@ -180,11 +178,10 @@ static bool do_action(WBindmap *bindmap, const char *str, ExtlFn func, uint act,
     binding.func = extl_ref_fn(func);
     if (bindmap_add_binding(bindmap, &binding)) return TRUE;
     extl_unref_fn(binding.func);
-    warn(TR("Unable to add binding %s."), str);
+    warn("Unable to add binding %s.", str);
   } else {
     binding.func = func;
     if (bindmap_remove_binding(bindmap, &binding)) return TRUE;
-    /*warn(TR("Unable to remove binding %s."), str);*/
   }
 
   return FALSE;
@@ -220,7 +217,7 @@ static bool do_submap(WBindmap *bindmap, const char *str, ExtlTab subtab,
 
   binding_deinit(&binding);
 
-  warn(TR("Unable to add submap for binding %s."), str);
+  warn("Unable to add submap for binding %s.", str);
 
   return FALSE;
 }
@@ -232,7 +229,6 @@ static StringIntMap action_map[] = {{"kpress", BINDING_KEYPRESS},
                                     {"mdrag", BINDING_BUTTONMOTION},
                                     {"submap_enter", BINDING_SUBMAP_ENTER},
                                     {"submap_wait", BINDING_SUBMAP_RELEASEMOD},
-                                    /*{"submap_leave", BINDING_SUBMAP_LEAVE},*/
                                     {NULL, 0}};
 
 static bool do_entry(WBindmap *bindmap, ExtlTab tab,
@@ -247,7 +243,7 @@ static bool do_entry(WBindmap *bindmap, ExtlTab tab,
   int area = 0;
 
   if (!extl_table_gets_s(tab, "action", &action_str)) {
-    warn(TR("Binding type not set."));
+    warn("Binding type not set.");
     goto fail;
   }
 
@@ -257,7 +253,7 @@ static bool do_entry(WBindmap *bindmap, ExtlTab tab,
   } else {
     action = stringintmap_value(action_map, action_str, -1);
     if (action < 0) {
-      warn(TR("Unknown binding type \"%s\"."), action_str);
+      warn("Unknown binding type \"%s\".", action_str);
       goto fail;
     }
   }
@@ -280,7 +276,7 @@ static bool do_entry(WBindmap *bindmap, ExtlTab tab,
       if (extl_table_gets_s(tab, "area", &area_str)) {
         area = stringintmap_value(areamap, area_str, -1);
         if (area < 0) {
-          warn(TR("Unknown area \"%s\" for binding %s."), area_str, ksb_str);
+          warn("Unknown area \"%s\" for binding %s.", area_str, ksb_str);
           area = 0;
         }
       }
@@ -314,14 +310,10 @@ bool bindmap_defbindings(WBindmap *bindmap, ExtlTab tab, bool submap) {
       extl_unref_table(ent);
       continue;
     }
-    warn(TR("Unable to get bindmap entry %d."), i);
+    warn("Unable to get bindmap entry %d.", i);
   }
   return (nok != 0);
 }
-
-/*}}}*/
-
-/*{{{ bindmap_getbindings */
 
 static char *get_mods(uint state) {
   char *ret = NULL;
@@ -348,7 +340,7 @@ static char *get_key(char *mods, uint ksb) {
   const char *s = XKeysymToString(ksb);
 
   if (s == NULL) {
-    warn(TR("Unable to convert keysym to string."));
+    warn("Unable to convert keysym to string.");
     return NULL;
   }
 
@@ -359,7 +351,7 @@ static char *get_button(char *mods, uint ksb) {
   const char *s = stringintmap_key(button_map, ksb, NULL);
 
   if (s == NULL) {
-    warn(TR("Unable to convert button to string."));
+    warn("Unable to convert button to string.");
     return NULL;
   }
 
@@ -458,5 +450,3 @@ ExtlTab bindmap_getbindings(WBindmap *bindmap) {
 
   return tab;
 }
-
-/*}}}*/

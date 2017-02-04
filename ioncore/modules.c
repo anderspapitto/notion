@@ -1,12 +1,3 @@
-/*
- * ion/ioncore/modules.c
- *
- * Copyright (c) Arnout Engelen 2011
- * Copyright (c) Tuomo Valkonen 1999-2009.
- *
- * See the included file LICENSE for details.
- */
-
 #include <string.h>
 #include <ctype.h>
 #include <dlfcn.h>
@@ -20,8 +11,6 @@
 #include "../version.h"
 
 #ifndef CF_PRELOAD_MODULES
-
-/*{{{ Module list */
 
 typedef void *dlhandle;
 
@@ -38,7 +27,6 @@ static dlhandle get_handle(const char *name) {
 
 static const char *get_name(dlhandle handle) {
   Rb_node nd;
-
   rb_traverse(nd, modules) {
     if (nd->v.val == handle) return (const char *)(nd->k.key);
   }
@@ -49,28 +37,18 @@ static Rb_node add_module(char *name, dlhandle handle) {
   return rb_insert(modules, name, handle);
 }
 
-/*}}}*/
-
-/*{{{ Module symbol access */
-
 static void *get_module_symbol(dlhandle handle, const char *modulename,
                                const char *name) {
   char *p;
   void *ret;
-
   p = scat(modulename, name);
-
   if (p == NULL) return NULL;
-
   ret = dlsym(handle, p);
-
   free(p);
-
   return ret;
 }
 
-static void (*get_module_fptr(dlhandle handle, const char *modulename,
-                              const char *name))(void **) {
+static void (*get_module_fptr(dlhandle handle, const char *modulename, const char *name))(void **) {
   /* This is not valid ISO C. However, it is 'tried and tested'. The
    * workaround originally recommended[1] is not alias-safe[2]. The approach
    * we chose, while not valid ISO C, *is* valid under POSIX 2008[3]. Newer
@@ -118,10 +96,6 @@ static void call_deinit(dlhandle handle, const char *modulename) {
   if (deinitfn != NULL) deinitfn();
 }
 
-/*}}}*/
-
-/*{{{ Init */
-
 bool ioncore_init_module_support() {
   modules = make_rb();
   return (modules != NULL);
@@ -144,7 +118,7 @@ static int try_load(const char *file, void *UNUSED(param)) {
     slash++;
 
   if (dot <= slash) {
-    warn(TR("Invalid module name."));
+    warn("Invalid module name.");
     goto err1;
   }
 
@@ -155,7 +129,7 @@ static int try_load(const char *file, void *UNUSED(param)) {
   name[dot - slash] = '\0';
 
   if (get_handle(name)) {
-    warn_obj(file, TR("The module is already loaded."));
+    warn_obj(file, "The module is already loaded.");
     goto err2;
   }
 
@@ -169,15 +143,15 @@ static int try_load(const char *file, void *UNUSED(param)) {
   if (get_name(handle)) return EXTL_TRYCONFIG_OK;
 
   if (!check_has_version(handle, name)) {
-    warn_obj(file, TR("Module version information for %s not found. "
-                      "Refusing to use."),
+    warn_obj(file, "Module version information for %s not found. "
+                   "Refusing to use.",
              name);
     goto err3;
   }
 
   if (!check_version(handle, name)) {
-    warn_obj(file, TR("Module version mismatch: expected '%s', found '%s'."
-                      " Refusing to use."),
+    warn_obj(file, "Module version mismatch: expected '%s', found '%s'."
+                   " Refusing to use.",
              NOTION_API_VERSION, get_version(handle, name));
     goto err3;
   }
@@ -187,7 +161,7 @@ static int try_load(const char *file, void *UNUSED(param)) {
   if (mod == NULL) goto err3;
 
   if (!call_init(handle, name)) {
-    warn_obj(file, TR("Unable to initialise module %s."), name);
+    warn_obj(file, "Unable to initialise module %s.", name);
     rb_delete_node(mod);
     goto err3;
   }
@@ -206,18 +180,14 @@ static bool do_load_module(const char *modname) {
   int retval;
   const char *extension = "so";
 
-  retval = extl_try_config(modname, NULL, (ExtlTryConfigFn *)try_load, NULL,
-                           extension, NULL);
+  retval = extl_try_config(modname, NULL, (ExtlTryConfigFn *)try_load, NULL, extension, NULL);
 
-  if (retval == EXTL_TRYCONFIG_NOTFOUND)
-    warn(TR("Unable to find '%s.%s' on search path."), modname, extension);
+  if (retval == EXTL_TRYCONFIG_NOTFOUND) {
+    warn("Unable to find '%s.%s' on search path.", modname, extension);
+  }
 
   return (retval == EXTL_TRYCONFIG_OK);
 }
-
-/*}}}*/
-
-/*{{{ Deinit */
 
 static void do_unload_module(Rb_node mod) {
   char *name = (char *)mod->k.key;
@@ -230,8 +200,6 @@ static void do_unload_module(Rb_node mod) {
 }
 
 #else
-
-/*{{{ Static module support */
 
 static bool call_init(WStaticModuleInfo *handle) {
   if (handle->init != NULL) return handle->init();
@@ -252,14 +220,14 @@ static bool do_load_module(const char *name) {
   }
 
   if (mod->name == NULL) {
-    warn_obj(name, TR("Unknown module."));
+    warn_obj(name, "Unknown module.");
     return FALSE;
   }
 
   if (mod->loaded) return TRUE;
 
   if (!call_init(mod)) {
-    warn_obj(name, TR("Unable to initialise module."));
+    warn_obj(name, "Unable to initialise module.");
     return FALSE;
   }
 
@@ -281,22 +249,13 @@ void ioncore_unload_modules() {
 
 bool ioncore_init_module_support() { return TRUE; }
 
-/*}}}*/
-
 #endif
 
-/*{{{ Exports */
-
-/*EXTL_DOC
- * Attempt to load a C-side module.
- */
 EXTL_EXPORT
 bool ioncore_load_module(const char *modname) {
   if (modname == NULL) {
-    warn(TR("No module to load given."));
+    warn("No module to load given.");
     return FALSE;
   }
   return do_load_module(modname);
 }
-
-/*}}}*/

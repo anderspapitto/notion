@@ -1,11 +1,3 @@
-/*
- * ion/mod_tiling/main.c
- *
- * Copyright (c) Tuomo Valkonen 1999-2009.
- *
- * See the included file LICENSE for details.
- */
-
 #include <libtu/map.h>
 
 #include <ioncore/common.h>
@@ -20,21 +12,15 @@
 #include "placement.h"
 #include "exports.h"
 
-/*{{{ Module information */
-
 #include "../version.h"
 
 char mod_tiling_ion_api_version[] = NOTION_API_VERSION;
-
-/*}}}*/
 
 /*{{{ Bindmaps and configuration variables */
 
 WBindmap *mod_tiling_tiling_bindmap = NULL;
 
 int mod_tiling_raise_delay = CF_RAISE_DELAY;
-
-/*}}}*/
 
 /*{{{ Configuration */
 
