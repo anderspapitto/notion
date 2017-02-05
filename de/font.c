@@ -8,66 +8,7 @@
 #include "brush.h"
 #include "precompose.h"
 
-#define UTF_DATA 0x3F
-#define UTF_2_DATA 0x1F
-#define UTF_3_DATA 0x0F
-#define UTF_1 0x80
-#define UTF_2 0xC0
-#define UTF_3 0xE0
-
-static void toucs(const char *str_, int len, XChar2b **str16, int *len16) {
-  int i = 0;
-  const uchar *str = (const uchar *)str_;
-  wchar_t prev = 0;
-
-  *str16 = ALLOC_N(XChar2b, len);
-  *len16 = 0;
-
-  while (i < len) {
-    wchar_t ch = 0;
-
-    if ((str[i] & UTF_3) == UTF_3) {
-      if (i + 2 >= len) break;
-      ch = ((str[i] & UTF_3_DATA) << 12) | ((str[i + 1] & UTF_DATA) << 6) |
-           (str[i + 2] & UTF_DATA);
-      i += 3;
-    } else if ((str[i] & UTF_2) == UTF_2) {
-      if (i + 1 >= len) break;
-      ch = ((str[i] & UTF_2_DATA) << 6) | (str[i + 1] & UTF_DATA);
-      i += 2;
-    } else if (str[i] < UTF_1) {
-      ch = str[i];
-      i++;
-    } else {
-      ch = '?';
-      i++;
-    }
-
-    if (*len16 > 0) {
-      wchar_t precomp = do_precomposition(prev, ch);
-      if (precomp != -1) {
-        (*len16)--;
-        ch = precomp;
-      }
-    }
-
-    (*str16)[*len16].byte2 = ch & 0xff;
-    (*str16)[*len16].byte1 = (ch >> 8) & 0xff;
-    (*len16)++;
-    prev = ch;
-  }
-}
-
 static DEFont *fonts = NULL;
-
-static bool iso10646_font(const char *fontname) {
-  const char *iso;
-
-  if (strchr(fontname, ',') != NULL) return FALSE; /* fontset */
-
-  iso = strstr(fontname, "iso10646-1");
-  return (iso != NULL && iso[10] == '\0');
-}
 
 const char *de_default_fontname() {
   if (ioncore_g.use_mb)
@@ -295,10 +236,6 @@ uint defont_get_text_width(DEFont *font, const char *text, uint len) {
 #endif /* HAVE_X11_XFT */
 }
 
-/*}}}*/
-
-/*{{{ String drawing */
-
 #ifndef HAVE_X11_XFT
 void debrush_do_draw_string_default(DEBrush *brush, int x, int y,
                                     const char *str, int len, bool needfill,
@@ -399,10 +336,7 @@ void debrush_do_draw_string(DEBrush *brush, int x, int y, const char *str,
            (brush, x, y, str, len, needfill, colours));
 }
 
-void debrush_draw_string(DEBrush *brush, int x, int y, const char *str, int len,
-                         bool needfill) {
+void debrush_draw_string(DEBrush *brush, int x, int y, const char *str, int len, bool needfill) {
   DEColourGroup *cg = debrush_get_current_colour_group(brush);
   if (cg != NULL) debrush_do_draw_string(brush, x, y, str, len, needfill, cg);
 }
-
-/*}}}*/

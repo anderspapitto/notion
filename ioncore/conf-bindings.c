@@ -1,11 +1,3 @@
-/*
- * ion/ioncore/conf-bindings.c
- *
- * Copyright (c) Tuomo Valkonen 1999-2009.
- *
- * See the included file LICENSE for details.
- */
-
 #include <string.h>
 
 #define XK_MISCELLANY
@@ -83,12 +75,6 @@ bool ioncore_parse_keybut(const char *str, uint *mod_ret, uint *ksb_ret,
 
     if (!button) {
       keysym = XStringToKeysym(p);
-#ifdef CF_SUN_F1X_REMAP
-      if (keysym == XK_F11)
-        keysym = SunXK_F36;
-      else if (keysym == XK_F12)
-        keysym = SunXK_F37;
-#endif
     }
 
     if (!button && keysym != NoSymbol) {
@@ -152,12 +138,7 @@ bool ioncore_parse_keybut(const char *str, uint *mod_ret, uint *ksb_ret,
 
 #undef BUTTON1_NDX
 
-/*}}}*/
-
-/*{{{ bindmap_defbindings */
-
-static bool do_action(WBindmap *bindmap, const char *str, ExtlFn func, uint act,
-                      uint mod, uint ksb, int area, bool wr) {
+static bool do_action(WBindmap *bindmap, const char *str, ExtlFn func, uint act, uint mod, uint ksb, int area, bool wr) {
   WBinding binding;
 
   if (wr && mod == 0) {
@@ -187,8 +168,7 @@ static bool do_action(WBindmap *bindmap, const char *str, ExtlFn func, uint act,
   return FALSE;
 }
 
-static bool do_submap(WBindmap *bindmap, const char *str, ExtlTab subtab,
-                      uint action, uint mod, uint ksb) {
+static bool do_submap(WBindmap *bindmap, const char *str, ExtlTab subtab, uint action, uint mod, uint ksb) {
   WBinding binding, *bnd;
   uint kcb = 0;
 
@@ -358,7 +338,7 @@ static char *get_button(char *mods, uint ksb) {
   return scat(mods, s);
 }
 
-static bool get_kpress(WBindmap *bindmap, WBinding *b, ExtlTab t) {
+static bool get_kpress(WBinding *b, ExtlTab t) {
   char *mods;
   char *key;
 
@@ -411,9 +391,9 @@ static bool get_mact(WBindmap *bindmap, WBinding *b, ExtlTab t) {
 
   free(button);
 
-  if (b->area != 0 && bindmap->areamap != NULL)
-    extl_table_sets_s(t, "area",
-                      stringintmap_key(bindmap->areamap, b->area, NULL));
+  if (b->area != 0 && bindmap->areamap != NULL){
+    extl_table_sets_s(t, "area", stringintmap_key(bindmap->areamap, b->area, NULL));
+  }
 
   extl_table_sets_f(t, "func", b->func);
 
@@ -424,7 +404,7 @@ static ExtlTab getbinding(WBindmap *bindmap, WBinding *b) {
   ExtlTab t = extl_create_table();
 
   if (b->act == BINDING_KEYPRESS) {
-    if (get_kpress(bindmap, b, t)) return t;
+    if (get_kpress(b, t)) return t;
   } else {
     if (get_mact(bindmap, b, t)) return t;
   }

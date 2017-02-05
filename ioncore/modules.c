@@ -10,8 +10,6 @@
 #include "modules.h"
 #include "../version.h"
 
-#ifndef CF_PRELOAD_MODULES
-
 typedef void *dlhandle;
 
 static Rb_node modules = NULL;
@@ -86,14 +84,6 @@ static bool call_init(dlhandle handle, const char *modulename) {
   if (initfn == NULL) return TRUE;
 
   return initfn();
-}
-
-static void call_deinit(dlhandle handle, const char *modulename) {
-  void (*deinitfn)(void);
-
-  deinitfn = (void (*)())get_module_fptr(handle, modulename, "_deinit");
-
-  if (deinitfn != NULL) deinitfn();
 }
 
 bool ioncore_init_module_support() {
@@ -188,68 +178,6 @@ static bool do_load_module(const char *modname) {
 
   return (retval == EXTL_TRYCONFIG_OK);
 }
-
-static void do_unload_module(Rb_node mod) {
-  char *name = (char *)mod->k.key;
-  dlhandle handle = mod->v.val;
-
-  call_deinit(handle, name);
-
-  dlclose(handle);
-  free(name);
-}
-
-#else
-
-static bool call_init(WStaticModuleInfo *handle) {
-  if (handle->init != NULL) return handle->init();
-  return TRUE;
-}
-
-static void call_deinit(WStaticModuleInfo *handle) {
-  if (handle->deinit != NULL) handle->deinit();
-}
-
-extern WStaticModuleInfo ioncore_static_modules[];
-
-static bool do_load_module(const char *name) {
-  WStaticModuleInfo *mod;
-
-  for (mod = ioncore_static_modules; mod->name != NULL; mod++) {
-    if (strcmp(mod->name, name) == 0) break;
-  }
-
-  if (mod->name == NULL) {
-    warn_obj(name, "Unknown module.");
-    return FALSE;
-  }
-
-  if (mod->loaded) return TRUE;
-
-  if (!call_init(mod)) {
-    warn_obj(name, "Unable to initialise module.");
-    return FALSE;
-  }
-
-  mod->loaded = TRUE;
-
-  return TRUE;
-}
-
-void ioncore_unload_modules() {
-  WStaticModuleInfo *mod;
-
-  for (mod = ioncore_static_modules; mod->name != NULL; mod++) {
-    if (mod->loaded) {
-      call_deinit(mod);
-      mod->loaded = FALSE;
-    }
-  }
-}
-
-bool ioncore_init_module_support() { return TRUE; }
-
-#endif
 
 EXTL_EXPORT
 bool ioncore_load_module(const char *modname) {
