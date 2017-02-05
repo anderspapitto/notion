@@ -13,9 +13,6 @@ IMPLCLASS(WHook, Obj, hook_deinit, NULL);
 
 static Rb_node named_hooks = NULL;
 
-/*{{{ Named hooks */
-
-/* If hk==NULL to register, new is attempted to be created. */
 WHook *mainloop_register_hook(const char *name, WHook *hk) {
   char *nnm;
 
@@ -65,9 +62,6 @@ WHook *mainloop_unregister_hook(const char *name, WHook *hk) {
   return hk;
 }
 
-/*EXTL_DOC
- * Find named hook \var{name}.
- */
 EXTL_SAFE
 EXTL_EXPORT
 WHook *mainloop_get_hook(const char *name) {
@@ -81,10 +75,6 @@ WHook *mainloop_get_hook(const char *name) {
 
   return NULL;
 }
-
-/*}}}*/
-
-/*{{{ Init/deinit */
 
 static void destroy_item(WHook *hk, WHookItem *item) {
   if (item->fn == NULL) extl_unref_fn(item->efn);
@@ -115,10 +105,6 @@ void hook_deinit(WHook *hk) {
   while (hk->items != NULL) destroy_item(hk, hk->items);
 }
 
-/*}}}*/
-
-/*{{{ Find/add/remove */
-
 WHookItem *hook_find(WHook *hk, WHookDummy *fn) {
   WHookItem *hi;
 
@@ -139,9 +125,6 @@ WHookItem *hook_find_extl(WHook *hk, ExtlFn efn) {
   return NULL;
 }
 
-/*EXTL_DOC
- * Is \var{fn} hooked to hook \var{hk}?
- */
 EXTL_SAFE
 EXTL_EXPORT_MEMBER
 bool hook_listed(WHook *hk, ExtlFn efn) {
@@ -159,10 +142,6 @@ bool hook_add(WHook *hk, WHookDummy *fn) {
   return TRUE;
 }
 
-/*EXTL_DOC
- * Add \var{efn} to the list of functions to be called when the
- * hook \var{hk} is triggered.
- */
 EXTL_EXPORT_AS(WHook, add)
 bool hook_add_extl(WHook *hk, ExtlFn efn) {
   WHookItem *item;
@@ -199,10 +178,6 @@ bool hook_remove_extl(WHook *hk, ExtlFn efn) {
   if (item != NULL) destroy_item(hk, item);
   return (item != NULL);
 }
-
-/*}}}*/
-
-/*{{{ Basic marshallers */
 
 static bool marshall_v(WHookDummy *fn, void *UNUSED(param)) {
   fn();
@@ -248,12 +223,7 @@ static bool marshall_extl_alt_o(ExtlFn fn, void *param) {
 
 static bool marshall_alt_p(bool (*fn)(), void *param) { return fn(param); }
 
-/*}}}*/
-
-/*{{{ Call */
-
-void hook_call(const WHook *hk, void *p, WHookMarshall *m,
-               WHookMarshallExtl *em) {
+void hook_call(const WHook *hk, void *p, WHookMarshall *m, WHookMarshallExtl *em) {
   WHookItem *hi, *next;
 
   for (hi = hk->items; hi != NULL; hi = next) {
@@ -307,5 +277,3 @@ bool hook_call_alt_o(const WHook *hk, Obj *o) {
 bool hook_call_alt_p(const WHook *hk, void *p, WHookMarshallExtl *em) {
   return hook_call_alt(hk, p, (WHookMarshall *)marshall_alt_p, em);
 }
-
-/*}}}*/

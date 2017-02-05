@@ -56,8 +56,7 @@ static void duppipe(int fd, int idx, int *fds) {
   close(fds[1]);
 }
 
-pid_t mainloop_fork(void (*fn)(void *p), void *fnp, int *infd, int *outfd,
-                    int *errfd) {
+pid_t mainloop_fork(void (*fn)(void *p), void *fnp, int *infd, int *outfd, int *errfd) {
   int pid;
   int infds[2];
   int outfds[2];
@@ -144,8 +143,7 @@ static void do_spawn(void *spawnp) {
   mainloop_do_exec(p->cmd);
 }
 
-pid_t mainloop_do_spawn(const char *cmd, void (*initenv)(void *p), void *p,
-                        int *infd, int *outfd, int *errfd) {
+pid_t mainloop_do_spawn(const char *cmd, void (*initenv)(void *p), void *p, int *infd, int *outfd, int *errfd) {
   SpawnP spawnp;
 
   spawnp.cmd = cmd;

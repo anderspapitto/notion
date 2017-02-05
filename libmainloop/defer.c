@@ -1,11 +1,3 @@
-/*
- * ion/libmainloop/defer.c
- *
- * Copyright (c) Tuomo Valkonen 1999-2009.
- *
- * See the included file LICENSE for details.
- */
-
 /* This file contains routines for deferred execution of potentially
  * dangerous actions. They're called upon returning to the main
  * loop.
@@ -65,11 +57,8 @@ static void free_defer(WDeferred *d) {
 
 static void defer_watch_handler(Watch *w, Obj *UNUSED(obj)) {
   WDeferred *d = (WDeferred *)w;
-
   UNLINK_ITEM(*(WDeferred **)(d->list), d, next, prev);
-
   free_defer(d);
-
   D(warn("Object destroyed while deferred actions are still pending."));
 }
 
@@ -139,9 +128,6 @@ bool mainloop_defer_extl_on_list(ExtlFn fn, WDeferred **list) {
   return TRUE;
 }
 
-/*EXTL_DOC
- * Defer execution of \var{fn} until the main loop.
- */
 EXTL_SAFE
 EXTL_EXPORT_AS(mainloop, defer)
 bool mainloop_defer_extl(ExtlFn fn) {
@@ -160,7 +146,6 @@ static void do_execute(WDeferred *d) {
     /* The deferral should not be on the list, if there
      * was an object, and it got destroyed.
      */
-    /*if(obj!=NULL)*/
     a(obj);
   } else if (fn != extl_fn_none()) {
     extl_call(fn, NULL, NULL);

@@ -1,11 +1,3 @@
-/*
- * libmainloop/select.c
- *
- * Partly based on a contributed code.
- *
- * See the included file LICENSE for details.
- */
-
 #include <signal.h>
 #include <sys/select.h>
 #include <errno.h>
@@ -17,8 +9,6 @@
 
 #include "select.h"
 #include "signal.h"
-
-/*{{{ File descriptor management */
 
 static WInputFd *input_fds = NULL;
 
@@ -32,8 +22,7 @@ static WInputFd *find_input_fd(int fd) {
   return tmp;
 }
 
-bool mainloop_register_input_fd(int fd, void *data,
-                                void (*callback)(int fd, void *d)) {
+bool mainloop_register_input_fd(int fd, void *data, void (*callback)(int fd, void *d)) {
   WInputFd *tmp;
 
   if (find_input_fd(fd) != NULL) return FALSE;
@@ -79,16 +68,11 @@ static void check_input_fds(fd_set *rfds) {
   }
 }
 
-/*}}}*/
-
-/*{{{ Select */
-
 void mainloop_select() {
   fd_set rfds;
   int nfds = 0;
   int ret = 0;
 
-#if _POSIX_SELECT || _POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600
   {
     sigset_t oldmask;
 
@@ -102,34 +86,5 @@ void mainloop_select() {
 
     sigprocmask(SIG_SETMASK, &oldmask, NULL);
   }
-#else
-#warning "pselect() unavailable -- using dirty hacks"
-  {
-    struct timeval tv = {0, 0};
-    bool to;
-
-    /* If there are timers, make sure we return from select with
-     * some delay, if the timer signal happens right before
-     * entering select(). Race conditions with other signals
-     * we'll just have to ignore without pselect().
-     */
-    do {
-      bool to;
-      FD_ZERO(&rfds);
-      set_input_fds(&rfds, &nfds);
-
-      to = libmainloop_get_timeout(&tv);
-
-      if (mainloop_unhandled_signals()) {
-        ret = 0;
-        break;
-      }
-
-      ret = select(nfds + 1, &rfds, NULL, NULL, to ? &tv : NULL);
-    } while (ret < 0 && errno == EINTR && !mainloop_unhandled_signals());
-  }
-#endif
   if (ret > 0) check_input_fds(&rfds);
 }
-
-/*}}}*/
