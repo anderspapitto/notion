@@ -1,11 +1,3 @@
-/*
- * ion/ioncore/group.h
- *
- * Copyright (c) Tuomo Valkonen 1999-2009. 
- *
- * See the included file LICENSE for details.
- */
-
 #ifndef ION_IONCORE_GROUP_H
 #define ION_IONCORE_GROUP_H
 
@@ -30,14 +22,14 @@ DECLSTRUCT(WGroupAttachParams){
     uint geom_set:1;
     uint geom_weak_set:1;
     uint switchto_set:1;
-    
+
     uint switchto:1;
     uint bottom:1;
     uint whatever:1;
-    
+
     int geom_weak;
     WRectangle geom;
-    
+
     uint level;
     WSizePolicy szplcy;
     WRegion *stack_above;
@@ -62,31 +54,31 @@ extern bool group_init(WGroup *grp, WWindow *parent, const WFitParams *fp, const
 extern WGroup *create_group(WWindow *parent, const WFitParams *fp, const char *name);
 extern void group_deinit(WGroup *grp);
 
-extern WRegion *group_load(WWindow *par, const WFitParams *fp, 
+extern WRegion *group_load(WWindow *par, const WFitParams *fp,
                            ExtlTab tab);
 extern void group_do_load(WGroup *ws, ExtlTab tab);
 
 extern WRegion* group_current(WGroup *group);
 
-DYNFUN WStacking *group_do_add_managed(WGroup *ws, WRegion *reg, 
+DYNFUN WStacking *group_do_add_managed(WGroup *ws, WRegion *reg,
                                        int level, WSizePolicy szplcy);
-extern WStacking *group_do_add_managed_default(WGroup *ws, WRegion *reg, 
+extern WStacking *group_do_add_managed_default(WGroup *ws, WRegion *reg,
                                                int level, WSizePolicy szplcy);
 
-extern void groupattachparams_get(WGroupAttachParams *par, ExtlTab tab, 
+extern void groupattachparams_get(WGroupAttachParams *par, ExtlTab tab,
                                   const char *sub);
 
-extern WRegion *group_do_attach(WGroup *ws, 
+extern WRegion *group_do_attach(WGroup *ws,
                                 WGroupAttachParams *param,
                                 WRegionAttachData *data);
-extern bool group_do_attach_final(WGroup *ws, 
+extern bool group_do_attach_final(WGroup *ws,
                                   WRegion *reg,
                                   const WGroupAttachParams *param);
 
 extern WRegion *group_attach(WGroup *ws, WRegion *reg, ExtlTab param);
 extern WRegion *group_attach_new(WGroup *ws, ExtlTab param);
 
-extern void group_manage_stdisp(WGroup *ws, WRegion *stdisp, 
+extern void group_manage_stdisp(WGroup *ws, WRegion *stdisp,
                                 const WMPlexSTDispInfo *di);
 
 extern void group_managed_remove(WGroup *ws, WRegion *reg);
@@ -102,14 +94,13 @@ extern bool group_rescue_clientwins(WGroup *ws, WRescueInfo *info);
 extern bool group_rqclose(WGroup *ws);
 extern bool group_rqclose_relocate(WGroup *ws);
 
-extern bool group_managed_rqorder(WGroup *grp, WRegion *sub, 
+extern bool group_managed_rqorder(WGroup *grp, WRegion *sub,
                                   WRegionOrder order);
 
 extern WStacking *group_find_stacking(WGroup *ws, WRegion *r);
 extern WStacking *group_find_to_focus(WGroup *ws, WStacking *to_try);
 
 extern WRegion *region_groupleader_of(WRegion *reg);
-/*extern WRegion *region_group_of(WRegion *reg);*/
 
 extern ExtlTab group_get_configuration(WGroup *ws);
 

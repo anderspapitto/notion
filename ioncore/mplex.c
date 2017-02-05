@@ -673,7 +673,6 @@ bool mplex_do_prepare_focus(WMPlex *mplex, WStacking *node, WStacking *sub,
   PtrList *hidelist = NULL;
   PtrList **hidelistp = (ew ? NULL : &hidelist);
   WStacking *foc;
-  /*bool within=FALSE;*/
 
   if (sub == NULL && node == NULL) return FALSE;
 
@@ -692,7 +691,7 @@ bool mplex_do_prepare_focus(WMPlex *mplex, WStacking *node, WStacking *sub,
     if (ioncore_g.autoraise && !(flags & REGION_GOTO_ENTERWINDOW) &&
         foc->level > STACKING_LEVEL_BOTTOM) {
       WStacking **stackingp = mplex_get_stackingp(mplex);
-      stacking_restack(stackingp, foc, None, NULL, NULL, FALSE);
+      stacking_restack(stackingp, foc, None, FALSE);
     }
 
     res->reg = foc->reg;
@@ -887,8 +886,7 @@ bool mplex_managed_rqorder(WMPlex *mplex, WRegion *reg, WRegionOrder order) {
 
   if (st == NULL) return FALSE;
 
-  stacking_restack(stackingp, st, None, NULL, NULL,
-                   (order != REGION_ORDER_FRONT));
+  stacking_restack(stackingp, st, None, (order != REGION_ORDER_FRONT));
 
   return TRUE;
 }

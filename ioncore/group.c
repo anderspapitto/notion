@@ -216,7 +216,7 @@ static bool group_managed_prepare_focus(WGroup *ws, WRegion *reg, int flags,
     if (ioncore_g.autoraise && !(flags & REGION_GOTO_ENTERWINDOW) &&
         st->level > STACKING_LEVEL_BOTTOM) {
       WStacking **stackingp = group_get_stackingp(ws);
-      stacking_restack(stackingp, st, None, NULL, NULL, FALSE);
+      stacking_restack(stackingp, st, None, FALSE);
     }
 
     res->reg = st->reg;
@@ -826,7 +826,7 @@ static WStacking *prv(WGroup *ws, WStacking *st, bool wrap) {
 
 typedef WStacking *NxtFn(WGroup *ws, WStacking *st, bool wrap);
 
-static bool focusable(WGroup *ws, WStacking *st, uint min_level) {
+static bool focusable(WStacking *st, uint min_level) {
   return (st->reg != NULL && REGION_IS_MAPPED(st->reg) &&
           !(st->reg->flags & REGION_SKIP_FOCUS) && st->level >= min_level);
 }
@@ -846,10 +846,10 @@ static WStacking *do_get_next(WGroup *ws, WStacking *sti, NxtFn *fn, bool wrap,
 
     if (st == NULL || st == sti) break;
 
-    if (focusable(ws, st, min_level)) return st;
+    if (focusable(st, min_level)) return st;
   }
 
-  if (sti_ok && focusable(ws, sti, min_level)) return sti;
+  if (sti_ok && focusable(sti, min_level)) return sti;
 
   return NULL;
 }
@@ -934,8 +934,7 @@ bool group_managed_rqorder(WGroup *grp, WRegion *reg, WRegionOrder order) {
 
   if (st == NULL) return FALSE;
 
-  stacking_restack(stackingp, st, None, NULL, NULL,
-                   (order != REGION_ORDER_FRONT));
+  stacking_restack(stackingp, st, None, (order != REGION_ORDER_FRONT));
 
   return TRUE;
 }

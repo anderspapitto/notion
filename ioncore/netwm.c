@@ -1,11 +1,3 @@
-/*
- * ion/ioncore/netwm.c
- *
- * Copyright (c) Tuomo Valkonen 1999-2009.
- *
- * See the included file LICENSE for details.
- */
-
 #include <X11/Xatom.h>
 #include <X11/Xmd.h>
 
@@ -22,8 +14,6 @@
 #include "extlconv.h"
 #include "group.h"
 #include "event.h"
-
-/*{{{ Atoms */
 
 static Atom atom_net_wm_name = 0;
 static Atom atom_net_wm_state = 0;
@@ -44,30 +34,18 @@ static Atom atom_net_supported = 0;
 #define SOURCE_APPLICATION 1
 #define SOURCE_PAGER 2
 
-/*}}}*/
-
-/*{{{ Initialisation */
-
 void netwm_init() {
   atom_net_wm_name = XInternAtom(ioncore_g.dpy, "_NET_WM_NAME", False);
   atom_net_wm_state = XInternAtom(ioncore_g.dpy, "_NET_WM_STATE", False);
-  atom_net_wm_state_fullscreen =
-      XInternAtom(ioncore_g.dpy, "_NET_WM_STATE_FULLSCREEN", False);
-  atom_net_wm_state_demands_attention =
-      XInternAtom(ioncore_g.dpy, "_NET_WM_STATE_DEMANDS_ATTENTION", False);
+  atom_net_wm_state_fullscreen = XInternAtom(ioncore_g.dpy, "_NET_WM_STATE_FULLSCREEN", False);
+  atom_net_wm_state_demands_attention = XInternAtom(ioncore_g.dpy, "_NET_WM_STATE_DEMANDS_ATTENTION", False);
   atom_net_supported = XInternAtom(ioncore_g.dpy, "_NET_SUPPORTED", False);
-  atom_net_supporting_wm_check =
-      XInternAtom(ioncore_g.dpy, "_NET_SUPPORTING_WM_CHECK", False);
-  atom_net_virtual_roots =
-      XInternAtom(ioncore_g.dpy, "_NET_VIRTUAL_ROOTS", False);
-  atom_net_active_window =
-      XInternAtom(ioncore_g.dpy, "_NET_ACTIVE_WINDOW", False);
-  atom_net_wm_user_time =
-      XInternAtom(ioncore_g.dpy, "_NET_WM_USER_TIME", False);
-  atom_net_wm_allowed_actions =
-      XInternAtom(ioncore_g.dpy, "_NET_WM_ALLOWED_ACTIONS", False);
-  atom_net_wm_moveresize =
-      XInternAtom(ioncore_g.dpy, "_NET_WM_MOVERESIZE", False);
+  atom_net_supporting_wm_check = XInternAtom(ioncore_g.dpy, "_NET_SUPPORTING_WM_CHECK", False);
+  atom_net_virtual_roots = XInternAtom(ioncore_g.dpy, "_NET_VIRTUAL_ROOTS", False);
+  atom_net_active_window = XInternAtom(ioncore_g.dpy, "_NET_ACTIVE_WINDOW", False);
+  atom_net_wm_user_time = XInternAtom(ioncore_g.dpy, "_NET_WM_USER_TIME", False);
+  atom_net_wm_allowed_actions = XInternAtom(ioncore_g.dpy, "_NET_WM_ALLOWED_ACTIONS", False);
+  atom_net_wm_moveresize = XInternAtom(ioncore_g.dpy, "_NET_WM_MOVERESIZE", False);
 }
 
 void netwm_init_rootwin(WRootWin *rw) {
@@ -100,10 +78,6 @@ void netwm_init_rootwin(WRootWin *rw) {
   xwindow_set_utf8_property(rw->dummy_win, atom_net_wm_name, p, 1);
 }
 
-/*}}}*/
-
-/*{{{ _NET_WM_STATE */
-
 bool netwm_check_initial_fullscreen(WClientWin *cwin) {
   int i, n;
   long *data;
@@ -122,9 +96,6 @@ bool netwm_check_initial_fullscreen(WClientWin *cwin) {
   return FALSE;
 }
 
-/*EXTL_DOC
- * refresh \_NET\_WM\_STATE markers for this window
- */
 EXTL_SAFE
 EXTL_EXPORT
 void ioncore_update_net_state(WClientWin *cwin) { netwm_update_state(cwin); }
@@ -198,10 +169,6 @@ static void netwm_state_change_rq(WClientWin *cwin,
   }
 }
 
-/*}}}*/
-
-/*{{{ _NET_ACTIVE_WINDOW */
-
 void netwm_set_active(WRegion *reg) {
   CARD32 data[1] = {None};
 
@@ -231,17 +198,9 @@ static void netwm_active_window_rq(WClientWin *cwin,
     region_set_activity((WRegion *)cwin, SETPARAM_SET);
 }
 
-/*}}}*/
-
-/*{{{ _NET_WM_NAME */
-
 char **netwm_get_name(WClientWin *cwin) {
   return xwindow_get_text_property(cwin->win, atom_net_wm_name, NULL);
 }
-
-/*}}}*/
-
-/*{{{ netwm_handle_client_message */
 
 void netwm_handle_client_message(const XClientMessageEvent *ev) {
   /* Check _NET_WM_STATE fullscreen request */
@@ -256,10 +215,6 @@ void netwm_handle_client_message(const XClientMessageEvent *ev) {
   }
 }
 
-/*}}}*/
-
-/*{{{ netwm_handle_property */
-
 bool netwm_handle_property(WClientWin *cwin, const XPropertyEvent *ev) {
   if (ev->atom != atom_net_wm_name) return FALSE;
 
@@ -267,37 +222,16 @@ bool netwm_handle_property(WClientWin *cwin, const XPropertyEvent *ev) {
   return TRUE;
 }
 
-/*}}}*/
-
-/*{{{ user time */
-
-/** When a new window is mapped, look at the netwm user time to find out
- * whether the new window should be switched to and get the focus.
- *
- * It is unclear what the desired behavior would be, and how we should takee
- * into consideration ioncore_g.usertime_diff_new and IONCORE_CLOCK_SKEW_MS,
- * so for now we deny raising the new window only in the special case where
- * its user time is set to 0, specifically preventing it from being raised.
- */
 void netwm_check_manage_user_time(WClientWin *cwin, WManageParams *param) {
-  /* the currently focussed window */
   WClientWin *cur = OBJ_CAST(ioncore_g.focus_current, WClientWin);
-  /* the new window */
   Window win = region_xwindow((WRegion *)cwin);
-  /* user time */
   CARD32 ut = 0;
-  /* whether the new (got) and current (gotcut) windows had their usertime
-   * set */
-  bool got = FALSE, gotcut = FALSE;
+  bool got = FALSE;
   bool nofocus = FALSE;
 
   if (cur != NULL) {
-    Window curwin;
     /* current window user time */
-    CARD32 cut;
     if (param->tfor == cur) return;
-    curwin = region_xwindow((WRegion *)cur);
-    gotcut = xwindow_get_cardinal_property(curwin, atom_net_wm_user_time, &cut);
   }
 
   got = xwindow_get_cardinal_property(win, atom_net_wm_user_time, &ut);
@@ -319,10 +253,6 @@ void netwm_check_manage_user_time(WClientWin *cwin, WManageParams *param) {
   }
 }
 
-/*}}}*/
-
-/*{{{ _NET_WM_VIRTUAL_ROOTS */
-
 int count_screens() {
   int result = 0;
   WScreen *scr;
@@ -332,9 +262,6 @@ int count_screens() {
   return result;
 }
 
-/*EXTL_DOC
- * refresh \_NET\_WM\_VIRTUAL\_ROOTS
- */
 EXTL_SAFE
 EXTL_EXPORT
 void ioncore_screens_updated(WRootWin *rw) {
@@ -358,5 +285,3 @@ void ioncore_screens_updated(WRootWin *rw) {
 
   free(virtualroots);
 }
-
-/*}}}*/

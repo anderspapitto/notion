@@ -1,11 +1,3 @@
-/*
- * ion/ioncore/stacking.h
- *
- * Copyright (c) Tuomo Valkonen 1999-2009.
- *
- * See the included file LICENSE for details.
- */
-
 #ifndef ION_IONCORE_STACKING_H
 #define ION_IONCORE_STACKING_H
 
@@ -30,12 +22,12 @@ DECLSTRUCT(WStacking){
     uint level;
     WSizePolicy szplcy;
     WStacking *mgr_next, *mgr_prev;
-    
+
     /* flags */
     uint to_unweave:2;
     uint hidden:1;
     uint pseudomodal:1;
-    
+
     /* WMPlex stuff */
     WLListNode *lnode;
 };
@@ -78,22 +70,21 @@ WRegion *stacking_iter_mgr(WStackingIterTmp *tmp);
 WStacking *stacking_iter_mgr_nodes(WStackingIterTmp *tmp);
 
 void stacking_weave(WStacking **stacking, WStacking **np, bool below);
-WStacking *stacking_unweave(WStacking **stacking, 
+WStacking *stacking_unweave(WStacking **stacking,
                             WStackingFilter *filt, void *filt_data);
 
-void stacking_restack(WStacking **stacking, WStacking *st, Window fb_win,
-                      WStackingFilter *filt, void *filt_data, bool lower);
+void stacking_restack(WStacking **stacking, WStacking *st, Window fb_win, bool lower);
 
 WStacking *stacking_find_to_focus(WStacking *stacking, WStacking *to_try,
-                                  WStackingFilter *include_filt, 
-                                  WStackingFilter *approve_filt, 
+                                  WStackingFilter *include_filt,
+                                  WStackingFilter *approve_filt,
                                   void *filt_data);
-WStacking *stacking_find_to_focus_mapped(WStacking *stacking, 
+WStacking *stacking_find_to_focus_mapped(WStacking *stacking,
                                          WStacking *to_try,
                                          WRegion *mgr);
 
-uint stacking_min_level(WStacking *stacking, 
-                        WStackingFilter *include_filt, 
+uint stacking_min_level(WStacking *stacking,
+                        WStackingFilter *include_filt,
                         void *filt_data);
 
 uint stacking_min_level_mapped(WStacking *stacking);

@@ -1,11 +1,3 @@
-/*
- * ion/ioncore/stacking.c
- *
- * Copyright (c) Tuomo Valkonen 1999-2009.
- *
- * See the included file LICENSE for details.
- */
-
 #include <libtu/rb.h>
 #include <libtu/minmax.h>
 
@@ -14,8 +6,6 @@
 #include "stacking.h"
 #include "window.h"
 #include "sizepolicy.h"
-
-/*{{{ Alloc */
 
 WStacking *create_stacking() {
   WStacking *st = ALLOC(WStacking);
@@ -41,10 +31,6 @@ void stacking_free(WStacking *st) {
 
   free(st);
 }
-
-/*}}}*/
-
-/*{{{ Lookup */
 
 static Rb_node stacking_of_reg = NULL;
 
@@ -86,28 +72,19 @@ bool stacking_assoc(WStacking *st, WRegion *reg) {
   return TRUE;
 }
 
-/*}}}*/
-
-/*{{{ List processing */
-
 WStacking *stacking_unstack(WWindow *par, WStacking *regst) {
   WStacking *nxt = NULL, *st;
 
-  /*st=regst->next;*/
-
   UNLINK_ITEM(par->stacking, regst, next, prev);
 
-  /*while(st!=NULL){*/
   for (st = par->stacking; st != NULL; st = st->next) {
     if (st->above == regst) {
       st->above = NULL;
       nxt = st;
     }
-    /*st=st->next;*/
   }
 
   if (nxt == NULL) nxt = regst->above;
-
   if (regst->above == NULL) regst->above = NULL;
 
   return nxt;
@@ -241,10 +218,6 @@ void stacking_weave(WStacking **stacking, WStacking **np, bool below) {
   stacking_do_weave(stacking, np, below, None);
 }
 
-/*}}}*/
-
-/*{{{ Raise/lower */
-
 static bool is_above(WStacking *st, WStacking *p) {
   if (st->above == NULL)
     return FALSE;
@@ -293,29 +266,16 @@ static WStacking *unweave_subtree(WStacking **stacking, WStacking *regst,
   return tmp;
 }
 
-void stacking_restack(WStacking **stacking, WStacking *st, Window fb_win,
-                      WStackingFilter *filt, void *filt_data, bool lower) {
+void stacking_restack(WStacking **stacking, WStacking *st, Window fb_win, bool lower) {
   WStacking *tmp = unweave_subtree(stacking, st, lower);
-
   stacking_do_weave(stacking, &tmp, lower, fb_win);
-
   assert(tmp == NULL);
 }
 
-/*}}}*/
-
-/*{{{ Stacking lists */
-
 WStacking **window_get_stackingp(WWindow *wwin) { return &(wwin->stacking); }
-
 WStacking *window_get_stacking(WWindow *wwin) { return wwin->stacking; }
 
-/*}}}*/
-
-/*{{{ Stacking list iteration */
-
-void stacking_iter_init(WStackingIterTmp *tmp, WStacking *st,
-                        WStackingFilter *filt, void *filt_data) {
+void stacking_iter_init(WStackingIterTmp *tmp, WStacking *st, WStackingFilter *filt, void *filt_data) {
   tmp->st = st;
   tmp->filt = filt;
   tmp->filt_data = filt_data;
@@ -334,8 +294,7 @@ WStacking *stacking_iter_nodes(WStackingIterTmp *tmp) {
   return next;
 }
 
-void stacking_iter_mgr_init(WStackingIterTmp *tmp, WStacking *st,
-                            WStackingFilter *filt, void *filt_data) {
+void stacking_iter_mgr_init(WStackingIterTmp *tmp, WStacking *st, WStackingFilter *filt, void *filt_data) {
   tmp->st = st;
   tmp->filt = filt;
   tmp->filt_data = filt_data;
@@ -359,12 +318,7 @@ WRegion *stacking_iter_mgr(WStackingIterTmp *tmp) {
   return (st != NULL ? st->reg : NULL);
 }
 
-/*}}}*/
-
-/*{{{ Focus */
-
-uint stacking_min_level(WStacking *stacking, WStackingFilter *include_filt,
-                        void *filt_data) {
+uint stacking_min_level(WStacking *stacking, WStackingFilter *include_filt, void *filt_data) {
   uint min_level = STACKING_LEVEL_BOTTOM;
   WStacking *st = NULL;
 
@@ -454,5 +408,3 @@ bool stacking_must_focus(WStacking *stacking, WStacking *st) {
   return (stf == NULL ||
           (st->level > stf->level && st->level >= STACKING_LEVEL_MODAL1));
 }
-
-/*}}}*/
