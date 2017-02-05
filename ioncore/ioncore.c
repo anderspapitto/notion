@@ -55,9 +55,6 @@ WGlobal ioncore_g;
 
 static const char *progname = "notion";
 
-static const char ioncore_copy[] =
-    "Notion " NOTION_VERSION ", see the README for copyright details.";
-
 static const char *ioncore_about = NULL;
 
 WHook *ioncore_post_layout_setup_hook = NULL;
@@ -82,20 +79,6 @@ void ioncore_warn_nolog(const char *str, ...) {
 
 #define TEXTDOMAIN "notion"
 
-static bool init_messages(const char *localedir) {
-  if (bindtextdomain(TEXTDOMAIN, localedir) == NULL) {
-    warn_err_obj("bindtextdomain");
-    return FALSE;
-  } else if (textdomain(TEXTDOMAIN) == NULL) {
-    warn_err_obj("textdomain");
-    return FALSE;
-  }
-  return TRUE;
-}
-
-/*}}}*/
-
-/*{{{ ioncore_init */
 #define INIT_HOOK_(NM)                             \
   NM = mainloop_register_hook(#NM, create_hook()); \
   if (NM == NULL) return FALSE
@@ -215,8 +198,7 @@ static bool init_global() {
   return TRUE;
 }
 
-bool ioncore_init(const char *prog, int argc, char *argv[],
-                  const char *localedir) {
+bool ioncore_init(const char *prog, int argc, char *argv[]) {
   if (!init_global()) return FALSE;
 
   progname = prog;

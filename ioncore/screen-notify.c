@@ -25,8 +25,6 @@
 #include "screen-notify.h"
 #include "strings.h"
 
-/*{{{ Generic stuff */
-
 static WInfoWin *do_get_popup_win(WScreen *scr, Watch *watch, uint pos,
                                   char *style) {
   WInfoWin *iw = (WInfoWin *)(watch->obj);
@@ -85,22 +83,7 @@ static void do_unnotify(Watch *watch) {
   }
 }
 
-// returns the position or the stdisp, or -1 if there isn't one
-static int get_stdisp_pos(WScreen *scr) {
-  WRegion *stdisp = NULL;
-  WMPlexSTDispInfo info;
-
-  mplex_get_stdisp(&scr->mplex, &stdisp, &info);
-
-  return (stdisp != NULL) ? info.pos : -1;
-}
-
-/*}}}*/
-
-/*{{{ Notifywin */
-
 static WInfoWin *get_notifywin(WScreen *scr) {
-    int stdisp_pos = get_stdisp_pos(scr);
     return do_get_popup_win(scr, &scr->notifywin_watch,
                             MPLEX_STDISP_TR,
                             "actnotify"
@@ -225,16 +208,8 @@ static void screen_do_update_notifywin(WScreen *scr) {
     _screen_do_update_notifywin(scr);
 }
 
-/*}}}*/
-
-/*{{{ Infowin */
-
 static WInfoWin *get_infowin(WScreen *scr) {
-  int stdisp_pos = get_stdisp_pos(scr);
-  return do_get_popup_win(
-      scr, &scr->infowin_watch,
-      (stdisp_pos == MPLEX_STDISP_TR) ? MPLEX_STDISP_BR : MPLEX_STDISP_TR,
-      "tab-info");
+  return do_get_popup_win(scr, &scr->infowin_watch, MPLEX_STDISP_TR, "tab-info");
 }
 
 void screen_unnotify_infowin(WScreen *scr) { do_unnotify(&scr->infowin_watch); }

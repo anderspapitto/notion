@@ -76,7 +76,6 @@ int main(int argc, char *argv[]) {
   const char *display = NULL;
   char *cmd = NULL;
   int stflags = 0;
-  int opt;
   ErrorLog el;
   FILE *ef = NULL;
   char *efnam = NULL;
@@ -92,7 +91,9 @@ int main(int argc, char *argv[]) {
 
   localedir = prefix_add(LOCALEDIR);
 
-  if (!ioncore_init(CF_EXECUTABLE, argc, argv, localedir)) return EXIT_FAILURE;
+  if (!ioncore_init(CF_EXECUTABLE, argc, argv)){
+      return EXIT_FAILURE;
+  }
 
   if (localedir != NULL) free(localedir);
 
