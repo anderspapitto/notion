@@ -1,11 +1,3 @@
-/*
- * ion/ioncore/kbresize.c
- *
- * Copyright (c) Tuomo Valkonen 1999-2009.
- *
- * See the included file LICENSE for details.
- */
-
 #include <math.h>
 #include <sys/time.h>
 #include <time.h>
@@ -22,8 +14,6 @@
 #include "binding.h"
 #include "focus.h"
 #include "bindmaps.h"
-
-/*{{{ Resize accelerator */
 
 static struct timeval last_action_tv = {-1, 0};
 static struct timeval last_update_tv = {-1, 0};
@@ -45,18 +35,12 @@ void ioncore_set_moveres_accel(ExtlTab tab) {
   int t_max, t_min, rd, er;
   double step, maxacc;
 
-  if (extl_table_gets_i(tab, "kbresize_t_max", &t_max))
-    actmax = (t_max > 0 ? t_max : INT_MAX);
-  if (extl_table_gets_i(tab, "kbresize_t_min", &t_min))
-    uptmin = (t_min > 0 ? t_min : INT_MAX);
-  if (extl_table_gets_d(tab, "kbresize_step", &step))
-    accelinc = (step > 0 ? step : 1);
-  if (extl_table_gets_d(tab, "kbresize_maxacc", &maxacc))
-    accelmax = (maxacc > 0 ? maxacc * maxacc : 1);
-  if (extl_table_gets_i(tab, "kbresize_delay", &rd))
-    resize_delay = maxof(0, rd);
-  if (extl_table_gets_i(tab, "edge_resistance", &er))
-    ioncore_edge_resistance = maxof(0, er);
+  if (extl_table_gets_i(tab, "kbresize_t_max", &t_max)) actmax = (t_max > 0 ? t_max : INT_MAX);
+  if (extl_table_gets_i(tab, "kbresize_t_min", &t_min)) uptmin = (t_min > 0 ? t_min : INT_MAX);
+  if (extl_table_gets_d(tab, "kbresize_step", &step)) accelinc = (step > 0 ? step : 1);
+  if (extl_table_gets_d(tab, "kbresize_maxacc", &maxacc)) accelmax = (maxacc > 0 ? maxacc * maxacc : 1);
+  if (extl_table_gets_i(tab, "kbresize_delay", &rd)) resize_delay = maxof(0, rd);
+  if (extl_table_gets_i(tab, "edge_resistance", &er)) ioncore_edge_resistance = maxof(0, er);
 }
 
 void ioncore_get_moveres_accel(ExtlTab tab) {
@@ -77,7 +61,7 @@ static long tvdiffmsec(struct timeval *tv1, struct timeval *tv2) {
   return (int)(t1 - t2);
 }
 
-void moveresmode_accel(WMoveresMode *mode, int *wu, int *hu, int accel_mode) {
+void moveresmode_accel(int *wu, int *hu, int accel_mode) {
   struct timeval tv;
   long adiff, udiff;
 
@@ -104,10 +88,6 @@ void moveresmode_accel(WMoveresMode *mode, int *wu, int *hu, int accel_mode) {
   if (*hu != 0) *hu = (*hu) * ceil(sqrt(accel) / abs(*hu));
 }
 
-/*}}}*/
-
-/*{{{ Keyboard resize handler */
-
 static ExtlExportedFn *moveres_safe_fns[] = {
     (ExtlExportedFn *)&moveresmode_resize,
     (ExtlExportedFn *)&moveresmode_move,
@@ -123,20 +103,12 @@ static bool resize_handler(WRegion *reg, XEvent *xev) {
   XKeyEvent *ev = &xev->xkey;
   WBinding *binding = NULL;
   WMoveresMode *mode;
-
   if (ev->type == KeyRelease) return FALSE;
-
   if (reg == NULL) return FALSE;
-
   mode = moveres_mode(reg);
-
   if (mode == NULL) return FALSE;
-
-  binding = bindmap_lookup_binding(ioncore_moveres_bindmap, BINDING_KEYPRESS,
-                                   ev->state, ev->keycode);
-
+  binding = bindmap_lookup_binding(ioncore_moveres_bindmap, BINDING_KEYPRESS, ev->state, ev->keycode);
   if (!binding) return FALSE;
-
   if (binding != NULL) {
     extl_protect(&moveres_safelist);
     extl_call(binding->func, "oo", NULL, mode, reg);
@@ -145,10 +117,6 @@ static bool resize_handler(WRegion *reg, XEvent *xev) {
 
   return (moveres_mode(reg) == NULL);
 }
-
-/*}}}*/
-
-/*{{{ Resize timer */
 
 static WTimer *resize_timer = NULL;
 
@@ -161,10 +129,7 @@ static bool setup_resize_timer(WMoveresMode *mode) {
     resize_timer = create_timer();
     if (resize_timer == NULL) return FALSE;
   }
-
-  timer_set(resize_timer, resize_delay, (WTimerHandler *)tmr_end_resize,
-            (Obj *)mode);
-
+  timer_set(resize_timer, resize_delay, (WTimerHandler *)tmr_end_resize, (Obj *)mode);
   return TRUE;
 }
 
@@ -175,10 +140,6 @@ static void reset_resize_timer() {
     resize_timer = NULL;
   }
 }
-
-/*}}}*/
-
-/*{{{ Misc. */
 
 static int limit_and_encode_mode(int *left, int *right, int *top, int *bottom) {
   *left = sign(*left);
@@ -199,60 +160,26 @@ static void resize_units(WMoveresMode *mode, int *wret, int *hret) {
   }
 }
 
-/*}}}*/
-
-/*{{{ Keyboard resize interface */
-
-/*EXTL_DOC
- * Shrink or grow resize mode target one step in each direction.
- * Acceptable values for the parameters \var{left}, \var{right}, \var{top}
- * and \var{bottom} are as follows: -1: shrink along,
- * 0: do not change, 1: grow along corresponding border.
- */
 EXTL_EXPORT_MEMBER
-void moveresmode_resize(WMoveresMode *mode, int left, int right, int top,
-                        int bottom) {
+void moveresmode_resize(WMoveresMode *mode, int left, int right, int top, int bottom) {
   int wu = 0, hu = 0;
   int accel_mode = 0;
-
   if (!setup_resize_timer(mode)) return;
-
   accel_mode = 3 * limit_and_encode_mode(&left, &right, &top, &bottom);
   resize_units(mode, &wu, &hu);
-  moveresmode_accel(mode, &wu, &hu, accel_mode);
-
-  moveresmode_delta_resize(mode, -left * wu, right * wu, -top * hu, bottom * hu,
-                           NULL);
+  moveresmode_accel(&wu, &hu, accel_mode);
+  moveresmode_delta_resize(mode, -left * wu, right * wu, -top * hu, bottom * hu, NULL);
 }
 
-/*EXTL_DOC
- * Move resize mode target one step:
- *
- * \begin{tabular}{rl}
- * \hline
- * \var{horizmul}/\var{vertmul} & effect \\\hline
- * -1 & Move left/up \\
- * 0 & No effect \\
- * 1 & Move right/down \\
- * \end{tabular}
- */
 EXTL_EXPORT_MEMBER
 void moveresmode_move(WMoveresMode *mode, int horizmul, int vertmul) {
   int accel_mode = 0, dummy = 0;
-
   if (!setup_resize_timer(mode)) return;
-
-  accel_mode =
-      1 + 3 * limit_and_encode_mode(&horizmul, &vertmul, &dummy, &dummy);
-  moveresmode_accel(mode, &horizmul, &vertmul, accel_mode);
-
+  accel_mode = 1 + 3 * limit_and_encode_mode(&horizmul, &vertmul, &dummy, &dummy);
+  moveresmode_accel(&horizmul, &vertmul, accel_mode);
   moveresmode_delta_resize(mode, horizmul, horizmul, vertmul, vertmul, NULL);
 }
 
-/*EXTL_DOC
- * Request exact geometry in move/resize mode. For details on parameters,
- * see \fnref{WRegion.rqgeom}.
- */
 EXTL_EXPORT_AS(WMoveresMode, rqgeom)
 ExtlTab moveresmode_rqgeom_extl(WMoveresMode *mode, ExtlTab g) {
   WRQGeomParams rq = RQGEOMPARAMS_INIT;
@@ -265,18 +192,11 @@ ExtlTab moveresmode_rqgeom_extl(WMoveresMode *mode, ExtlTab g) {
   return extl_table_from_rectangle(&res);
 }
 
-/*EXTL_DOC
- * Returns current geometry.
- */
 EXTL_EXPORT_MEMBER
 ExtlTab moveresmode_geom(WMoveresMode *mode) {
   return extl_table_from_rectangle(&mode->geom);
 }
 
-/*EXTL_DOC
- * Return from move/resize mode and apply changes unless opaque
- * move/resize is enabled.
- */
 EXTL_EXPORT_MEMBER
 void moveresmode_finish(WMoveresMode *mode) {
   WRegion *reg = moveresmode_target(mode);
@@ -287,10 +207,6 @@ void moveresmode_finish(WMoveresMode *mode) {
   }
 }
 
-/*EXTL_DOC
- * Return from move/resize cancelling changes if opaque
- * move/resize has not been enabled.
- */
 EXTL_EXPORT_MEMBER
 void moveresmode_cancel(WMoveresMode *mode) {
   WRegion *reg = moveresmode_target(mode);
@@ -306,28 +222,12 @@ static void cancel_moveres(WRegion *reg) {
   if (mode != NULL) moveresmode_cancel(mode);
 }
 
-/*EXTL_DOC
- * Enter move/resize mode for \var{reg}. The bindings set with
- * \fnref{ioncore.set_bindings} for \type{WMoveresMode} are used in
- * this mode. Of the functions exported by the Ion C core, only
- * \fnref{WMoveresMode.resize}, \fnref{WMoveresMode.move},
- * \fnref{WMoveresMode.cancel} and \fnref{WMoveresMode.end} are
- * allowed to be called while in this mode.
- */
 EXTL_EXPORT_MEMBER
 WMoveresMode *region_begin_kbresize(WRegion *reg) {
   WMoveresMode *mode = region_begin_resize(reg, NULL, FALSE);
-
   if (mode == NULL) return NULL;
-
   if (!setup_resize_timer(mode)) return NULL;
-
   accel_reset();
-
-  ioncore_grab_establish(reg, resize_handler,
-                         (GrabKilledHandler *)cancel_moveres, 0);
-
+  ioncore_grab_establish(reg, resize_handler, (GrabKilledHandler *)cancel_moveres, 0);
   return mode;
 }
-
-/*}}}*/

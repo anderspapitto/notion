@@ -1,11 +1,3 @@
-/*
- * ion/ioncore/infowin.h
- *
- * Copyright (c) Tuomo Valkonen 1999-2009.
- *
- * See the included file LICENSE for details.
- */
-
 #include <string.h>
 
 #include <libtu/objp.h>
@@ -18,13 +10,10 @@
 #include "event.h"
 #include "strings.h"
 
-/*{{{ Init/deinit */
-
-bool infowin_init(WInfoWin *p, WWindow *parent, const WFitParams *fp,
-                  const char *style) {
+bool infowin_init(WInfoWin *p, WWindow *parent, const WFitParams *fp, const char *style) {
   XSetWindowAttributes attr;
 
-  if (!window_init(&(p->wwin), parent, fp, "WInfoWin")) return FALSE;
+  if (!window_init(&(p->wwin), parent, fp)) return FALSE;
 
   p->buffer = ALLOC_N(char, INFOWIN_BUFFER_LEN);
   if (p->buffer == NULL) goto fail;
@@ -88,10 +77,6 @@ void infowin_deinit(WInfoWin *p) {
   window_deinit(&(p->wwin));
 }
 
-/*}}}*/
-
-/*{{{ Drawing and geometry */
-
 void infowin_draw(WInfoWin *p, bool UNUSED(complete)) {
   WRectangle g;
 
@@ -123,10 +108,6 @@ void infowin_updategr(WInfoWin *p) {
   window_draw(&(p->wwin), TRUE);
 }
 
-/*}}}*/
-
-/*{{{ Content-setting */
-
 GrStyleSpec *infowin_stylespec(WInfoWin *p) { return &p->attr; }
 
 static void infowin_do_set_text(WInfoWin *p, const char *str) {
@@ -156,9 +137,6 @@ static void infowin_resize(WInfoWin *p) {
     region_rqgeom((WRegion *)p, &rq, NULL);
 }
 
-/*EXTL_DOC
- * Set contents of the info window.
- */
 EXTL_EXPORT_MEMBER
 void infowin_set_text(WInfoWin *p, const char *str, int maxw) {
   bool set = FALSE;
@@ -184,10 +162,6 @@ void infowin_set_text(WInfoWin *p, const char *str, int maxw) {
   window_draw((WWindow *)p, TRUE);
 }
 
-/*}}}*/
-
-/*{{{ Load */
-
 WRegion *infowin_load(WWindow *par, const WFitParams *fp, ExtlTab tab) {
   char *style = NULL, *text = NULL;
   WInfoWin *p;
@@ -208,15 +182,9 @@ WRegion *infowin_load(WWindow *par, const WFitParams *fp, ExtlTab tab) {
   return (WRegion *)p;
 }
 
-/*}}}*/
-
-/*{{{ Dynamic function table and class implementation */
-
 static DynFunTab infowin_dynfuntab[] = {{window_draw, infowin_draw},
                                         {region_updategr, infowin_updategr},
                                         END_DYNFUNTAB};
 
 EXTL_EXPORT
 IMPLCLASS(WInfoWin, WWindow, infowin_deinit, infowin_dynfuntab);
-
-/*}}}*/

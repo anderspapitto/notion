@@ -425,7 +425,7 @@ bool tiling_do_attach_initial(WTiling *ws, WRegion *reg) {
 }
 
 static WRegion *create_frame_tiling(WWindow *parent, const WFitParams *fp) {
-  return (WRegion *)create_frame(parent, fp, FRAME_MODE_TILED, "Tiling Frame");
+  return (WRegion *)create_frame(parent, fp, FRAME_MODE_TILED);
 }
 
 bool tiling_init(WTiling *ws, WWindow *parent, const WFitParams *fp,
@@ -433,8 +433,7 @@ bool tiling_init(WTiling *ws, WWindow *parent, const WFitParams *fp,
   const char *p[1];
 
   ws->split_tree = NULL;
-  ws->create_frame_fn =
-      (create_frame_fn ? create_frame_fn : create_frame_tiling);
+  ws->create_frame_fn = (create_frame_fn ? create_frame_fn : create_frame_tiling);
   ws->stdispnode = NULL;
   ws->managed_list = NULL;
   ws->batchop = FALSE;

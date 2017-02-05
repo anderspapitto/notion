@@ -32,8 +32,7 @@ bool framedpholder_init(WFramedPHolder *ph, WPHolder *cont,
   return TRUE;
 }
 
-WFramedPHolder *create_framedpholder(WPHolder *cont,
-                                     const WFramedParam *param) {
+WFramedPHolder *create_framedpholder(WPHolder *cont, const WFramedParam *param) {
   CREATEOBJ_IMPL(WFramedPHolder, framedpholder, (p, cont, param));
 }
 
@@ -111,12 +110,13 @@ WRegion *framed_handler(WWindow *par, const WFitParams *fp, void *ap_) {
   WFrame *frame;
   WRegion *reg;
 
-  frame = create_frame(par, fp, param->mode, "Framed PHolder Frame");
+  frame = create_frame(par, fp, param->mode);
 
   if (frame == NULL) return NULL;
 
-  if (fp->mode & (REGION_FIT_BOUNDS | REGION_FIT_WHATEVER))
+  if (fp->mode & (REGION_FIT_BOUNDS | REGION_FIT_WHATEVER)){
     mp.flags |= MPLEX_ATTACH_WHATEVER;
+  }
 
   reg = mplex_do_attach(&frame->mplex, &mp, ap->data);
 

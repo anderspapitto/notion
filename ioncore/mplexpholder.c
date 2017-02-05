@@ -1,11 +1,3 @@
-/*
- * ion/ioncore/mplexpholder.c
- *
- * Copyright (c) Tuomo Valkonen 2005-2009.
- *
- * See the included file LICENSE for details.
- */
-
 #include <libtu/objp.h>
 #include <libtu/obj.h>
 #include <libtu/pointer.h>
@@ -18,14 +10,11 @@
 #include "framedpholder.h"
 #include "basicpholder.h"
 
-/*{{{ Primitives */
-
 static bool on_ph_list(WMPlexPHolder *UNUSED(ll), WMPlexPHolder *ph) {
   return ph->prev != NULL;
 }
 
-static void mplexpholder_do_link(WMPlexPHolder *ph, WMPlex *mplex,
-                                 WMPlexPHolder *after, WLListNode *or_after) {
+static void mplexpholder_do_link(WMPlexPHolder *ph, WMPlex *mplex, WMPlexPHolder *after, WLListNode *or_after) {
   assert(mplex == ph->mplex && mplex != NULL);
 
   if (after != NULL) {
@@ -49,7 +38,6 @@ static void mplexpholder_do_link(WMPlexPHolder *ph, WMPlex *mplex,
 
 static WMPlexPHolder *get_head(WMPlexPHolder *ph) {
   while (1) {
-    /* ph->prev==NULL should not happen.. */
     if (ph->prev == NULL || ph->prev->next == NULL) break;
     ph = ph->prev;
   }
@@ -94,12 +82,7 @@ void mplexpholder_do_unlink(WMPlexPHolder *ph, WMPlex *mplex) {
   ph->prev = NULL;
 }
 
-/*}}}*/
-
-/*{{{ Init/deinit */
-
-static void mplex_get_attach_params(WMPlex *mplex, WStacking *st,
-                                    WMPlexAttachParams *param) {
+static void mplex_get_attach_params(WStacking *st, WMPlexAttachParams *param) {
   param->flags = (MPLEX_ATTACH_SIZEPOLICY | MPLEX_ATTACH_GEOM |
                   MPLEX_ATTACH_LEVEL | (st->hidden ? MPLEX_ATTACH_HIDDEN : 0) |
                   (st->lnode == NULL ? MPLEX_ATTACH_UNNUMBERED : 0));
@@ -123,7 +106,7 @@ bool mplexpholder_init(WMPlexPHolder *ph, WMPlex *mplex, WStacking *st,
   ph->recreate_pholder = NULL;
 
   if (st != NULL) {
-    mplex_get_attach_params(mplex, st, &ph->param);
+    mplex_get_attach_params(st, &ph->param);
 
     if (st->lnode != NULL) {
       after = LIST_LAST(st->lnode->phs, next, prev);
@@ -163,10 +146,6 @@ void mplexpholder_deinit(WMPlexPHolder *ph) {
   pholder_deinit(&(ph->ph));
 }
 
-/*}}}*/
-
-/*{{{ Move, attach */
-
 typedef struct {
   WMPlexPHolder *ph, *ph_head;
   WRegionAttachData *data;
@@ -181,7 +160,7 @@ static WRegion *recreate_handler(WWindow *par, const WFitParams *fp,
   WFramedParam *param = rp->param;
   WFrame *frame;
 
-  frame = create_frame(par, fp, param->mode, "MPlex PHolder Frame");
+  frame = create_frame(par, fp, param->mode);
 
   if (frame == NULL) return NULL;
 
@@ -220,8 +199,7 @@ static WFramedPHolder *get_recreate_ph(WMPlexPHolder *ph) {
   return get_head(ph)->recreate_pholder;
 }
 
-static WRegion *mplexpholder_attach_recreate(WMPlexPHolder *ph, int flags,
-                                             WRegionAttachData *data) {
+static WRegion *mplexpholder_attach_recreate(WMPlexPHolder *ph, int flags, WRegionAttachData *data) {
   WRegionAttachData data2;
   WFramedPHolder *fph;
   WRegion *res;
@@ -319,10 +297,6 @@ bool mplexpholder_stale(WMPlexPHolder *ph) {
   }
 }
 
-/*}}}*/
-
-/*{{{ WMPlex routines */
-
 void mplex_move_phs(WMPlex *mplex, WLListNode *node, WMPlexPHolder *after,
                     WLListNode *or_after) {
   WMPlexPHolder *ph;
@@ -384,12 +358,7 @@ void mplex_migrate_phs(WMPlex *src, WMPlex *dst) {
   }
 }
 
-/*}}}*/
-
-/*{{ Rescue */
-
-WRegion *mplex_rescue_attach(WMPlex *mplex, int flags,
-                             WRegionAttachData *data) {
+WRegion *mplex_rescue_attach(WMPlex *mplex, int flags, WRegionAttachData *data) {
   WMPlexAttachParams param;
 
   param.flags = 0;
@@ -400,48 +369,25 @@ WRegion *mplex_rescue_attach(WMPlex *mplex, int flags,
     WMPlex *src_mplex = REGION_MANAGER_CHK(reg, WMPlex);
     if (src_mplex != NULL) {
       WStacking *st = ioncore_find_stacking(reg);
-      if (st != NULL) mplex_get_attach_params(src_mplex, st, &param);
+      if (st != NULL) mplex_get_attach_params(st, &param);
     }
   }
 
-  param.flags |=
-      (MPLEX_ATTACH_INDEX |
-       (flags & PHOLDER_ATTACH_SWITCHTO ? MPLEX_ATTACH_SWITCHTO : 0));
+  param.flags |= (MPLEX_ATTACH_INDEX | (flags & PHOLDER_ATTACH_SWITCHTO ? MPLEX_ATTACH_SWITCHTO : 0));
   param.index = LLIST_INDEX_LAST;
 
   return mplex_do_attach(mplex, &param, data);
 }
 
-WPHolder *mplex_get_rescue_pholder_for(WMPlex *mplex, WRegion *mgd) {
-#if 0
-    WStacking *st=mplex_find_stacking(mplex, mgd);
-    WMPlexAttachParams param;
-    
-    param.flags=MPLEX_ATTACH_INDEX;
-    param.index=LLIST_INDEX_LAST;
-    
-    return create_mplexpholder(mplex, st, &param);
-#else
-  return (WPHolder *)create_basicpholder(
-      (WRegion *)mplex, (WBasicPHolderHandler *)mplex_rescue_attach);
-#endif
+WPHolder *mplex_get_rescue_pholder_for(WMPlex *mplex) {
+  return (WPHolder *)create_basicpholder( (WRegion *)mplex, (WBasicPHolderHandler *)mplex_rescue_attach);
 }
-
-/*}}}*/
-
-/*{{{ Class information */
 
 static DynFunTab mplexpholder_dynfuntab[] = {
     {(DynFun *)pholder_do_attach, (DynFun *)mplexpholder_do_attach},
-
     {(DynFun *)pholder_do_goto, (DynFun *)mplexpholder_do_goto},
-
     {(DynFun *)pholder_do_target, (DynFun *)mplexpholder_do_target},
-
     {(DynFun *)pholder_stale, (DynFun *)mplexpholder_stale},
-
     END_DYNFUNTAB};
 
 IMPLCLASS(WMPlexPHolder, WPHolder, mplexpholder_deinit, mplexpholder_dynfuntab);
-
-/*}}}*/

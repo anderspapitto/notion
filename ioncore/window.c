@@ -1,11 +1,3 @@
-/*
- * ion/ioncore/window.c
- *
- * Copyright (c) Tuomo Valkonen 1999-2009.
- *
- * See the included file LICENSE for details.
- */
-
 #include <libtu/objp.h>
 #include <libtu/minmax.h>
 
@@ -18,8 +10,6 @@
 #include "region.h"
 #include "xwindow.h"
 #include "region-iter.h"
-
-/*{{{ Dynfuns */
 
 void window_draw(WWindow *wwin, bool complete) {
   CALL_DYN(window_draw, wwin, (wwin, complete));
@@ -37,12 +27,7 @@ int window_press(WWindow *wwin, XButtonEvent *ev, WRegion **reg_ret) {
 
 void window_release(WWindow *wwin) { CALL_DYN(window_release, wwin, (wwin)); }
 
-/*}}}*/
-
-/*{{{ Init, create */
-
-bool window_do_init(WWindow *wwin, WWindow *par, const WFitParams *fp,
-                    Window win) {
+bool window_do_init(WWindow *wwin, WWindow *par, const WFitParams *fp, Window win) {
   if (win == None) {
     assert(par != NULL);
     win = create_xwindow(region_rootwin_of((WRegion *)par), par->win, &(fp->g));
@@ -61,8 +46,7 @@ bool window_do_init(WWindow *wwin, WWindow *par, const WFitParams *fp,
   return TRUE;
 }
 
-bool window_init(WWindow *wwin, WWindow *par, const WFitParams *fp,
-                 const char *name) {
+bool window_init(WWindow *wwin, WWindow *par, const WFitParams *fp) {
   return window_do_init(wwin, par, fp, None);
 }
 

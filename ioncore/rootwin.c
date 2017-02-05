@@ -33,7 +33,7 @@
 static bool redirect_error = FALSE;
 static bool ignore_badwindow = TRUE;
 
-static int my_redirect_error_handler(Display *dpy, XErrorEvent *ev) {
+static int my_redirect_error_handler() {
   redirect_error = TRUE;
   return 0;
 }
@@ -54,9 +54,6 @@ static int my_error_handler(Display *dpy, XErrorEvent *ev) {
       ignore_badwindow)
     return 0;
 
-#if 0
-    XmuPrintDefaultErrorMessage(dpy, ev, stderr);
-#else
   XGetErrorText(dpy, ev->error_code, msg, 128);
   snprintf(num, 32, "%d", ev->request_code);
   XGetErrorDatabaseText(dpy, "XRequest", num, "", request, 64);
@@ -70,7 +67,6 @@ static int my_error_handler(Display *dpy, XErrorEvent *ev) {
     warn("[%d] %s (%d) %#lx: %s", ev->serial, request, ev->request_code,
          ev->resourceid, msg);
   }
-#endif
 
   kill(getpid(), SIGTRAP);
 
@@ -236,18 +232,8 @@ void rootwin_deinit(WRootWin *rw) {
   screen_deinit(&rw->scr);
 }
 
-static bool rootwin_fitrep(WRootWin *rootwin, WWindow *par,
-                           const WFitParams *fp) {
-  D(warn("Don't know how to reparent or fit root windows."));
+static bool rootwin_fitrep() {
   return FALSE;
-}
-
-static void rootwin_map(WRootWin *rootwin) {
-  D(warn("Attempt to map a root window."));
-}
-
-static void rootwin_unmap(WRootWin *rootwin) {
-  D(warn("Attempt to unmap a root window -- impossible."));
 }
 
 EXTL_SAFE
@@ -266,8 +252,6 @@ WScreen *rootwin_current_scr(WRootWin *rootwin) {
 }
 
 static DynFunTab rootwin_dynfuntab[] = {
-    {region_map, rootwin_map},
-    {region_unmap, rootwin_unmap},
     {(DynFun *)region_fitrep, (DynFun *)rootwin_fitrep},
     END_DYNFUNTAB};
 

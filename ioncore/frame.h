@@ -1,11 +1,3 @@
-/*
- * ion/ioncore/frame.h
- *
- * Copyright (c) Tuomo Valkonen 1999-2009.
- *
- * See the included file LICENSE for details.
- */
-
 #ifndef ION_IONCORE_FRAME_H
 #define ION_IONCORE_FRAME_H
 
@@ -22,15 +14,14 @@
 #include "sizehint.h"
 #include "frame-tabs-recalc.h"
 
-#define FRAME_KEEP_FLAGS  0x0001
-#define FRAME_SAVED_VERT  0x0008
-#define FRAME_SAVED_HORIZ 0x0010
-#define FRAME_SHADED      0x0020
+#define FRAME_KEEP_FLAGS    0x0001
+#define FRAME_SAVED_VERT    0x0008
+#define FRAME_SAVED_HORIZ   0x0010
+#define FRAME_SHADED        0x0020
 #define FRAME_SHADED_TOGGLE 0x0040
-/*#define FRAME_DEST_EMPTY  0x0100*/
-#define FRAME_MAXED_VERT  0x0200
-#define FRAME_MAXED_HORIZ 0x0400
-#define FRAME_MIN_HORIZ   0x0800
+#define FRAME_MAXED_VERT    0x0200
+#define FRAME_MAXED_HORIZ   0x0400
+#define FRAME_MIN_HORIZ     0x0800
 
 /*#define FRAME_SZH_USEMINMAX 0x1000 */
 /*#define FRAME_FWD_CWIN_RQGEOM 0x2000 */
@@ -53,8 +44,6 @@ typedef enum{
     FRAME_BAR_SHAPED,
     FRAME_BAR_NONE
 } WFrameBarMode;
-
-
 
 DECLCLASS(WFrame){
     WMPlex mplex;
@@ -79,17 +68,12 @@ DECLCLASS(WFrame){
     TabCalcParams tabs_params;
 };
 
-
-/* Create/destroy */
-extern WFrame *create_frame(WWindow *parent, const WFitParams *fp,
-                            WFrameMode mode, char *name);
-extern bool frame_init(WFrame *frame, WWindow *parent, const WFitParams *fp,
-                       WFrameMode mode, char *name);
+extern WFrame *create_frame(WWindow *parent, const WFitParams *fp, WFrameMode mode);
+extern bool frame_init(WFrame *frame, WWindow *parent, const WFitParams *fp, WFrameMode mode);
 extern void frame_deinit(WFrame *frame);
 extern bool frame_rqclose(WFrame *frame);
 
 /* Mode */
-
 extern void frame_set_mode(WFrame *frame, WFrameMode mode);
 extern WFrameMode frame_mode(WFrame *frame);
 

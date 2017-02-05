@@ -79,17 +79,13 @@ extern void clientwin_destroyed(WClientWin *cwin);
 extern void clientwin_kill(WClientWin *cwin);
 extern void clientwin_rqclose(WClientWin *cwin, bool relocate_ignored);
 
-extern void clientwin_tfor_changed(WClientWin *cwin);
-
 extern void clientwin_get_set_name(WClientWin *cwin);
 
-extern void clientwin_handle_configure_request(WClientWin *cwin,
-                                               XConfigureRequestEvent *ev);
+extern void clientwin_handle_configure_request(WClientWin *cwin, XConfigureRequestEvent *ev);
 
 extern void clientwin_broken_app_resize_kludge(WClientWin *cwin);
 
-extern WRegion *clientwin_load(WWindow *par, const WFitParams *fp,
-                               ExtlTab tab);
+extern WRegion *clientwin_load(WWindow *par, const WFitParams *fp, ExtlTab tab);
 
 /* Some standard winprops */
 

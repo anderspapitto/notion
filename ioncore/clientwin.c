@@ -42,8 +42,6 @@ WHook *clientwin_mapped_hook = NULL;
 WHook *clientwin_unmapped_hook = NULL;
 WHook *clientwin_property_change_hook = NULL;
 
-/*{{{ Get properties */
-
 void clientwin_get_protocols(WClientWin *cwin) {
   Atom *protocols = NULL, *p;
   int n;
@@ -99,17 +97,10 @@ static void clientwin_get_winprops(WClientWin *cwin) {
   if (extl_table_is_bool_set(tab, "lazy_resize"))
     cwin->flags |= CLIENTWIN_PROP_LAZY_RESIZE;
 
-  DO_SZH("max_size", CLIENTWIN_PROP_MAXSIZE, CLIENTWIN_PROP_I_MAXSIZE, PMaxSize,
-         max_width, max_height, {});
-
-  DO_SZH("min_size", CLIENTWIN_PROP_MINSIZE, CLIENTWIN_PROP_I_MINSIZE, PMinSize,
-         min_width, min_height, {});
-
-  DO_SZH("resizeinc", CLIENTWIN_PROP_RSZINC, CLIENTWIN_PROP_I_RSZINC,
-         PResizeInc, width_inc, height_inc, {});
-
-  DO_SZH("aspect", CLIENTWIN_PROP_ASPECT, CLIENTWIN_PROP_I_ASPECT, PAspect,
-         min_aspect.x, min_aspect.y, {
+  DO_SZH("max_size", CLIENTWIN_PROP_MAXSIZE, CLIENTWIN_PROP_I_MAXSIZE, PMaxSize, max_width, max_height, {});
+  DO_SZH("min_size", CLIENTWIN_PROP_MINSIZE, CLIENTWIN_PROP_I_MINSIZE, PMinSize, min_width, min_height, {});
+  DO_SZH("resizeinc", CLIENTWIN_PROP_RSZINC, CLIENTWIN_PROP_I_RSZINC, PResizeInc, width_inc, height_inc, {});
+  DO_SZH("aspect", CLIENTWIN_PROP_ASPECT, CLIENTWIN_PROP_I_ASPECT, PAspect, min_aspect.x, min_aspect.y, {
     cwin->size_hints.max_aspect.x = i1;
     cwin->size_hints.max_aspect.y = i2;
   });
@@ -357,8 +348,7 @@ WClientWin *clientwin_get_transient_for(const WClientWin *cwin) {
 
 static bool postmanage_check(WClientWin *cwin, XWindowAttributes *attr) {
   /* Check that the window exists. The previous check and selectinput
-   * do not seem to catch all cases of window destroyal.
-   */
+   * do not seem to catch all cases of window destroyal. */
   XSync(ioncore_g.dpy, False);
 
   if (XGetWindowAttributes(ioncore_g.dpy, cwin->win, attr)) return TRUE;
@@ -406,8 +396,7 @@ WClientWin *ioncore_manage_clientwin(Window win, bool maprq) {
   if (cwin != NULL) return cwin;
 
   /* Select for UnmapNotify and DestroyNotify as the
-   * window might get destroyed or unmapped in the meanwhile.
-   */
+   * window might get destroyed or unmapped in the meanwhile. */
   xwindow_unmanaged_selectinput(win, StructureNotifyMask);
 
   if (!XGetWindowAttributes(ioncore_g.dpy, win, &attr)) {
@@ -415,8 +404,7 @@ WClientWin *ioncore_manage_clientwin(Window win, bool maprq) {
     goto fail2;
   }
 
-  /* Is it a dockapp?
-   */
+  /* Is it a dockapp? */
   hints = XGetWMHints(ioncore_g.dpy, win);
 
   if (hints != NULL) {
@@ -566,35 +554,6 @@ fail2:
   return NULL;
 }
 
-void clientwin_tfor_changed(WClientWin *cwin) {
-#if 0
-    WManageParams param=MANAGEPARAMS_INIT;
-    bool succeeded=FALSE;
-    param.tfor=clientwin_get_transient_for(cwin);
-    if(param.tfor==NULL)
-        return;
-
-    region_rootpos((WRegion*)cwin, &(param.geom.x), &(param.geom.y));
-    param.geom.w=REGION_GEOM(cwin).w;
-    param.geom.h=REGION_GEOM(cwin).h;
-    param.maprq=FALSE;
-    param.userpos=FALSE;
-    param.switchto=region_may_control_focus((WRegion*)cwin);
-    param.jumpto=extl_table_is_bool_set(cwin->proptab, "jumpto");
-    param.gravity=ForgetGravity;
-
-    CALL_ALT_B(succeeded, clientwin_do_manage_alt, (cwin, &param));
-    warn("WM_TRANSIENT_FOR changed for \"%s\".",
-         region_name((WRegion*)cwin));
-#else
-  warn("Changes is WM_TRANSIENT_FOR property are unsupported.");
-#endif
-}
-
-/*}}}*/
-
-/*{{{ Unmanage/destroy */
-
 static bool reparent_root(WClientWin *cwin) {
   XWindowAttributes attr;
   WWindow *par;
@@ -697,10 +656,6 @@ void clientwin_destroyed(WClientWin *cwin) {
   clientwin_do_unmapped(cwin, win);
 }
 
-/*}}}*/
-
-/*{{{ Kill/close */
-
 static bool send_clientmsg(Window win, Atom a, Time stmp) {
   XClientMessageEvent ev;
 
@@ -734,10 +689,6 @@ void clientwin_rqclose(WClientWin *cwin, bool UNUSED(relocate_ignored)) {
     warn("Client does not support the WM_DELETE protocol.");
   }
 }
-
-/*}}}*/
-
-/*{{{ State (hide/show) */
 
 static void set_clientwin_state(WClientWin *cwin, int state) {
   if (cwin->state != state) {
@@ -775,10 +726,6 @@ static void show_clientwin(WClientWin *cwin) {
   XSelectInput(ioncore_g.dpy, cwin->win, cwin->event_mask);
   set_clientwin_state(cwin, NormalState);
 }
-
-/*}}}*/
-
-/*{{{ Resize/reparent/reconf helpers */
 
 void clientwin_notify_rootpos(WClientWin *cwin, int rootx, int rooty) {
   XEvent ce;
@@ -823,17 +770,10 @@ static void convert_geom(const WFitParams *fp, WClientWin *cwin,
   WFitParams fptmp = *fp;
   WSizePolicy szplcy = SIZEPOLICY_FULL_EXACT;
 
-  /*if(cwin->szplcy!=SIZEPOLICY_DEFAULT)
-      szplcy=cwin->szplcy;*/
-
   sizepolicy(&szplcy, (WRegion *)cwin, NULL, REGION_RQGEOM_WEAK_ALL, &fptmp);
 
   *geom = fptmp.g;
 }
-
-/*}}}*/
-
-/*{{{ Region dynfuns */
 
 static bool postpone_resize(WClientWin *cwin) {
   return cwin->state == IconicState && cwin->flags & CLIENTWIN_PROP_LAZY_RESIZE;
@@ -959,16 +899,6 @@ static int clientwin_orientation(WClientWin *cwin) {
                      : REGION_ORIENTATION_NONE));
 }
 
-/*}}}*/
-
-/*{{{ Identity & lookup */
-
-/*EXTL_DOC
- * Returns a table containing the properties \code{WM_CLASS} (table entries
- * \var{instance} and \var{class}) and  \code{WM_WINDOW_ROLE} (\var{role})
- * properties for \var{cwin}. If a property is not set, the corresponding
- * field(s) are unset in the  table.
- */
 EXTL_SAFE
 EXTL_EXPORT_MEMBER
 ExtlTab clientwin_get_ident(WClientWin *cwin) {
@@ -1012,10 +942,6 @@ ExtlTab clientwin_get_ident(WClientWin *cwin) {
 
   return tab;
 }
-
-/*}}}*/
-
-/*{{{ ConfigureRequest */
 
 static bool check_fs_cfgrq(WClientWin *cwin, XConfigureRequestEvent *ev) {
   /* check full screen request */
@@ -1145,37 +1071,16 @@ void clientwin_handle_configure_request(WClientWin *cwin,
   }
 }
 
-/*}}}*/
-
-/*{{{ Kludges */
-
-/*EXTL_DOC
- * Attempts to fix window size problems with non-ICCCM compliant
- * programs.
- */
 EXTL_EXPORT_MEMBER
 void clientwin_nudge(WClientWin *cwin) {
-  XResizeWindow(ioncore_g.dpy, cwin->win, 2 * REGION_GEOM(cwin).w,
-                2 * REGION_GEOM(cwin).h);
+  XResizeWindow(ioncore_g.dpy, cwin->win, 2 * REGION_GEOM(cwin).w, 2 * REGION_GEOM(cwin).h);
   XFlush(ioncore_g.dpy);
-  XResizeWindow(ioncore_g.dpy, cwin->win, REGION_GEOM(cwin).w,
-                REGION_GEOM(cwin).h);
+  XResizeWindow(ioncore_g.dpy, cwin->win, REGION_GEOM(cwin).w, REGION_GEOM(cwin).h);
 }
 
-/*}}}*/
-
-/*{{{ Misc. */
-
-/*EXTL_DOC
- * Return the X window id for the client window.
- */
 EXTL_SAFE
 EXTL_EXPORT_MEMBER
 double clientwin_xid(WClientWin *cwin) { return cwin->win; }
-
-/*}}}*/
-
-/*{{{ Save/load */
 
 static int last_checkcode = 1;
 

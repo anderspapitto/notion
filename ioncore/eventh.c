@@ -1,11 +1,3 @@
-/*
- * ion/ioncore/eventh.c
- *
- * Copyright (c) Tuomo Valkonen 1999-2009.
- *
- * See the included file LICENSE for details.
- */
-
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/time.h>
@@ -29,8 +21,6 @@
 #include "netwm.h"
 #include "xwindow.h"
 #include "log.h"
-
-/*{{{ ioncore_handle_event */
 
 #define CASE_EVENT(EV) \
   case EV: /*          \
@@ -99,10 +89,6 @@ bool ioncore_handle_event(XEvent *ev) {
   return TRUE;
 }
 
-/*}}}*/
-
-/*{{{ Map, unmap, destroy */
-
 void ioncore_handle_map_request(const XMapRequestEvent *ev) {
   WRegion *reg;
 
@@ -132,10 +118,6 @@ void ioncore_handle_destroy_notify(const XDestroyWindowEvent *ev) {
   if (cwin != NULL) clientwin_destroyed(cwin);
 }
 
-/*}}}*/
-
-/*{{{ Client configure/property/message */
-
 void ioncore_handle_configure_request(XConfigureRequestEvent *ev) {
   WClientWin *cwin;
   XWindowChanges wc;
@@ -159,23 +141,6 @@ void ioncore_handle_configure_request(XConfigureRequestEvent *ev) {
 
 void ioncore_handle_client_message(const XClientMessageEvent *ev) {
   netwm_handle_client_message(ev);
-
-#if 0
-    WClientWin *cwin;
-
-    if(ev->message_type!=ioncore_g.atom_wm_change_state)
-        return;
-    
-    cwin=XWINDOW_REGION_OF_T(ev->window, WClientWin);
-
-    if(cwin==NULL)
-        return;
-    
-    if(ev->format==32 && ev->data.l[0]==IconicState){
-        if(cwin->state==NormalState)
-            iconify_clientwin(cwin);
-    }
-#endif
 }
 
 static bool pchg_mrsh_extl(ExtlFn fn, void **p) {
@@ -219,7 +184,7 @@ void ioncore_handle_property(const XPropertyEvent *ev) {
     if (!(cwin->flags & CLIENTWIN_USE_NET_WM_NAME))
       clientwin_get_set_name(cwin);
   } else if (ev->atom == XA_WM_TRANSIENT_FOR) {
-    clientwin_tfor_changed(cwin);
+      ;;
   } else if (ev->atom == ioncore_g.atom_wm_protocols) {
     clientwin_get_protocols(cwin);
   } else {
@@ -236,10 +201,6 @@ void ioncore_handle_property(const XPropertyEvent *ev) {
   }
 }
 
-/*}}}*/
-
-/*{{{ Misc. notifies */
-
 void ioncore_handle_mapping_notify(XEvent *ev) {
   do {
     XRefreshKeyboardMapping(&(ev->xmapping));
@@ -248,25 +209,16 @@ void ioncore_handle_mapping_notify(XEvent *ev) {
   ioncore_refresh_bindmaps();
 }
 
-/*}}}*/
-
-/*{{{ Expose */
-
 void ioncore_handle_expose(const XExposeEvent *ev) {
   WWindow *wwin;
   XEvent tmp;
 
-  while (XCheckWindowEvent(ioncore_g.dpy, ev->window, ExposureMask, &tmp))
-    /* nothing */;
+  while (XCheckWindowEvent(ioncore_g.dpy, ev->window, ExposureMask, &tmp)) { ;; }
 
   wwin = XWINDOW_REGION_OF_T(ev->window, WWindow);
 
   if (wwin != NULL) window_draw(wwin, FALSE);
 }
-
-/*}}}*/
-
-/*{{{ Enter window, focus */
 
 void ioncore_handle_enter_window(XEvent *ev) {
   XEnterWindowEvent *eev = &(ev->xcrossing);
@@ -328,8 +280,7 @@ void ioncore_handle_focus_in(const XFocusChangeEvent *ev) {
 
   if (reg == NULL) return;
 
-  D(fprintf(stderr, "FI: %s %p %d %d\n", OBJ_TYPESTR(reg), reg, ev->mode,
-            ev->detail);)
+  D(fprintf(stderr, "FI: %s %p %d %d\n", OBJ_TYPESTR(reg), reg, ev->mode, ev->detail);)
 
   if (ev->mode == NotifyGrab) return;
 
@@ -395,10 +346,6 @@ void ioncore_handle_focus_out(const XFocusChangeEvent *ev) {
     region_got_focus(reg);
 }
 
-/*}}}*/
-
-/*{{{ Pointer, keyboard */
-
 void ioncore_handle_buttonpress(XEvent *ev) {
   XEvent tmp;
   bool finished = FALSE;
@@ -412,9 +359,7 @@ void ioncore_handle_buttonpress(XEvent *ev) {
     ioncore_get_event(ev, IONCORE_EVENTMASK_PTRLOOP);
 
     if (ev->type == MotionNotify) {
-      /* Handle sequences of MotionNotify (possibly followed by button
-       * release) as one.
-       */
+      /* Handle sequences of MotionNotify (possibly followed by button release) as one. */
       if (XPeekEvent(ioncore_g.dpy, &tmp)) {
         if (tmp.type == MotionNotify || tmp.type == ButtonRelease)
           XNextEvent(ioncore_g.dpy, ev);
@@ -450,5 +395,3 @@ void ioncore_handle_keyboard(XEvent *ev) {
 
   if (ev->type == KeyPress) ioncore_do_handle_keypress(&(ev->xkey));
 }
-
-/*}}}*/

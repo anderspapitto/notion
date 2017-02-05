@@ -43,8 +43,6 @@
 
 #define CAN_MANAGE_STDISP(REG) HAS_DYN(REG, region_manage_stdisp)
 
-/*{{{ Stacking list stuff */
-
 WStacking *mplex_get_stacking(WMPlex *mplex) {
   return window_get_stacking(&mplex->win);
 }
@@ -63,12 +61,7 @@ WStacking *mplex_iter_nodes(WMPlexIterTmp *tmp) {
   return stacking_iter_mgr_nodes(tmp);
 }
 
-/*}}}*/
-
-/*{{{ Destroy/create mplex */
-
-bool mplex_do_init(WMPlex *mplex, WWindow *parent, const WFitParams *fp,
-                   Window win) {
+bool mplex_do_init(WMPlex *mplex, WWindow *parent, const WFitParams *fp, Window win) {
   mplex->flags = 0;
 
   mplex->mx_list = NULL;
@@ -100,7 +93,7 @@ bool mplex_init(WMPlex *mplex, WWindow *parent, const WFitParams *fp) {
   return mplex_do_init(mplex, parent, fp, None);
 }
 
-WMPlex *create_mplex(WWindow *parent, const WFitParams *fp, const char *name) {
+WMPlex *create_mplex(WWindow *parent, const WFitParams *fp) {
   CREATEOBJ_IMPL(WMPlex, mplex, (p, parent, fp));
 }
 
@@ -120,10 +113,6 @@ void mplex_deinit(WMPlex *mplex) {
   window_deinit((WWindow *)mplex);
 }
 
-/*}}}*/
-
-/*{{{ Node lookup etc. */
-
 WStacking *mplex_find_stacking(WMPlex *mplex, WRegion *reg) {
   WStacking *st;
 
@@ -131,7 +120,6 @@ WStacking *mplex_find_stacking(WMPlex *mplex, WRegion *reg) {
   if (reg == NULL || REGION_MANAGER(reg) != (WRegion *)mplex) return NULL;
 
   st = ioncore_find_stacking(reg);
-
   assert(st == NULL || st->mgr_prev != NULL);
 
   return st;
@@ -156,21 +144,10 @@ WRegion *mplex_current(WMPlex *mplex) {
   return (node == NULL ? NULL : node->reg);
 }
 
-/*}}}*/
-
-/*{{{ Exclusive list management and exports */
-
-/*EXTL_DOC
- * Returns the number of objects on the mutually exclusive list of \var{mplex}.
- */
 EXTL_SAFE
 EXTL_EXPORT_MEMBER
 int mplex_mx_count(WMPlex *mplex) { return mplex->mx_count; }
 
-/*EXTL_DOC
- * Returns the managed object currently active within the mutually exclusive
- * list of \var{mplex}.
- */
 EXTL_SAFE
 EXTL_EXPORT_MEMBER
 WRegion *mplex_mx_current(WMPlex *mplex) {
@@ -178,10 +155,6 @@ WRegion *mplex_mx_current(WMPlex *mplex) {
   return (lnode == NULL ? NULL : lnode->st->reg);
 }
 
-/*EXTL_DOC
- * Returns the \var{n}:th object on the mutually exclusive
- * list of \var{mplex}.
- */
 EXTL_SAFE
 EXTL_EXPORT_MEMBER
 WRegion *mplex_mx_nth(WMPlex *mplex, uint n) {
@@ -189,13 +162,6 @@ WRegion *mplex_mx_nth(WMPlex *mplex, uint n) {
   return (lnode == NULL ? NULL : lnode->st->reg);
 }
 
-/*EXTL_DOC
- * Iterate over numbered/mutually exclusive region list of \var{mplex}
- * until \var{iterfn} returns \code{false}.
- * The function is called in protected mode.
- * This routine returns \code{true} if it reaches the end of list
- * without this happening.
- */
 EXTL_SAFE
 EXTL_EXPORT_MEMBER
 bool mplex_mx_i(WMPlex *mplex, ExtlFn iterfn) {
@@ -205,13 +171,6 @@ bool mplex_mx_i(WMPlex *mplex, ExtlFn iterfn) {
   return extl_iter_objlist_(iterfn, (ObjIterator *)llist_iter_regions, &tmp);
 }
 
-/*EXTL_DOC
- * Iterate over managed regions of \var{mplex} until \var{iterfn} returns
- * \code{false}.
- * The function is called in protected mode.
- * This routine returns \code{true} if it reaches the end of list
- * without this happening.
- */
 EXTL_SAFE
 EXTL_EXPORT_MEMBER
 bool mplex_managed_i(WMPlex *mplex, ExtlFn iterfn) {
@@ -221,14 +180,6 @@ bool mplex_managed_i(WMPlex *mplex, ExtlFn iterfn) {
   return extl_iter_objlist_(iterfn, (ObjIterator *)mplex_iter, &tmp);
 }
 
-/*EXTL_DOC
- * Set index of \var{reg} to \var{index} within the mutually exclusive
- * list of \var{mplex}. Special values for \var{index} are:
- * \begin{tabularx}{\linewidth}{lX}
- *   $-1$ & Last. \\
- *   $-2$ & After \fnref{WMPlex.mx_current}. \\
- * \end{tabularx}
- */
 EXTL_EXPORT_MEMBER
 void mplex_set_index(WMPlex *mplex, WRegion *reg, int index) {
   WLListNode *lnode, *after;
@@ -259,11 +210,6 @@ void mplex_set_index(WMPlex *mplex, WRegion *reg, int index) {
   mplex_managed_changed(mplex, MPLEX_CHANGE_REORDER, FALSE, reg);
 }
 
-/*EXTL_DOC
- * Get index of \var{reg} on the mutually exclusive list of \var{mplex}.
- * The indices begin from zero.. If \var{reg} is not on the list,
- * -1 is returned.
- */
 EXTL_SAFE
 EXTL_EXPORT_MEMBER
 int mplex_get_index(WMPlex *mplex, WRegion *reg) {
@@ -279,27 +225,17 @@ int mplex_get_index(WMPlex *mplex, WRegion *reg) {
   return -1;
 }
 
-/*EXTL_DOC
- * Move \var{r} ``right'' within objects managed by \var{mplex} on list 1.
- */
 EXTL_EXPORT_MEMBER
 void mplex_inc_index(WMPlex *mplex, WRegion *r) {
   if (r == NULL) r = mplex_mx_current(mplex);
   if (r != NULL) mplex_set_index(mplex, r, mplex_get_index(mplex, r) + 1);
 }
 
-/*EXTL_DOC
- * Move \var{r} ``left'' within objects managed by \var{mplex} on list 1.
- */
 EXTL_EXPORT_MEMBER
 void mplex_dec_index(WMPlex *mplex, WRegion *r) {
   if (r == NULL) r = mplex_mx_current(mplex);
   if (r != NULL) mplex_set_index(mplex, r, mplex_get_index(mplex, r) - 1);
 }
-
-/*}}}*/
-
-/*{{{ Mapping */
 
 static void mplex_map_mgd(WMPlex *mplex) {
   WMPlexIterTmp tmp;
@@ -334,10 +270,6 @@ void mplex_unmap(WMPlex *mplex) {
    */
   if (!MPLEX_MGD_UNVIEWABLE(mplex)) mplex_unmap_mgd(mplex);
 }
-
-/*}}}*/
-
-/*{{{ Resize and reparent */
 
 bool mplex_fitrep(WMPlex *mplex, WWindow *par, const WFitParams *fp) {
   bool wchg = (REGION_GEOM(mplex).w != fp->g.w);
@@ -403,10 +335,6 @@ static void mplex_managed_rqgeom(WMPlex *mplex, WRegion *sub,
   if (!(rq->flags & REGION_RQGEOM_TRYONLY)) region_fitrep(sub, NULL, &fp);
 }
 
-/*}}}*/
-
-/*{{{ Focus  */
-
 typedef struct {
   WMPlex *mplex;
   WStacking *to_try;
@@ -440,9 +368,7 @@ static bool mapped_pseudomodal_include_filt(WStacking *st, void *data_) {
     return TRUE;
   }
 
-  /* Ok, modal node in the way. Let's see if it is pseudomodal
-   * and can be hidden.
-   */
+  /* Ok, modal node in the way. Let's see if it is pseudomodal and can be hidden. */
 
   stw = stacking_within(data->mplex, st);
 
@@ -513,8 +439,7 @@ static WStacking *mplex_do_to_focus_on(WMPlex *mplex, WStacking *node,
   st = mplex_find_to_focus(mplex, node, NULL, hidelist);
 
   /* If 'node' points to a group, it isn't actually on the stacking list.
-   * Give it the focus, if there's nothing "proper" that could be focussed.
-   */
+   * Give it the focus, if there's nothing "proper" that could be focussed. */
   if (st == NULL && grp != NULL && REGION_IS_MAPPED(grp)) st = node;
 
   if (st == node && within != NULL) *within = TRUE;
@@ -536,8 +461,7 @@ static WStacking *has_stacking_within(WMPlex *mplex, WRegion *reg) {
 }
 
 /* 1. Try keep focus in REGION_ACTIVE_SUB.
- * 2. Choose something else, attempting previous in focus history.
- */
+ * 2. Choose something else, attempting previous in focus history. */
 static WStacking *mplex_to_focus(WMPlex *mplex) {
   WStacking *foc = NULL;
   WRegion *reg = NULL;
@@ -554,8 +478,7 @@ static WStacking *mplex_to_focus(WMPlex *mplex) {
 
   if (foc != NULL) {
     /* In the history search case, 'foc' might point to a group,
-     * since we don't properly try to find a stacking within it...
-     */
+     * since we don't properly try to find a stacking within it... */
     return mplex_do_to_focus_on(mplex, foc, NULL, NULL, NULL);
   } else {
     return mplex_find_to_focus(mplex, NULL, NULL, NULL);
@@ -628,8 +551,7 @@ static void mplex_do_node_display(WMPlex *mplex, WStacking *node, bool call_chan
     region_unmap(sub);
 
   /* the mplex might have been resized while this window was invisible,
-   * and the client window might have had lazy resizing enabled.
-   */
+   * and the client window might have had lazy resizing enabled. */
   fp.mode = REGION_FIT_EXACT;
   mplex_managed_geom(mplex, &(fp.g));
   sizepolicy(&node->szplcy, node->reg, NULL, 0, &fp);
@@ -722,35 +644,21 @@ static void do_switch(WMPlex *mplex, WLListNode *lnode) {
   }
 }
 
-/*EXTL_DOC
- * Have \var{mplex} display the \var{n}:th object managed by it.
- */
 EXTL_EXPORT_MEMBER
 void mplex_switch_nth(WMPlex *mplex, uint n) {
   do_switch(mplex, llist_nth_node(mplex->mx_list, n));
 }
 
-/*EXTL_DOC
- * Have \var{mplex} display next (wrt. currently selected) object managed
- * by it.
- */
 EXTL_EXPORT_MEMBER
 void mplex_switch_next(WMPlex *mplex) {
   do_switch(mplex, LIST_NEXT_WRAP(mplex->mx_list, mplex->mx_current, next, prev));
 }
 
-/*EXTL_DOC
- * Have \var{mplex} display previous (wrt. currently selected) object
- * managed by it.
- */
 EXTL_EXPORT_MEMBER
 void mplex_switch_prev(WMPlex *mplex) {
   do_switch(mplex, LIST_PREV_WRAP(mplex->mx_list, mplex->mx_current, next, prev));
 }
 
-/*EXTL_DOC
- * Have \var{mplex} display the given child window already added to the mplex
- */
 EXTL_EXPORT_MEMBER
 void mplex_switch_to(WMPlex *mplex, WRegion *reg) {
   WPrepareFocusResult result;
@@ -777,30 +685,17 @@ bool mplex_set_hidden(WMPlex *mplex, WRegion *reg, int sp) {
   return STACKING_IS_HIDDEN(node);
 }
 
-/*EXTL_DOC
- * Set the visibility of the region \var{reg} on \var{mplex}
- * as specified with the parameter \var{how}
- * (one of \codestr{set}, \codestr{unset}, or \codestr{toggle}).
- * The resulting state is returned.
- */
 EXTL_EXPORT_AS(WMPlex, set_hidden)
 bool mplex_set_hidden_extl(WMPlex *mplex, WRegion *reg, const char *how) {
   return mplex_set_hidden(mplex, reg, libtu_string_to_setparam(how));
 }
 
-/*EXTL_DOC
- * Is \var{reg} on within \var{mplex} and hidden?
- */
 EXTL_SAFE
 EXTL_EXPORT_MEMBER
 bool mplex_is_hidden(WMPlex *mplex, WRegion *reg) {
   WStacking *node = mplex_find_stacking(mplex, reg);
   return (node != NULL && STACKING_IS_HIDDEN(node));
 }
-
-/*}}}*/
-
-/*{{{ Navigation */
 
 static WStacking *mplex_nxt(WMPlex *mplex, WStacking *st, bool wrap) {
   return (st->mgr_next != NULL ? st->mgr_next : (wrap ? mplex->mgd : NULL));
@@ -908,10 +803,6 @@ static void mplex_unstack(WMPlex *mplex, WStacking *st) {
   stacking_unstack(&mplex->win, st);
 }
 
-/* WMPlexWPHolder is used for position marking in order to allow
- * WLListNodes be safely removed in the attach handler hnd, that
- * could remove something this mplex is managing.
- */
 bool mplex_do_attach_final(WMPlex *mplex, WRegion *reg, WMPlexPHolder *ph) {
   WStacking *node = NULL;
   WLListNode *lnode = NULL;
@@ -1086,8 +977,7 @@ WRegion *mplex_attach_simple(WMPlex *mplex, WRegion *reg, int flags) {
   return mplex_do_attach(mplex, &param, &data);
 }
 
-static void get_params(WMPlex *mplex, ExtlTab tab, int mask,
-                       WMPlexAttachParams *par) {
+static void get_params(ExtlTab tab, int mask, WMPlexAttachParams *par) {
   int tmp;
   int ok = ~mask;
 
@@ -1123,11 +1013,6 @@ static void get_params(WMPlex *mplex, ExtlTab tab, int mask,
     par->flags |= MPLEX_ATTACH_GEOM & ok;
 }
 
-/*EXTL_DOC
- * Attach and reparent existing region \var{reg} to \var{mplex}.
- * The table \var{param} may contain the fields \var{index} and
- * \var{switchto} that are interpreted as for \fnref{WMPlex.attach_new}.
- */
 EXTL_EXPORT_MEMBER
 WRegion *mplex_attach(WMPlex *mplex, WRegion *reg, ExtlTab param) {
   WMPlexAttachParams par = MPLEXATTACHPARAMS_INIT;
@@ -1135,7 +1020,7 @@ WRegion *mplex_attach(WMPlex *mplex, WRegion *reg, ExtlTab param) {
 
   if (reg == NULL) return NULL;
 
-  get_params(mplex, param, 0, &par);
+  get_params(param, 0, &par);
 
   data.type = REGION_ATTACH_REPARENT;
   data.u.reg = reg;
@@ -1143,11 +1028,10 @@ WRegion *mplex_attach(WMPlex *mplex, WRegion *reg, ExtlTab param) {
   return mplex_do_attach(mplex, &par, &data);
 }
 
-WRegion *mplex_attach_new_(WMPlex *mplex, WMPlexAttachParams *par, int mask,
-                           ExtlTab param) {
+WRegion *mplex_attach_new_(WMPlex *mplex, WMPlexAttachParams *par, int mask, ExtlTab param) {
   WRegionAttachData data;
 
-  get_params(mplex, param, mask, par);
+  get_params(param, mask, par);
 
   data.type = REGION_ATTACH_LOAD;
   data.u.tab = param;
@@ -1155,41 +1039,9 @@ WRegion *mplex_attach_new_(WMPlex *mplex, WMPlexAttachParams *par, int mask,
   return mplex_do_attach(mplex, par, &data);
 }
 
-/*EXTL_DOC
- * Create a new region to be managed by \var{mplex}. At least the following
- * fields in \var{param} are understood (all but \var{type} are optional).
- *
- * \begin{tabularx}{\linewidth}{lX}
- *  \tabhead{Field & Description}
- *  \var{type} & (string) Class name (a string) of the object to be created. \\
- *  \var{name} & (string) Name of the object to be created (a string). \\
- *  \var{switchto} & (boolean) Should the region be switched to (boolean)? \\
- *  \var{unnumbered} & (boolean) Do not put on the numbered mutually
- *                     exclusive list. \\
- *  \var{index} & (integer) Index on this list, same as for
- *                \fnref{WMPlex.set_index}. \\
- *  \var{level} & (integer) Stacking level. \\
- *  \var{modal} & (boolean) Shortcut for modal stacking level. \\
- *  \var{hidden} & (boolean) Attach hidden, if not prevented
- *                  by e.g. the mutually exclusive list being empty.
- *                  This option overrides \var{switchto}. \\
- *  \var{passive} & (boolean) Skip in certain focusing operations. \\
- *  \var{pseudomodal} & (boolean) The attached region is ``pseudomodal''
- *                      if the stacking level dictates it to be modal.
- *                      This means that the region may be hidden to display
- *                      regions with lesser stacking levels. \\
- *  \var{sizepolicy} & (string) Size policy; see Section \ref{sec:sizepolicies}.
- *\\
- *  \var{geom} & (table) Geometry specification. \\
- * \end{tabularx}
- *
- * In addition parameters to the region to be created are passed in this
- * same table.
- */
 EXTL_EXPORT_MEMBER
 WRegion *mplex_attach_new(WMPlex *mplex, ExtlTab param) {
   WMPlexAttachParams par = MPLEXATTACHPARAMS_INIT;
-
   return mplex_attach_new_(mplex, &par, 0, param);
 }
 
@@ -1208,8 +1060,7 @@ static bool mplex_handle_drop(WMPlex *mplex, int x, int y, WRegion *dropped) {
   return (NULL != mplex_attach_simple(mplex, dropped, MPLEX_ATTACH_SWITCHTO));
 }
 
-WPHolder *mplex_prepare_manage(WMPlex *mplex, const WClientWin *cwin,
-                               const WManageParams *param, int priority) {
+WPHolder *mplex_prepare_manage(WMPlex *mplex, const WClientWin *cwin, const WManageParams *param, int priority) {
   int cpriority = MANAGE_PRIORITY_SUB(priority, MANAGE_PRIORITY_NORMAL);
   WMPlexAttachParams ap;
   WPHolder *ph = NULL;
@@ -1392,27 +1243,6 @@ static bool do_attach_stdisp(WRegion *UNUSED(mplex), WRegion *UNUSED(reg), void 
   return TRUE;
 }
 
-/*EXTL_DOC
- * Set/create status display for \var{mplex}. Table is a standard
- * description of the object to be created (as passed to e.g.
- * \fnref{WMPlex.attach_new}). In addition, the following fields are
- * recognised:
- *
- * \begin{tabularx}{\linewidth}{lX}
- *   \tabhead{Field & Description}
- *   \var{pos} & (string) The corner of the screen to place the status
- *               display in: one of \codestr{tl}, \codestr{tr}, \codestr{bl}
- *               or \codestr{br}. \\
- *   \var{fullsize} & (boolean) Waste all available space. \\
- *   \var{action} & (string) If this field is set to \codestr{keep},
- *                  \var{pos} and \var{fullsize} are changed for the existing
- *                  status display. If this field is set to \codestr{remove},
- *                  the existing status display is removed. If this
- *                  field is not set or is set to \codestr{replace}, a
- *                  new status display is created and the old, if any,
- *                  removed. \\
- * \end{tabularx}
- */
 EXTL_EXPORT_AS(WMPlex, set_stdisp)
 WRegion *mplex_set_stdisp_extl(WMPlex *mplex, ExtlTab t) {
   WRegion *stdisp = NULL;
@@ -1486,10 +1316,6 @@ static ExtlTab mplex_do_get_stdisp_extl(WMPlex *mplex, bool fullconfig) {
   return t;
 }
 
-/*EXTL_DOC
- * Get status display information. See \fnref{WMPlex.get_stdisp} for
- * information on the fields.
- */
 EXTL_SAFE
 EXTL_EXPORT_AS(WMPlex, get_stdisp)
 ExtlTab mplex_get_stdisp_extl(WMPlex *mplex) {
@@ -1520,9 +1346,7 @@ int mplex_default_index(WMPlex *mplex) {
 }
 
 /* For regions managing stdisps */
-
-void region_manage_stdisp(WRegion *reg, WRegion *stdisp,
-                          const WMPlexSTDispInfo *info) {
+void region_manage_stdisp(WRegion *reg, WRegion *stdisp, const WMPlexSTDispInfo *info) {
   CALL_DYN(region_manage_stdisp, reg, (reg, stdisp, info));
 }
 
@@ -1634,7 +1458,7 @@ void mplex_load_contents(WMPlex *mplex, ExtlTab tab) {
         WFitParams fp;
         WPHolder *ph;
 
-        get_params(mplex, subtab, 0, &par);
+        get_params(subtab, 0, &par);
         mplex_attach_fp(mplex, &par, &fp);
 
         par.flags |= MPLEX_ATTACH_INDEX;
@@ -1657,8 +1481,8 @@ void mplex_load_contents(WMPlex *mplex, ExtlTab tab) {
   }
 }
 
-WRegion *mplex_load(WWindow *par, const WFitParams *fp, ExtlTab tab, const char *name) {
-  WMPlex *mplex = create_mplex(par, fp, name);
+WRegion *mplex_load(WWindow *par, const WFitParams *fp, ExtlTab tab) {
+  WMPlex *mplex = create_mplex(par, fp);
   if (mplex != NULL) mplex_load_contents(mplex, tab);
   return (WRegion *)mplex;
 }
@@ -1667,8 +1491,7 @@ static DynFunTab mplex_dynfuntab[] = {
     {region_do_set_focus, mplex_do_set_focus},
     {region_managed_remove, mplex_managed_remove},
     {region_managed_rqgeom, mplex_managed_rqgeom},
-    {(DynFun *)region_managed_prepare_focus,
-     (DynFun *)mplex_managed_prepare_focus},
+    {(DynFun *)region_managed_prepare_focus, (DynFun *)mplex_managed_prepare_focus},
     {(DynFun *)region_handle_drop, (DynFun *)mplex_handle_drop},
     {region_map, mplex_map},
     {region_unmap, mplex_unmap},

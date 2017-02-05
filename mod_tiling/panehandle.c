@@ -1,11 +1,3 @@
-/*
- * ion/mod_tiling/panehandle.c
- *
- * Copyright (c) Tuomo Valkonen 1999-2009.
- *
- * See the included file LICENSE for details.
- */
-
 #include <string.h>
 
 #include <libtu/objp.h>
@@ -18,17 +10,11 @@
 #include "panehandle.h"
 #include "main.h"
 
-/*{{{ Init/deinit */
-
 static void panehandle_getbrush(WPaneHandle *pwin) {
-  GrBrush *brush =
-      gr_get_brush(pwin->wwin.win, region_rootwin_of((WRegion *)pwin), "pane");
-
+  GrBrush *brush = gr_get_brush(pwin->wwin.win, region_rootwin_of((WRegion *)pwin), "pane");
   if (brush != NULL) {
     if (pwin->brush != NULL) grbrush_release(pwin->brush);
-
     pwin->brush = brush;
-
     grbrush_get_border_widths(brush, &(pwin->bdw));
   }
 }
@@ -38,7 +24,7 @@ bool panehandle_init(WPaneHandle *pwin, WWindow *parent, const WFitParams *fp) {
   pwin->bline = GR_BORDERLINE_NONE;
   pwin->splitfloat = NULL;
 
-  if (!window_init(&(pwin->wwin), parent, fp, "WPanelHandle")) return FALSE;
+  if (!window_init(&(pwin->wwin), parent, fp)) return FALSE;
 
   panehandle_getbrush(pwin);
 
@@ -66,10 +52,6 @@ void panehandle_deinit(WPaneHandle *pwin) {
 
   window_deinit(&(pwin->wwin));
 }
-
-/*}}}*/
-
-/*{{{ Drawing */
 
 static void panehandle_updategr(WPaneHandle *pwin) {
   panehandle_getbrush(pwin);

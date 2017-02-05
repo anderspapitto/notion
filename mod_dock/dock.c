@@ -148,10 +148,6 @@ WDockParam dock_param_outline_style = {"outline_style", "outline style",
 static const WDockParam dock_param_tile_width = {"width", "tile width", NULL, 18};
 static const WDockParam dock_param_tile_height = {"height", "tile height", NULL, 18};
 
-/*}}}*/
-
-/*{{{ Misc. */
-
 #define CLIENTWIN_WINPROP_POSITION "dockposition"
 #define CLIENTWIN_WINPROP_BORDER "dockborder"
 
@@ -253,9 +249,7 @@ static void dock_reshape(WDock *dock) {
     }
 }
 
-static void dock_arrange_dockapps(WDock *dock, const WRectangle *bd_dockg,
-                                  const WDockApp *replace_this,
-                                  WDockApp *with_this) {
+static void dock_arrange_dockapps(WDock *dock, const WRectangle *bd_dockg, const WDockApp *replace_this, WDockApp *with_this) {
     GrBorderWidths dock_bdw, dockapp_bdw;
     WDockApp dummy_copy, *dockapp;
     int pos, grow, cur_coord = 0;
@@ -329,7 +323,7 @@ static void dock_arrange_dockapps(WDock *dock, const WRectangle *bd_dockg,
     }
 }
 
-static void dock_set_minmax(WDock *dock, int grow, const WRectangle *g) {
+static void dock_set_minmax(WDock *dock, const WRectangle *g) {
     dock->min_w = g->w; dock->min_h = g->h;
     dock->max_w = INT_MAX; dock->max_h = g->h;
 }
@@ -342,9 +336,7 @@ static void dockapp_calc_preferred_size(WDock *dock, int grow,
     region_size_hints_correct(da->reg, &(da->geom.w), &(da->geom.h), TRUE);
 }
 
-static void dock_managed_rqgeom_(WDock *dock, WRegion *reg, int flags,
-                                 const WRectangle *geom, WRectangle *geomret,
-                                 bool just_update_minmax) {
+static void dock_managed_rqgeom_(WDock *dock, WRegion *reg, int flags, const WRectangle *geom, WRectangle *geomret, bool just_update_minmax) {
     WDockApp *dockapp = NULL, *thisdockapp = NULL, thisdockapp_copy;
     WRectangle dock_geom, border_dock_geom;
     GrBorderWidths dock_bdw, dockapp_bdw;
@@ -443,7 +435,7 @@ static void dock_managed_rqgeom_(WDock *dock, WRegion *reg, int flags,
     /* Fit dock to new geom if required */
     if (!(flags & REGION_RQGEOM_TRYONLY)) {
         WRQGeomParams rq = RQGEOMPARAMS_INIT;
-        dock_set_minmax(dock, grow, &border_dock_geom);
+        dock_set_minmax(dock, &border_dock_geom);
         if (just_update_minmax) return;
         rq.flags = REGION_RQGEOM_WEAK_X | REGION_RQGEOM_WEAK_Y;
         rq.geom = border_dock_geom;
@@ -455,8 +447,7 @@ static void dock_managed_rqgeom_(WDock *dock, WRegion *reg, int flags,
             *geomret = thisdockapp->geom;
     } else {
         if (thisdockapp != NULL && geomret != NULL) {
-            dock_arrange_dockapps(dock, &REGION_GEOM(dock), thisdockapp,
-                                  &thisdockapp_copy);
+            dock_arrange_dockapps(dock, &REGION_GEOM(dock), thisdockapp, &thisdockapp_copy);
             *geomret = thisdockapp_copy.geom;
         }
     }
@@ -481,7 +472,7 @@ static bool dock_fitrep(WDock *dock, WWindow *parent, const WFitParams *fp) {
     return TRUE;
 }
 
-static int dock_orientation(WDock *dock) {
+static int dock_orientation() {
     return REGION_ORIENTATION_HORIZONTAL;
 }
 
@@ -517,9 +508,6 @@ static void dock_draw(WDock *dock, bool complete) {
     grbrush_end(dock->brush);
 }
 
-/*EXTL_DOC
- * Resizes and refreshes \var{dock}.
- */
 EXTL_EXPORT_MEMBER
 void dock_resize(WDock *dock) {
     dock_managed_rqgeom_(dock, NULL, 0, NULL, NULL, FALSE);
@@ -535,9 +523,7 @@ static void dock_brush_release(WDock *dock) {
 
 static void dock_brush_get(WDock *dock) {
     dock_brush_release(dock);
-    dock->brush =
-        gr_get_brush(((WWindow *)dock)->win, region_rootwin_of((WRegion *)dock),
-                     "stdisp-dock");
+    dock->brush = gr_get_brush(((WWindow *)dock)->win, region_rootwin_of((WRegion *)dock), "stdisp-dock");
 }
 
 static void dock_updategr(WDock *dock) {
@@ -545,8 +531,7 @@ static void dock_updategr(WDock *dock) {
     dock_resize(dock);
 }
 
-static void mplexpos(int pos, int *mpos) {
-    int hp = pos & DOCK_HPOS_MASK, vp = pos & DOCK_VPOS_MASK;
+static void mplexpos(int *mpos) {
     *mpos = MPLEX_STDISP_BL;
 }
 
@@ -564,29 +549,10 @@ static void dock_do_set(WDock *dock, ExtlTab conftab, bool resize) {
     if (extl_table_gets_b(conftab, dock_param_is_auto.key, &b))
         dock->is_auto = b;
     if (resize) {
-        WMPlex *par = OBJ_CAST(REGION_PARENT(dock), WMPlex);
         dock_resize(dock);
     }
 }
 
-/*EXTL_DOC
- * Configure \var{dock}. \var{conftab} is a table of key/value pairs:
- *
- * \begin{tabularx}{\linewidth}{llX}
- *  \tabhead{Key & Values & Description}
- *  \var{name} & string & Name of dock \\
- *  \var{pos} & string in $\{t,m,b\}\times\{t,c,b\}$ & Dock position.
- *       Can only be used in floating mode. \\
- *  \var{grow} & up/down/left/right &
- *       Growth direction where new dockapps are added. Also
- *       sets orientation for dock when working as WMPlex status
- *       display (see \fnref{WMPlex.set_stdisp}). \\
- *  \var{is_auto} & bool &
- *       Should \var{dock} automatically manage new dockapps? \\
- * \end{tabularx}
- *
- * Any parameters not explicitly set in \var{conftab} will be left unchanged.
- */
 EXTL_EXPORT_MEMBER
 void dock_set(WDock *dock, ExtlTab conftab) {
     dock_do_set(dock, conftab, TRUE);
@@ -600,10 +566,6 @@ static void dock_do_get(WDock *dock, ExtlTab conftab) {
     extl_table_sets_b(conftab, "save", dock->save);
 }
 
-/*EXTL_DOC
- * Get \var{dock}'s configuration table. See \fnref{WDock.set} for a
- * description of the table.
- */
 EXTL_SAFE
 EXTL_EXPORT_MEMBER
 ExtlTab dock_get(WDock *dock) {
@@ -627,7 +589,7 @@ static bool dock_init(WDock *dock, WWindow *parent, const WFitParams *fp) {
     dock->arrange_called = FALSE;
     dock->save = TRUE;
 
-    if (!window_init((WWindow *)dock, parent, &fp2, "WDock")) return FALSE;
+    if (!window_init((WWindow *)dock, parent, &fp2)) return FALSE;
     region_add_bindmap((WRegion *)dock, dock_bindmap);
     window_select_input(&(dock->win), IONCORE_EVENTMASK_CWINMGR);
     dock_brush_get(dock);
@@ -649,12 +611,9 @@ static void dock_deinit(WDock *dock) {
 
 EXTL_EXPORT
 WDock *mod_dock_create(ExtlTab tab) {
-    char *mode            = NULL;
-    bool floating         = FALSE;
     int screenid          = 0;
     WScreen *screen       = NULL;
     WDock *dock           = NULL;
-    WRegion *stdisp       = NULL;
     WMPlexSTDispInfo din;
     WFitParams fp;
 
@@ -674,7 +633,7 @@ WDock *mod_dock_create(ExtlTab tab) {
 
     /* Calculate min/max size */
     dock_managed_rqgeom_(dock, NULL, 0, NULL, NULL, TRUE);
-    mplexpos(dock->pos, &din.pos);
+    mplexpos(&din.pos);
     din.fullsize = FALSE; /* not supported */
     if (mplex_set_stdisp((WMPlex *)screen, (WRegion *)dock, &din))
         return dock;
@@ -685,9 +644,6 @@ WDock *mod_dock_create(ExtlTab tab) {
     return NULL;
 }
 
-/*EXTL_DOC
- * Toggle floating docks on \var{mplex}.
- */
 EXTL_EXPORT
 void mod_dock_set_floating_shown_on(WMPlex *mplex, const char *how) {
     int setpar = libtu_setparam_invert(libtu_string_to_setparam(how));
@@ -755,9 +711,6 @@ static WRegion *dock_do_attach(WDock *dock, WRegionAttachData *data) {
                                 data);
 }
 
-/*EXTL_DOC
- * Attach \var{reg} to \var{dock}.
- */
 EXTL_EXPORT_MEMBER
 bool dock_attach(WDock *dock, WRegion *reg) {
     WRegionAttachData data;
@@ -876,7 +829,7 @@ static bool dock_clientwin_is_dockapp(WClientWin *cwin, const WManageParams *par
     return is_dockapp;
 }
 
-static WDock *dock_find_suitable_dock(WClientWin *cwin, const WManageParams *param) {
+static WDock *dock_find_suitable_dock(WClientWin *cwin) {
     WDock *dock;
     for (dock = docks; dock; dock = dock->dock_next) {
         if (!dock->is_auto) continue;
@@ -891,7 +844,7 @@ static bool clientwin_do_manage_hook(WClientWin *cwin, const WManageParams *para
     if (!dock_clientwin_is_dockapp(cwin, param)) {
         return FALSE;
     }
-    dock = dock_find_suitable_dock(cwin, param);
+    dock = dock_find_suitable_dock(cwin);
     if (!dock) { return FALSE; }
     return region_manage_clientwin((WRegion *)dock, cwin, param, MANAGE_PRIORITY_NONE);
 }

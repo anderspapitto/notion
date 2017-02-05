@@ -54,7 +54,7 @@ static WFrameMode framemode_is_floating(WFrameMode mode) {
   return (modea == FRAME_MODE_FLOATING || modea == FRAME_MODE_TRANSIENT);
 }
 
-bool frame_init(WFrame *frame, WWindow *parent, const WFitParams *fp, WFrameMode mode, char *name) {
+bool frame_init(WFrame *frame, WWindow *parent, const WFitParams *fp, WFrameMode mode) {
   WRectangle mg;
 
   frame->flags = 0;
@@ -83,8 +83,8 @@ bool frame_init(WFrame *frame, WWindow *parent, const WFitParams *fp, WFrameMode
   return TRUE;
 }
 
-WFrame *create_frame(WWindow *parent, const WFitParams *fp, WFrameMode mode, char *name) {
-  CREATEOBJ_IMPL(WFrame, frame, (p, parent, fp, mode, name));
+WFrame *create_frame(WWindow *parent, const WFitParams *fp, WFrameMode mode) {
+  CREATEOBJ_IMPL(WFrame, frame, (p, parent, fp, mode));
 }
 
 void frame_deinit(WFrame *frame) {
@@ -668,7 +668,7 @@ WRegion *frame_load(WWindow *par, const WFitParams *fp, ExtlTab tab) {
     }
   }
 
-  frame = create_frame(par, fp, mode, "WFrame");
+  frame = create_frame(par, fp, mode);
   if (frame != NULL) frame_do_load(frame, tab);
 
   if (DEST_EMPTY(frame) && frame->mplex.mgd == NULL) {

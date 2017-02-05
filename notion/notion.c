@@ -70,7 +70,6 @@ void check_new_user_help() {
 
   free(oldbeard);
 }
-
 int main(int argc, char *argv[]) {
   const char *cfgfile = "cfg_notion";
   const char *display = NULL;
