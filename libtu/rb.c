@@ -33,7 +33,6 @@ static Rb_node lprev(Rb_node n);
 static Rb_node rprev(Rb_node n);
 static void recolor(Rb_node n);
 static void single_rotate(Rb_node y, int l);
-static void rb_print_tree(Rb_node t, int level);
 static void rb_iprint_tree(Rb_node t, int level);
 
 /* Gcc complains if non-char* pointer is passed to printf %p  */
@@ -484,32 +483,6 @@ void rb_delete_node(Rb_node n) {
       single_rotate(p, !il);
       setblack(x);
       return;
-    }
-  }
-}
-
-void rb_print_tree(Rb_node t, int level) {
-  int i;
-  if (ishead(t) && t->p.parent == t) {
-    printf("tree %p is empty\n", DONT_COMPLAIN t);
-  } else if (ishead(t)) {
-    printf("Head: %p.  Root = %p\n", DONT_COMPLAIN t, DONT_COMPLAIN t->p.root);
-    rb_print_tree(t->p.root, 0);
-  } else {
-    if (isext(t)) {
-      for (i = 0; i < level; i++) putchar(' ');
-      printf("Ext node %p: %c,%c: p=%p, k=%s\n", DONT_COMPLAIN t,
-             isred(t) ? 'R' : 'B', isleft(t) ? 'l' : 'r',
-             DONT_COMPLAIN t->p.parent, DONT_COMPLAIN t->k.key);
-    } else {
-      rb_print_tree(t->c.child.left, level + 2);
-      rb_print_tree(t->c.child.right, level + 2);
-      for (i = 0; i < level; i++) putchar(' ');
-      printf("Int node %p: %c,%c: l=%p, r=%p, p=%p, lr=(%s,%s)\n",
-             DONT_COMPLAIN t, isred(t) ? 'R' : 'B', isleft(t) ? 'l' : 'r',
-             DONT_COMPLAIN t->c.child.left, DONT_COMPLAIN t->c.child.right,
-             DONT_COMPLAIN t->p.parent, DONT_COMPLAIN t->k.lext->k.key,
-             DONT_COMPLAIN t->v.rext->k.key);
     }
   }
 }

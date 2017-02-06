@@ -328,10 +328,9 @@ static void dock_set_minmax(WDock *dock, const WRectangle *g) {
     dock->max_w = INT_MAX; dock->max_h = g->h;
 }
 
-static void dockapp_calc_preferred_size(WDock *dock, int grow,
-                                        const WRectangle *tile_size,
-                                        WDockApp *da) {
-    int w = da->geom.w, h = da->geom.h;
+static void dockapp_calc_preferred_size(const WRectangle *tile_size, WDockApp *da) {
+    int w = da->geom.w;
+    int h = da->geom.h;
     da->geom.w = w; da->geom.h = minof(h, tile_size->h);
     region_size_hints_correct(da->reg, &(da->geom.w), &(da->geom.h), TRUE);
 }
@@ -345,8 +344,7 @@ static void dock_managed_rqgeom_(WDock *dock, WRegion *reg, int flags, const WRe
     WRectangle tile_size;
 
     /* dock_resize calls with NULL parameters. */
-    assert(reg != NULL ||
-           (geomret == NULL && !(flags & REGION_RQGEOM_TRYONLY)));
+    assert(reg != NULL || (geomret == NULL && !(flags & REGION_RQGEOM_TRYONLY)));
 
     dock_get_pos_grow(dock, &pos, &grow);
     dock_get_tile_size(dock, &tile_size);
@@ -389,7 +387,7 @@ static void dock_managed_rqgeom_(WDock *dock, WRegion *reg, int flags, const WRe
 
         if (update) {
             /* Calculcate preferred size */
-            dockapp_calc_preferred_size(dock, grow, &tile_size, da);
+            dockapp_calc_preferred_size(&tile_size, da);
 
             /* Determine whether dockapp should be placed on a tile */
             da->tile = da->geom.w <= tile_size.w && da->geom.h <= tile_size.h;

@@ -58,21 +58,6 @@ static void lua_rawset_check(lua_State *st, int index) {
   lua_rawset(st, index);
 }
 
-static void lua_rawseti_check(lua_State *st, int index, int n) {
-  CHECK_TABLE(st, index);
-  lua_rawseti(st, index, n);
-}
-
-static void lua_rawget_check(lua_State *st, int index) {
-  CHECK_TABLE(st, index);
-  lua_rawget(st, index);
-}
-
-static void lua_rawgeti_check(lua_State *st, int index, int n) {
-  CHECK_TABLE(st, index);
-  lua_rawgeti(st, index, n);
-}
-
 typedef bool ExtlCPCallFn(lua_State *st, void *ptr);
 
 typedef struct {

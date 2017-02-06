@@ -1,11 +1,3 @@
-/*
- * ion/de/brush.c
- *
- * Copyright (c) Tuomo Valkonen 1999-2009.
- *
- * See the included file LICENSE for details.
- */
-
 #include <string.h>
 
 #include <libtu/objp.h>
@@ -45,7 +37,7 @@ bool debrush_init(DEBrush *brush, Window win, const GrStyleSpec *spec,
 
 #ifdef HAVE_X11_XFT
   brush->draw=NULL;
-#endif /* HAVE_X11_XFT */
+#endif
 
   style->usecount++;
 
@@ -74,8 +66,7 @@ DEBrush *create_debrush(Window win, const GrStyleSpec *spec, DEStyle *style) {
   CREATEOBJ_IMPL(DEBrush, debrush, (p, win, spec, style));
 }
 
-static DEBrush *do_get_brush(Window win, WRootWin *rootwin,
-                             const char *stylename, bool slave) {
+static DEBrush *do_get_brush(Window win, WRootWin *rootwin, const char *stylename) {
   DEStyle *style;
   DEBrush *brush;
   GrStyleSpec spec;
@@ -99,12 +90,11 @@ static DEBrush *do_get_brush(Window win, WRootWin *rootwin,
 }
 
 DEBrush *de_get_brush(Window win, WRootWin *rootwin, const char *stylename) {
-  return do_get_brush(win, rootwin, stylename, FALSE);
+  return do_get_brush(win, rootwin, stylename);
 }
 
-DEBrush *debrush_get_slave(DEBrush *master, WRootWin *rootwin,
-                           const char *stylename) {
-  return do_get_brush(master->win, rootwin, stylename, TRUE);
+DEBrush *debrush_get_slave(DEBrush *master, WRootWin *rootwin, const char *stylename) {
+  return do_get_brush(master->win, rootwin, stylename);
 }
 
 void debrush_deinit(DEBrush *brush) {
@@ -121,8 +111,7 @@ void debrush_deinit(DEBrush *brush) {
 void debrush_release(DEBrush *brush) { destroy_obj((Obj *)brush); }
 
 #ifdef HAVE_X11_XFT
-XftDraw *debrush_get_draw(DEBrush *brush, Drawable d)
-{
+XftDraw *debrush_get_draw(DEBrush *brush, Drawable d) {
     if(brush->draw==NULL)
         brush->draw=XftDrawCreate(ioncore_g.dpy, d,
                                   XftDEDefaultVisual(),

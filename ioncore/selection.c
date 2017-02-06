@@ -1,11 +1,3 @@
-/*
- * ion/ioncore/selection.c
- *
- * Copyright (c) Tuomo Valkonen 1999-2009.
- *
- * See the included file LICENSE for details.
- */
-
 #include <X11/Xmd.h>
 #include <string.h>
 
@@ -22,11 +14,9 @@ static ExtlFn continuation;
 
 #define CLIPATOM(X) XA_PRIMARY
 
-static Atom XA_COMPOUND_TEXT(Display *unused) {
+static Atom XA_COMPOUND_TEXT() {
   static Atom a = None;
-
   if (a == None) a = XInternAtom(ioncore_g.dpy, "COMPOUND_TEXT", False);
-
   return a;
 }
 

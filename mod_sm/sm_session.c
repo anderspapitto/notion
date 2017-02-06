@@ -44,7 +44,6 @@ char *mod_sm_get_ion_id() { return sm_client_id; }
  IcePcocessMessages determines message protocol,
  unpacks the message and sends it to the client via
  registered callbacks. */
-
 static void sm_process_messages(int UNUSED(fd), void *UNUSED(data)) {
   Bool ret;
 
@@ -54,11 +53,8 @@ static void sm_process_messages(int UNUSED(fd), void *UNUSED(data)) {
   }
 }
 
-/* Callback triggered when an Ice connection is
- opened or closed. */
-
-static void sm_ice_watch_fd(IceConn conn, IcePointer UNUSED(client_data),
-                            Bool opening, IcePointer *UNUSED(watch_data)) {
+/* Callback triggered when an Ice connection is opened or closed. */
+static void sm_ice_watch_fd(IceConn conn, IcePointer UNUSED(client_data), Bool opening, IcePointer *UNUSED(watch_data)) {
   if (opening) {
     if (sm_fd != -1) { /* shouldn't happen */
       warn("Too many ICE connections.");
@@ -76,7 +72,6 @@ static void sm_ice_watch_fd(IceConn conn, IcePointer UNUSED(client_data),
 }
 
 /* Store restart information and stuff in the session manager */
-
 static void sm_set_some_properties() {
   SmPropValue program_val, userid_val;
   SmProp program_prop, userid_prop, clone_prop;
@@ -105,32 +100,25 @@ static void sm_set_some_properties() {
   clone_prop.num_vals = 1;
   clone_prop.vals = &program_val;
 
-  SmcSetProperties(sm_conn, sizeof(props) / sizeof(props[0]),
-                   (SmProp **)&props);
+  SmcSetProperties(sm_conn, sizeof(props) / sizeof(props[0]), (SmProp **)&props);
 }
 
 static void sm_set_other_properties() {
   char *restore = "-session";
   char *clientid = "-smclientid";
-  char *rmprog = "/bin/rm";
-  char *rmarg = "-rf";
   int nvals = 0, i;
   const char *sdir = NULL, *cid = NULL;
 
-  SmPropValue discard_val[3];
-  SmProp discard_prop = {SmDiscardCommand, SmLISTofARRAY8, 3, NULL};
   SmPropValue restart_hint_val, *restart_val = NULL;
   SmProp restart_hint_prop = {SmRestartStyleHint, SmCARD8, 1, NULL};
   SmProp restart_prop = {SmRestartCommand, SmLISTofARRAY8, 0, NULL};
 
   SmProp *props[2];
 
-  discard_prop.vals = discard_val;
   restart_hint_prop.vals = &restart_hint_val;
 
   props[0] = &restart_prop;
   props[1] = &restart_hint_prop;
-  /*props[2]=&discard_prop;*/
 
   sdir = extl_sessiondir();
   cid = mod_sm_get_ion_id();
@@ -161,15 +149,7 @@ static void sm_set_other_properties() {
   restart_val[nvals++].length = strlen(cid);
   restart_prop.num_vals = nvals;
   restart_prop.vals = restart_val;
-  discard_val[0].length = strlen(rmprog);
-  discard_val[0].value = rmprog;
-  discard_val[1].length = strlen(rmarg);
-  discard_val[1].value = rmarg;
-  discard_val[2].length = strlen(sdir);
-  discard_val[2].value = (char *)sdir;
-
-  SmcSetProperties(sm_conn, sizeof(props) / sizeof(props[0]),
-                   (SmProp **)&props);
+  SmcSetProperties(sm_conn, sizeof(props) / sizeof(props[0]), (SmProp **)&props);
 
   free(restart_val);
 }

@@ -22,9 +22,6 @@ DEFont *de_load_font(const char *fontname) {
     XftFont *font;
 #endif
   DEFont *fnt;
-  XFontSet fontset = NULL;
-  XFontStruct *fontstruct = NULL;
-  const char *default_fontname = de_default_fontname();
 
   assert(fontname != NULL);
 
@@ -182,8 +179,6 @@ void defont_get_font_extents(DEFont *font, GrFontExtents *fnte) {
         return;
     }
 #endif /* HAVE_X11_XFT */
-fail:
-  DE_RESET_FONT_EXTENTS(fnte);
 }
 
 uint debrush_get_text_width(DEBrush *brush, const char *text, uint len) {
@@ -299,7 +294,6 @@ void debrush_do_draw_string_default(DEBrush *brush,
                                     DEColourGroup *colours)
 {
     Window win = brush->win;
-    GC gc=brush->d->normal_gc;
     XftDraw *draw;
     XftFont *font;
 
