@@ -7,7 +7,7 @@ endif
 
 include $(TOPDIR)/build/system-inc.mk
 
-CFLAGS += $(C98_SOURCE) $(POSIX_SOURCE) $(WARN)
+CFLAGS += $(C98_SOURCE) $(WARN)
 
 SOURCES=iterable.c  map.c  misc.c  obj.c  objlist.c  optparser.c  output.c  parser.c  prefix.c  ptrlist.c  rb.c  setparam.c  stringstore.c  tokenizer.c  util.c errorlog.c
 

@@ -10,7 +10,6 @@ INCDIR=$(PREFIX)/include
 CC=gcc
 
 C89_SOURCE=-ansi
-POSIX_SOURCE=-D_POSIX_SOURCE
 
 # Same as '-Wall -pedantic' without '-Wunused' as callbacks often
 # have unused variables.

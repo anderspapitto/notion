@@ -2,7 +2,7 @@ TOPDIR=..
 include $(TOPDIR)/build/system-inc.mk
 
 INCLUDES += $(LIBTU_INCLUDES) $(LIBEXTL_INCLUDES) -I..
-CFLAGS += $(POSIX_SOURCE) $(C99_SOURCE)
+CFLAGS += $(C99_SOURCE)
 SOURCES = select.c defer.c signal.c hooks.c exec.c
 
 #MAKE_EXPORTS=mainloop
