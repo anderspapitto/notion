@@ -26,11 +26,8 @@ static void do_dispatch_message(const char *message);
 
 void verbose(const char *p, ...) {
   va_list args;
-
   va_start(args, p);
-
   verbose_v(p, args);
-
   va_end(args);
 }
 
@@ -60,18 +57,11 @@ void warn_progname_enable(bool enable) { progname_enable = enable; }
 
 static void put_prog_name() {
   const char *progname;
-
   if (!progname_enable) return;
-
   progname = libtu_progname();
-
   if (progname == NULL) return;
-
   fprintf(stderr, "%s: ", (char *)progname);
 }
-
-/* warn
- */
 
 static void fallback_warn() {
   put_prog_name();
@@ -138,9 +128,6 @@ void warn_err_obj_line(const char *obj, int line) {
   DO_DISPATCH(errmsg_err_obj_line, (obj, line));
 }
 
-/* errmsg
- */
-
 #define CALL_V_RET(NAME, ARGS) \
   char *ret;                   \
   va_list args;                \
@@ -169,8 +156,7 @@ char *errmsg_v(const char *p, va_list args) {
   return res;
 }
 
-char *errmsg_obj_line_v(const char *obj, int line, const char *p,
-                        va_list args) {
+char *errmsg_obj_line_v(const char *obj, int line, const char *p, va_list args) {
   char *res1 = NULL, *res2, *res3;
 
   if (obj != NULL) {
@@ -222,9 +208,6 @@ char *errmsg_err_obj_line(const char *obj, int line) {
   }
   return res;
 }
-
-/* die
- */
 
 void die(const char *p, ...) {
   set_warn_handler(NULL);
