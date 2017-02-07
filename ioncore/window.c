@@ -62,27 +62,9 @@ void window_deinit(WWindow *wwin) {
     /* Probably should not try destroy if root window... */
     XDestroyWindow(ioncore_g.dpy, wwin->win);
   }
-
-  /* There are no backlinks from WStacking to us, so it is not
-   * necessary to do any deinitialisation there.
-   */
-}
-
-static void window_notify_subs_rootpos(WWindow *wwin, int x, int y) {
-  /* WRegion *sub; */
-  /* FOR_ALL_CHILDREN(wwin, sub) { */
-  /*   region_notify_rootpos(sub, x + REGION_GEOM(sub).x, y + REGION_GEOM(sub).y); */
-  /* } */
-}
-
-void window_notify_subs_move(WWindow *wwin) {
-  int x = 0, y = 0;
-  region_rootpos(&(wwin->region), &x, &y);
-  window_notify_subs_rootpos(wwin, x, y);
 }
 
 void window_do_fitrep(WWindow *wwin, WWindow *par, const WRectangle *geom) {
-  bool move = (REGION_GEOM(wwin).x != geom->x || REGION_GEOM(wwin).y != geom->y);
   int w = maxof(1, geom->w);
   int h = maxof(1, geom->h);
 
@@ -96,8 +78,6 @@ void window_do_fitrep(WWindow *wwin, WWindow *par, const WRectangle *geom) {
   }
 
   REGION_GEOM(wwin) = *geom;
-
-  if (move) window_notify_subs_move(wwin);
 }
 
 bool window_fitrep(WWindow *wwin, WWindow *par, const WFitParams *fp) {
@@ -144,7 +124,6 @@ static DynFunTab window_dynfuntab[] = {
     {region_do_set_focus, window_do_set_focus},
     {(DynFun *)region_fitrep, (DynFun *)window_fitrep},
     {(DynFun *)region_xwindow, (DynFun *)window_xwindow},
-    {region_notify_rootpos, window_notify_subs_rootpos},
     {region_restack, window_restack},
     END_DYNFUNTAB};
 

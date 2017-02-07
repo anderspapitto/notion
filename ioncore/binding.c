@@ -7,14 +7,8 @@
 #include "regbind.h"
 #include <libextl/extl.h>
 
-#ifndef CF_NO_LOCK_HACK
-#define CF_HACK_IGNORE_EVIL_LOCKS
-#endif
-
-#ifdef CF_HACK_IGNORE_EVIL_LOCKS
 #define XK_MISCELLANY
 #include <X11/keysymdef.h>
-#endif
 
 #define N_MODS 8
 
@@ -22,7 +16,6 @@ static const uint modmasks[N_MODS] = {ShiftMask, LockMask, ControlMask, Mod1Mask
 static XModifierKeymap *modmap = NULL;
 
 #define KNOWN_MODIFIERS_MASK (ShiftMask | LockMask | ControlMask | Mod1Mask | Mod2Mask | Mod3Mask | Mod4Mask | Mod5Mask)
-#ifdef CF_HACK_IGNORE_EVIL_LOCKS
 #define N_EVILLOCKS 3
 #define N_LOOKUPEVIL 2
 
@@ -38,7 +31,6 @@ static void evil_grab_button(Display *display, uint button, uint modifiers,
                              Cursor cursor);
 static void evil_ungrab_key(Display *display, uint keycode, uint modifiers, Window grab_window);
 static void evil_ungrab_button(Display *display, uint button, uint modifiers, Window grab_window);
-#endif
 
 #define CVAL(A, B, V) (A->V < B->V ? -1 : (A->V > B->V ? 1 : 0))
 
@@ -242,9 +234,7 @@ void ioncore_init_bindings() {
 
     assert(modmap != NULL);
 
-#ifdef CF_HACK_IGNORE_EVIL_LOCKS
     lookup_evil_locks();
-#endif
 }
 
 void ioncore_update_modmap() {
@@ -260,13 +250,8 @@ void ioncore_update_modmap() {
 
 void binding_grab_on(const WBinding *binding, Window win) {
     if (binding->act == BINDING_KEYPRESS && binding->kcb != 0) {
-#ifndef CF_HACK_IGNORE_EVIL_LOCKS
-        XGrabKey(ioncore_g.dpy, binding->kcb, binding->state, win, True,
-                 GrabModeAsync, GrabModeAsync);
-#else
         evil_grab_key(ioncore_g.dpy, binding->kcb, binding->state, win, True,
                       GrabModeAsync, GrabModeAsync);
-#endif
     }
 
     if (binding->act != BINDING_BUTTONPRESS &&
@@ -277,24 +262,14 @@ void binding_grab_on(const WBinding *binding, Window win) {
 
     if (binding->state == 0 || binding->area != 0) return;
 
-#ifndef CF_HACK_IGNORE_EVIL_LOCKS
-    XGrabButton(ioncore_g.dpy, binding->kcb, binding->state, win, True,
-                IONCORE_EVENTMASK_PTRGRAB, GrabModeAsync, GrabModeAsync, None,
-                None);
-#else
     evil_grab_button(ioncore_g.dpy, binding->kcb, binding->state, win, True,
                      IONCORE_EVENTMASK_PTRGRAB, GrabModeAsync, GrabModeAsync,
                      None, None);
-#endif
 }
 
 void binding_ungrab_on(const WBinding *binding, Window win) {
     if (binding->act == BINDING_KEYPRESS && binding->kcb != 0) {
-#ifndef CF_HACK_IGNORE_EVIL_LOCKS
-        XUngrabKey(ioncore_g.dpy, binding->kcb, binding->state, win);
-#else
         evil_ungrab_key(ioncore_g.dpy, binding->kcb, binding->state, win);
-#endif
     }
 
     if (binding->act != BINDING_BUTTONPRESS &&
@@ -304,12 +279,7 @@ void binding_ungrab_on(const WBinding *binding, Window win) {
         return;
 
     if (binding->state == 0 || binding->area != 0) return;
-
-#ifndef CF_HACK_IGNORE_EVIL_LOCKS
-    XUngrabButton(ioncore_g.dpy, binding->kcb, binding->state, win);
-#else
     evil_ungrab_button(ioncore_g.dpy, binding->kcb, binding->state, win);
-#endif
 }
 
 /* */
@@ -348,9 +318,7 @@ static WBinding *do_bindmap_lookup_binding(WBindmap *bindmap, int act,
 
     if (bindmap->nbindings == 0) return NULL;
 
-#ifdef CF_HACK_IGNORE_EVIL_LOCKS
     state &= ~evilignoremask;
-#endif
     state &= KNOWN_MODIFIERS_MASK;
 
     tmp.act = act;
@@ -399,15 +367,10 @@ WBinding *bindmap_lookup_binding_area(WBindmap *bindmap, int act, uint state, ui
     return binding;
 }
 
-/*
- * A dirty hack to deal with (==ignore) evil locking modifier keys.
- */
-
+/* A dirty hack to deal with (==ignore) evil locking modifier keys. */
 int ioncore_unmod(int state, int keycode) {
     int j;
-#ifdef CF_HACK_IGNORE_EVIL_LOCKS
     state &= ~evilignoremask;
-#endif
     state &= KNOWN_MODIFIERS_MASK;
     for (j = 0; j < N_MODS * modmap->max_keypermod; j++) {
         if (modmap->modifiermap[j] == keycode)
@@ -429,9 +392,7 @@ int ioncore_modstate() {
                 state |= modmasks[j / modmap->max_keypermod];
         }
     }
-#ifdef CF_HACK_IGNORE_EVIL_LOCKS
     state &= ~evilignoremask;
-#endif
     state &= KNOWN_MODIFIERS_MASK;
     return state;
 }
@@ -443,8 +404,6 @@ bool ioncore_ismod(int keycode) {
     }
     return FALSE;
 }
-
-#ifdef CF_HACK_IGNORE_EVIL_LOCKS
 
 static void lookup_evil_locks() {
     uint keycodes[N_LOOKUPEVIL];
@@ -553,5 +512,3 @@ static void evil_ungrab_button(Display *display, uint button, uint modifiers, Wi
         }
     }
 }
-
-#endif /* CF_HACK_IGNORE_EVIL_LOCKS */
