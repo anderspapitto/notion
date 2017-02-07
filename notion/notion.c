@@ -46,11 +46,6 @@ void check_new_user_help() {
   }
 
   if (tmp != NULL) {
-    if (access(tmp, F_OK) == 0)
-      libtu_asprintf(&cmd, "%s %s", CF_XMESSAGE, tmp);
-    else
-      libtu_asprintf(&cmd, "%s %s/welcome.txt", CF_XMESSAGE, SHAREDIR);
-
     free(tmp);
 
     if (cmd != NULL) {
@@ -80,7 +75,6 @@ int main(int argc, char *argv[]) {
   char *efnam = NULL;
   bool may_continue = FALSE;
   bool noerrorlog = FALSE;
-  char *localedir;
 
   libtu_init(argv[0]);
 
@@ -88,20 +82,16 @@ int main(int argc, char *argv[]) {
   prefix_set(argv[0], CF_RELOCATABLE_BIN_LOCATION);
 #endif
 
-  localedir = prefix_add(LOCALEDIR);
-
-  if (!ioncore_init(CF_EXECUTABLE, argc, argv)){
+  if (!ioncore_init("/usr/bin/notion", argc, argv)){
       return EXIT_FAILURE;
   }
 
-  if (localedir != NULL) free(localedir);
-
-  prefix_wrap_simple(extl_add_searchdir, EXTRABINDIR); /* ion-completefile */
-  prefix_wrap_simple(extl_add_searchdir, MODULEDIR);
-  prefix_wrap_simple(extl_add_searchdir, ETCDIR);
-  prefix_wrap_simple(extl_add_searchdir, SHAREDIR);
-  prefix_wrap_simple(extl_add_searchdir, LCDIR);
-  extl_set_userdirs(CF_EXECUTABLE);
+  prefix_wrap_simple(extl_add_searchdir, "/usr/lib/notion/bin");
+  prefix_wrap_simple(extl_add_searchdir, "/usr/lib/notion/mod");
+  prefix_wrap_simple(extl_add_searchdir, "/usr/etc");
+  prefix_wrap_simple(extl_add_searchdir, "/usr/share/libextl");
+  prefix_wrap_simple(extl_add_searchdir, "/usr/lib/notion/lc");
+  extl_set_userdirs("notion");
 
   if (!noerrorlog) {
     /* We may have to pass the file to xmessage so just using tmpfile()
