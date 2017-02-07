@@ -2,7 +2,7 @@ TOPDIR=..
 include $(TOPDIR)/build/system-inc.mk
 
 INCLUDES += $(X11_INCLUDES) $(LIBTU_INCLUDES) $(LIBEXTL_INCLUDES) -I..
-CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE)
+CFLAGS += $(C99_SOURCE)
 
 SOURCES=binding.c conf-bindings.c cursor.c event.c exec.c focus.c     \
 	strings.c key.c modules.c mwmhints.c pointer.c property.c         \

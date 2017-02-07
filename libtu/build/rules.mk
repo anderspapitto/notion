@@ -1,11 +1,3 @@
-##
-## Some make rules
-##
-
-# Beware: in releases, the Notion rules.mk is used to build both libtu, 
-# libextl and notion - so structural changes to this file should also be
-# carried out on the Notion rules.mk
-
 ifdef MODULE
 ifeq ($(PRELOAD_MODULES),1)
 MODULE_TARGETS := $(MODULE).a $(MODULE).lc
@@ -20,9 +12,6 @@ LUA_COMPILED := $(subst .lua,.lc, $(LUA_SOURCES))
 TARGETS := $(TARGETS) $(LUA_COMPILED)
 endif
 
-
-# Main targets
-######################################
 
 .PHONY: subdirs
 .PHONY: subdirs-clean
@@ -39,10 +28,6 @@ realclean: subdirs-realclean _clean _realclean
 
 install: subdirs-install _install
 
-
-# Exports
-######################################
-
 ifdef MAKE_EXPORTS
 
 EXPORTS_C = exports.c
@@ -58,16 +43,12 @@ _exports: $(EXPORTS_C)
 %xports.c %xports.h:
 	$(MKEXPORTS) -module $(MAKE_EXPORTS) -o $(EXPORTS_C) -h $(EXPORTS_H) $(SOURCES)
 
-else # !MAKE_EXPORTS
+else
 
 EXPORTS_C = 
 EXPORTS_H = 
 
-endif # !MAKE_EXPORTS
-
-
-# Compilation and linking
-######################################
+endif
 
 OBJS=$(subst .c,.o,$(SOURCES) $(EXPORTS_C))
 
@@ -75,7 +56,7 @@ ifdef MODULE
 
 ifneq ($(PRELOAD_MODULES),1)
 
-CC_PICFLAGS=-fPIC -DPIC
+CC_PICFLAGS=-fPIC
 LD_SHAREDFLAGS=-shared
 
 %.o: %.c
@@ -89,9 +70,9 @@ module_install: module_stub_install
 	$(INSTALLDIR) $(MODULEDIR)
 	$(INSTALL) -m $(BIN_MODE) $(MODULE).so $(MODULEDIR)
 
-else # PRELOAD_MODULES
+else
 
-PICOPT=-fPIC -DPIC
+PICOPT=-fPIC
 LINKOPT=-shared
 
 %.o: %.c
@@ -129,17 +110,11 @@ else # !MODULE
 endif# !MODULE
 
 
-# Clean rules
-######################################
-
 _clean:
 	$(RM) -f $(TO_CLEAN) core *.d $(OBJS)
 
 _realclean:
 	$(RM) -f $(TO_REALCLEAN) $(TARGETS)
-
-# Lua rules
-######################################
 
 %.lc: %.lua
 	$(LUAC) -o $@ $<
@@ -150,14 +125,8 @@ lc_install:
 		$(INSTALL) -m $(DATA_MODE) $$i $(LCDIR); \
 	done
 
-# Dependencies
-######################################
-
 CFLAGS += -MMD
 -include *.d
-
-# Subdirectories
-######################################
 
 ifdef SUBDIRS
 
@@ -177,12 +146,3 @@ subdirs-install:
 	set -e; for i in $(INSTALL_SUBDIRS); do $(MAKE) -C $$i install; done
 
 endif
-
-# Localisation
-######################################
-
-TO_CLEAN += potfiles_c potfiles_lua
-
-_potfiles:
-	echo "$(SOURCES)"|tr ' ' '\n' > potfiles_c
-	echo "$(LUA_SOURCES) $(ETC)"|tr ' ' '\n' > potfiles_lua

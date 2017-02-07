@@ -1,15 +1,4 @@
-/*
- * libtu/output.c
- *
- * Copyright (c) Tuomo Valkonen 1999-2002.
- *
- * You may distribute and modify this library under the terms of either
- * the Clarified Artistic License or the GNU LGPL, version 2.1 or later.
- */
-
-#if HAS_SYSTEM_ASPRINTF
 #define _GNU_SOURCE
-#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -21,10 +10,6 @@
 #include "output.h"
 #include "util.h"
 #include "private.h"
-
-#if !HAS_SYSTEM_ASPRINTF
-#include "snprintf_2.2/snprintf.c"
-#endif
 
 static void default_warn_handler(const char *message);
 

@@ -1,35 +1,19 @@
-##
-## Extl Makefile
-##
-
 ifeq ($(MAKELEVEL),0)
 TOPDIR=.
 else
 TOPDIR=..
 endif
 
-# System-specific configuration
 include $(TOPDIR)/build/system-inc.mk
 
-######################################
-
 INCLUDES += $(LIBTU_INCLUDES) $(LUA_INCLUDES)
-
-CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE)
-
+CFLAGS += $(C99_SOURCE)
 SOURCES=readconfig.c luaextl.c misc.c
-
 HEADERS=readconfig.h extl.h luaextl.h private.h types.h
-
 TARGETS=libextl.a libextl-mkexports
-
 .PHONY : libextl-mkexports test
 
-######################################
-
 include $(TOPDIR)/build/rules.mk
-
-######################################
 
 ifdef LUA
 

@@ -420,10 +420,8 @@ static void dock_managed_rqgeom_(WDock *dock, WRegion *reg, int flags, const WRe
     }
 
     /* Calculate width and height of dock */
-    if (n_dockapps) {
-        dock_geom.w = total_w;
-        dock_geom.h = max_h;
-    }
+    dock_geom.w = total_w;
+    dock_geom.h = max_h;
 
     border_dock_geom.x = REGION_GEOM(dock).x;
     border_dock_geom.y = REGION_GEOM(dock).y;

@@ -232,10 +232,6 @@ void rootwin_deinit(WRootWin *rw) {
   screen_deinit(&rw->scr);
 }
 
-static bool rootwin_fitrep() {
-  return FALSE;
-}
-
 EXTL_SAFE
 EXTL_EXPORT_MEMBER
 WScreen *rootwin_current_scr(WRootWin *rootwin) {
@@ -251,9 +247,7 @@ WScreen *rootwin_current_scr(WRootWin *rootwin) {
   return (fb ? fb : &rootwin->scr);
 }
 
-static DynFunTab rootwin_dynfuntab[] = {
-    {(DynFun *)region_fitrep, (DynFun *)rootwin_fitrep},
-    END_DYNFUNTAB};
+static DynFunTab rootwin_dynfuntab[] = { END_DYNFUNTAB };
 
 EXTL_EXPORT
 IMPLCLASS(WRootWin, WScreen, rootwin_deinit, rootwin_dynfuntab);

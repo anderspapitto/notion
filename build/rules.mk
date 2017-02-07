@@ -1,7 +1,3 @@
-##
-## Some make rules
-##
-
 ifdef MODULE
 ifeq ($(PRELOAD_MODULES),1)
 MODULE_TARGETS := $(MODULE).a $(MODULE).lc
@@ -27,10 +23,6 @@ EXECUTABLE_ := $(EXECUTABLE)$(BIN_SUFFIX)
 TARGETS := $(TARGETS) $(EXECUTABLE_)
 endif
 
-
-# Main targets
-######################################
-
 .PHONY: subdirs
 .PHONY: subdirs-clean
 .PHONY: subdirs-realclean
@@ -46,11 +38,7 @@ realclean: subdirs-realclean _clean _realclean
 
 install: subdirs-install _install
 
-
 ifdef MAKE_EXPORTS
-
-# Exports
-######################################
 
 EXPORTS_C = exports.c
 EXPORTS_H = exports.h
@@ -65,9 +53,6 @@ _exports: $(EXPORTS_C)
 %xports.c %xports.h: $(SOURCES) $(MKEXPORTS_EXTRA_DEPS)
 	$(MKEXPORTS) -module $(MAKE_EXPORTS) -o $(EXPORTS_C) -h $(EXPORTS_H) \
 	$(SOURCES) $(MKEXPORTS_EXTRAS)
-
-# Exports documentation
-######################################
 
 EXPORTS_DOC = exports.tex
 
@@ -87,12 +72,7 @@ EXPORTS_DOC =
 
 endif # !MAKE_EXPORTS
 
-
-# Compilation and linking
-######################################
-
 OBJS=$(subst .c,.o,$(SOURCES) $(EXPORTS_C))
-
 
 ifdef EXECUTABLE
 
@@ -129,8 +109,6 @@ executable_install:
 
 endif # EXECUTABLE
 
-
-
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
@@ -138,7 +116,7 @@ ifdef MODULE
 
 ifneq ($(PRELOAD_MODULES),1)
 
-CFLAGS += -fPIC -DPIC
+CFLAGS += -fPIC
 LD_SHAREDFLAGS=-shared
 
 # notion might not link to Xext, so modules will have to link to it themselves
@@ -155,7 +133,7 @@ module_install: module_stub_install
 
 else # PRELOAD_MODULES
 
-PICOPT=-fPIC -DPIC
+PICOPT=-fPIC
 LINKOPT=-shared
 
 $(MODULE).a: $(OBJS) $(EXT_OBJS)
@@ -178,22 +156,15 @@ else
 
 LUA_SOURCES += $(MODULE_STUB)
 
-endif #MODULE_STUB
+endif
 
-endif# !MODULE
-
-
-# Clean rules
-######################################
+endif
 
 _clean:
 	$(RM) -f $(TO_CLEAN) core *.d $(OBJS)
 
 _realclean:
 	$(RM) -f $(TO_REALCLEAN) $(TARGETS)
-
-# Lua rules
-######################################
 
 %.lc: %.lua
 	$(LUAC) -o $@ $<
@@ -204,14 +175,8 @@ lc_install:
 		$(INSTALL) -m $(DATA_MODE) $$i $(DESTDIR)$(LCDIR); \
 	done
 
-# Dependencies
-######################################
-
 CFLAGS += -MMD
 -include *.d
-
-# Subdirectories
-######################################
 
 ifdef SUBDIRS
 
@@ -229,17 +194,4 @@ subdirs-install:
 
 endif
 
-# Localisation
-######################################
-
-TO_CLEAN += potfiles_c potfiles_lua
-
-_potfiles:
-	echo "$(SOURCES)"|tr ' ' '\n' > potfiles_c
-	echo "$(LUA_SOURCES) $(ETC)"|tr ' ' '\n' > potfiles_lua
-
-# Defaults
-######################################
-
-INSTALL_STRIP ?= -s
-INSTALLBIN ?= $(INSTALL) $(INSTALL_STRIP) -m $(BIN_MODE)
+INSTALLBIN ?= $(INSTALL) -s -m $(BIN_MODE)

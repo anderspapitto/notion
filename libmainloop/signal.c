@@ -18,9 +18,7 @@
 #include "hooks.h"
 
 static int kill_sig = 0;
-#if 1
 static int wait_sig = 0;
-#endif
 
 static int usr2_sig = 0;
 static bool had_tmr = FALSE;
@@ -33,7 +31,6 @@ static sigset_t special_sigs;
 static WTimer *queue = NULL;
 
 int mainloop_gettime(struct timeval *val) {
-#if defined(_POSIX_MONOTONIC_CLOCK) && (_POSIX_MONOTONIC_CLOCK >= 0)
   struct timespec spec;
   int ret;
   static int checked = 0;
@@ -52,9 +49,6 @@ int mainloop_gettime(struct timeval *val) {
       return ret;
     }
   }
-#else
-#warning "Monotonic clock unavailable; please fix your operating system."
-#endif
   return gettimeofday(val, NULL);
 }
 
@@ -165,24 +159,20 @@ bool mainloop_check_signals() {
   if (usr2_sig != 0) {
     usr2_sig = 0;
     if (mainloop_sigusr2_hook != NULL) {
-      hook_call(mainloop_sigusr2_hook, NULL, (WHookMarshall *)mrsh_usr2,
-                (WHookMarshallExtl *)mrsh_usr2_extl);
+      hook_call(mainloop_sigusr2_hook, NULL, (WHookMarshall *)mrsh_usr2, (WHookMarshallExtl *)mrsh_usr2_extl);
     }
   }
 
-#if 1
   if (wait_sig != 0) {
     ChldParams p;
     wait_sig = 0;
     while ((p.pid = waitpid(-1, &p.code, WNOHANG | WUNTRACED)) > 0) {
       if (mainloop_sigchld_hook != NULL &&
           (WIFEXITED(p.code) || WIFSIGNALED(p.code))) {
-        hook_call(mainloop_sigchld_hook, &p, (WHookMarshall *)mrsh_chld,
-                  (WHookMarshallExtl *)mrsh_chld_extl);
+        hook_call(mainloop_sigchld_hook, &p, (WHookMarshall *)mrsh_chld, (WHookMarshallExtl *)mrsh_chld_extl);
       }
     }
   }
-#endif
 
   if (kill_sig != 0) return kill_sig;
 
@@ -237,9 +227,6 @@ static void add_to_current_time(struct timeval *when, uint msecs) {
   when->tv_sec += tmp_usec / 1000000;
 }
 
-/*EXTL_DOC
- * Is timer set?
- */
 EXTL_EXPORT_MEMBER
 bool timer_is_set(WTimer *timer) {
   WTimer *tmr;
@@ -249,8 +236,7 @@ bool timer_is_set(WTimer *timer) {
   return FALSE;
 }
 
-void timer_do_set(WTimer *timer, uint msecs, WTimerHandler *handler, Obj *obj,
-                  ExtlFn fn) {
+void timer_do_set(WTimer *timer, uint msecs, WTimerHandler *handler, Obj *obj, ExtlFn fn) {
   WTimer *q, **qptr;
 
   timer_reset(timer);
@@ -285,17 +271,11 @@ void timer_set(WTimer *timer, uint msecs, WTimerHandler *handler, Obj *obj) {
   timer_do_set(timer, msecs, handler, obj, extl_fn_none());
 }
 
-/*EXTL_DOC
- * Set \var{timer} to call \var{fn} in \var{msecs} milliseconds.
- */
 EXTL_EXPORT_AS(WTimer, set)
 void timer_set_extl(WTimer *timer, uint msecs, ExtlFn fn) {
   timer_do_set(timer, msecs, NULL, NULL, extl_ref_fn(fn));
 }
 
-/*EXTL_DOC
- * Reset timer.
- */
 EXTL_EXPORT_MEMBER
 void timer_reset(WTimer *timer) {
   WTimer *q = queue, **qptr = &queue;
@@ -330,9 +310,6 @@ void timer_deinit(WTimer *timer) { timer_reset(timer); }
 
 WTimer *create_timer() { CREATEOBJ_IMPL(WTimer, timer, (p)); }
 
-/*EXTL_DOC
- * Create a new timer.
- */
 EXTL_EXPORT_AS(mainloop, create_timer)
 WTimer *create_timer_extl_owned() {
   WTimer *timer = create_timer();
@@ -358,8 +335,7 @@ static void usr2_handler(int UNUSED(signal_num)) { usr2_sig = 1; }
 
 static void exit_handler(int signal_num) {
   if (kill_sig > 0) {
-    warn("Got signal %d while %d is still to be handled.", signal_num,
-         kill_sig);
+    warn("Got signal %d while %d is still to be handled.", signal_num, kill_sig);
   }
   kill_sig = signal_num;
 }
@@ -367,14 +343,6 @@ static void exit_handler(int signal_num) {
 static void timer_handler(int UNUSED(signal_num)) { had_tmr = TRUE; }
 
 static void ignore_handler(int UNUSED(signal_num)) {}
-
-#ifndef SA_RESTART
-/* glibc is broken (?) and does not define SA_RESTART with
- * '-ansi -D_XOPEN_SOURCE -D_XOPEN_SOURCE_EXTENDED', so just try to live
- * without it.
- */
-#define SA_RESTART 0
-#endif
 
 #define IFTRAP(X) if (sigismember(which, X))
 #define DEADLY(X) IFTRAP(X) signal(X, deadly_signal_handler);
@@ -395,50 +363,47 @@ void mainloop_trap_signals(const sigset_t *which) {
   sigemptyset(&oldset);
   sigprocmask(SIG_SETMASK, &set, &oldset);
 
-  /* I do not handle SIG{ILL,SEGV,FPE,BUS} since there's not much I can do in
-   * response */
-
+  /* I do not handle SIG{ILL,SEGV,FPE,BUS} since there's not much I can do in response */
   DEADLY(SIGHUP);
   DEADLY(SIGQUIT);
   DEADLY(SIGINT);
   DEADLY(SIGABRT);
 
   IGNORE(SIGTRAP);
-  /*IGNORE(SIGWINCH);*/
 
   sigemptyset(&(sa.sa_mask));
 
   IFTRAP(SIGALRM) {
     sa.sa_handler = timer_handler;
-    sa.sa_flags = SA_RESTART;
+    sa.sa_flags = 0;
     sigaction(SIGALRM, &sa, NULL);
     sigaddset(&special_sigs, SIGALRM);
   }
 
   IFTRAP(SIGCHLD) {
     sa.sa_handler = chld_handler;
-    sa.sa_flags = SA_NOCLDSTOP | SA_RESTART;
+    sa.sa_flags = SA_NOCLDSTOP;
     sigaction(SIGCHLD, &sa, NULL);
     sigaddset(&special_sigs, SIGCHLD);
   }
 
   IFTRAP(SIGUSR2) {
     sa.sa_handler = usr2_handler;
-    sa.sa_flags = SA_RESTART;
+    sa.sa_flags = 0;
     sigaction(SIGUSR2, &sa, NULL);
     sigaddset(&special_sigs, SIGUSR2);
   }
 
   IFTRAP(SIGTERM) {
     sa.sa_handler = exit_handler;
-    sa.sa_flags = SA_RESTART;
+    sa.sa_flags = 0;
     sigaction(SIGTERM, &sa, NULL);
     sigaddset(&special_sigs, SIGTERM);
   }
 
   IFTRAP(SIGUSR1) {
     sa.sa_handler = exit_handler;
-    sa.sa_flags = SA_RESTART;
+    sa.sa_flags = 0;
     sigaction(SIGUSR1, &sa, NULL);
   }
 

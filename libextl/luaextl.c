@@ -24,8 +24,7 @@
 #define MAGIC 0xf00ba7
 
 /* Maximum number of parameters and return values for calls from Lua
- * and (if va_copy is not available) return value from Lua functions.
- */
+ * and (if va_copy is not available) return value from Lua functions. */
 #define MAX_PARAMS 16
 
 static lua_State *l_st = NULL;
@@ -1209,34 +1208,19 @@ typedef struct {
   va_list *args;
   void *misc;
   int nret;
-#ifndef CF_HAS_VA_COPY
   void *ret_ptrs[MAX_PARAMS];
-#endif
 } ExtlDoCallParam;
 
 static bool extl_get_retvals(lua_State *st, int m, ExtlDoCallParam *param) {
   void *ptr;
   const char *spec = param->rspec;
 
-#ifdef CF_HAS_VA_COPY
   va_list args;
   va_copy(args, *(param->args));
-#else
-  if (m > MAX_PARAMS) {
-    extl_warn(
-        "Too many return values. Use a C compiler that has va_copy to support more.");
-    return FALSE;
-  }
-#endif
 
   while (m > 0) {
     bool dead = FALSE;
-#ifdef CF_HAS_VA_COPY
     ptr = va_arg(args, void *);
-#else
-    ptr = va_arg(*(param->args), void *);
-    param->ret_ptrs[param->nret] = ptr;
-#endif
     if (!extl_stack_get(st, -m, *spec, TRUE, &dead, ptr)) {
       if (dead) {
         extl_warn("Returned dead object.");
@@ -1253,9 +1237,7 @@ static bool extl_get_retvals(lua_State *st, int m, ExtlDoCallParam *param) {
     m--;
   }
 
-#ifdef CF_HAS_VA_COPY
   va_end(args);
-#endif
 
   return TRUE;
 }
@@ -1308,11 +1290,7 @@ static bool extl_cpcall_call(lua_State *st, ExtlCPCallFn *fn,
    */
 
   for (i = 0; i < param->nret; i++) {
-#ifdef CF_HAS_VA_COPY
     ptr = va_arg(*(param->args), void *);
-#else
-    ptr = param->ret_ptrs[i];
-#endif
     extl_free(ptr, *(param->rspec + i), STRINGS_ALL);
   }
 

@@ -1,16 +1,4 @@
-##
-## System settings
-##
-
-
-##
-## Installation paths
-##
-
 PREFIX=/usr/local
-
-# Unless you are creating a package conforming to some OS's standards, you
-# probably do not want to modify the following directories:
 
 # Main binaries
 BINDIR=$(PREFIX)/bin
@@ -37,17 +25,8 @@ VARDIR=/var/cache/libextl
 # Message catalogs
 LOCALEDIR=$(PREFIX)/share/locale
 
-
-##
-## Libtu
-##
-
 LIBTU_LIBS = -ltu
 LIBTU_INCLUDES =
-
-##
-## Lua
-##
 
 # To skip auto-detection of lua uncomment this and edit the variables below to
 # suit your installation of lua.
@@ -90,57 +69,22 @@ endif # lua
 
 endif # LUA_MANUAL
 
-
-##
-## C compiler
-##
-
 CC=gcc
 
 # Same as '-Wall -pedantic' without '-Wunused' as callbacks often
 # have unused variables.
-WARN=	-W -Wimplicit -Wreturn-type -Wswitch -Wcomment \
+WARN=-W -Wimplicit -Wreturn-type -Wswitch -Wcomment \
 	-Wtrigraphs -Wformat -Wchar-subscripts \
 	-Wparentheses -pedantic -Wuninitialized
 
-CFLAGS=-g -Os $(WARN) $(DEFINES) $(EXTRA_INCLUDES) $(INCLUDES)
-LDFLAGS=-g -Os $(EXTRA_LIBS) $(LIBS)
+CFLAGS=-Os $(WARN) $(DEFINES) $(EXTRA_INCLUDES) $(INCLUDES)
+LDFLAGS=-Os $(EXTRA_LIBS) $(LIBS)
 
-# The following options are mainly for development use and can be used
-# to check that the code seems to conform to some standards. Depending
-# on the version and vendor of you libc, the options may or may not have
-# expected results. If you define one of C99_SOURCE or XOPEN_SOURCE, you
-# may also have to define the other. 
-
-#C89_SOURCE=-ansi
-
-#POSIX_SOURCE=-D_POSIX_SOURCE
-
-# Most systems
-#XOPEN_SOURCE=-D_XOPEN_SOURCE -D_XOPEN_SOURCE_EXTENDED
-# SunOS, (Irix)
-#XOPEN_SOURCE=-D__EXTENSIONS__
-
-C99_SOURCE=-std=gnu11 -DCF_HAS_VA_COPY
-
-# The -DCF_HAS_VA_COPY option should allow for some optimisations, and 
-# in some cases simply defining
-#C99_SOURCE=-DCF_HAS_VA_COPY
-# might allow for those optimisations to be taken without any  special
-# libc or compiler options.
-
-##
-## AR
-##
+C99_SOURCE=-std=gnu11
 
 AR=ar
 ARFLAGS=cr
 RANLIB=ranlib
-
-
-##
-## Install & strip
-##
 
 INSTALL=sh $(TOPDIR)/install-sh -c
 INSTALLDIR=mkdir -p
