@@ -1,12 +1,3 @@
-/*
- * notion/ioncore/property.c
- *
- * Copyright (c) The Notion Team 2011.
- * Copyright (c) Tuomo Valkonen 1999-2009.
- *
- * See the included file LICENSE for details.
- */
-
 #include <X11/Xmd.h>
 #include <string.h>
 
@@ -14,11 +5,7 @@
 #include "property.h"
 #include "global.h"
 
-/*{{{ Primitives */
-
-static ulong xwindow_get_property_(Window win, Atom atom, Atom type,
-                                   ulong n32expected, bool more, uchar **p,
-                                   int *format) {
+static ulong xwindow_get_property_(Window win, Atom atom, Atom type, ulong n32expected, bool more, uchar **p, int *format) {
   Atom real_type;
   ulong n = -1, extra = 0;
   int status;
@@ -50,10 +37,6 @@ ulong xwindow_get_property(Window win, Atom atom, Atom type, ulong n32expected,
   int format = 0;
   return xwindow_get_property_(win, atom, type, n32expected, more, p, &format);
 }
-
-/*}}}*/
-
-/*{{{ String property stuff */
 
 char *xwindow_get_string_property(Window win, Atom a, int *nret) {
   char *p;
@@ -133,15 +116,6 @@ char **xwindow_get_text_property(Window win, Atom a, int *nret) {
   if (nret) *nret = (!st ? 0 : -1);
 
   if (!st) return NULL;
-
-#ifdef CF_XFREE86_TEXTPROP_BUG_WORKAROUND
-  while (prop.nitems > 0) {
-    if (prop.value[prop.nitems - 1] == '\0')
-      prop.nitems--;
-    else
-      break;
-  }
-#endif
 
   if (!ioncore_g.use_mb) {
     Status st = XTextPropertyToStringList(&prop, &list, &n);

@@ -89,13 +89,7 @@ void de_get_border(DEBorder *border, ExtlTab tab) {
   de_get_border_sides(&(border->sides), tab);
 }
 
-/*}}}*/
-
-/*{{{ Colours */
-
-static bool de_get_colour_(WRootWin *rootwin, DEColour *ret, ExtlTab tab,
-                           const char *what, DEColour substitute,
-                           DEColour inherit) {
+static bool de_get_colour_(WRootWin *rootwin, DEColour *ret, ExtlTab tab, const char *what, DEColour substitute, DEColour inherit) {
   char *name = NULL;
   bool set = FALSE;
 
@@ -127,20 +121,12 @@ void de_get_colour_group(WRootWin *rootwin, DEColourGroup *cg, ExtlTab tab,
 
   DEColour black, white;
 
-#ifdef HAVE_X11_XFT
-    de_alloc_colour(rootwin, &black, "black");
-    de_alloc_colour(rootwin, &white, "white");
-#else
-    black=DE_BLACK(rootwin);
-    white=DE_WHITE(rootwin);
-#endif
+  de_alloc_colour(rootwin, &black, "black");
+  de_alloc_colour(rootwin, &white, "white");
 
-  de_get_colour(rootwin, &(cg->hl), tab, "highlight_colour",
-                (based_on ? based_on->cgrp.hl : white));
-  de_get_colour(rootwin, &(cg->sh), tab, "shadow_colour",
-                (based_on ? based_on->cgrp.sh : white));
-  de_get_colour(rootwin, &(cg->fg), tab, "foreground_colour",
-                (based_on ? based_on->cgrp.fg : white));
+  de_get_colour(rootwin, &(cg->hl), tab, "highlight_colour", (based_on ? based_on->cgrp.hl : white));
+  de_get_colour(rootwin, &(cg->sh), tab, "shadow_colour", (based_on ? based_on->cgrp.sh : white));
+  de_get_colour(rootwin, &(cg->fg), tab, "foreground_colour", (based_on ? based_on->cgrp.fg : white));
   bgset = de_get_colour(rootwin, &(cg->bg), tab, "background_colour",
                         (based_on ? based_on->cgrp.bg : black));
 

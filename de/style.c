@@ -52,12 +52,6 @@ void destyle_create_tab_gcs(DEStyle *style) {
   /*gcv.function=GXclear;*/
   gcv.stipple = stipple_pixmap;
   gcvmask = GCFillStyle | GCStipple /*|GCFunction*/;
-#ifndef HAVE_X11_XFT
-  if (style->font != NULL && style->font->fontstruct != NULL) {
-    gcv.font = style->font->fontstruct->fid;
-    gcvmask |= GCFont;
-  }
-#endif /* HAVE_X11_XFT */
   style->stipple_gc = XCreateGC(dpy, root, gcvmask, &gcv);
   XCopyGC(dpy, style->normal_gc,
           GCLineStyle | GCLineWidth | GCJoinStyle | GCCapStyle,
@@ -158,14 +152,9 @@ void destyle_dump(DEStyle *style) {
 }
 
 bool destyle_init(DEStyle *style, WRootWin *rootwin, const char *name) {
-    DEColour black, white;
-#ifdef HAVE_X11_XFT
-    de_alloc_colour(rootwin, &black, "black");
-    de_alloc_colour(rootwin, &white, "white");
-#else
-    black=DE_BLACK(rootwin);
-    white=DE_WHITE(rootwin);
-#endif /* HAVE_X11_XFT */
+  DEColour black, white;
+  de_alloc_colour(rootwin, &black, "black");
+  de_alloc_colour(rootwin, &white, "white");
   if (!gr_stylespec_load(&style->spec, name)) return FALSE;
 
   style->based_on = NULL;

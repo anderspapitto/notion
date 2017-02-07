@@ -22,7 +22,6 @@ include $(TOPDIR)/build/lua-detect.mk
 X11_PREFIX ?= /usr
 X11_LIBS=-L$(X11_PREFIX)/lib -lX11 -lXext
 X11_INCLUDES=-I$(X11_PREFIX)/include
-DEFINES += -DCF_XFREE86_TEXTPROP_BUG_WORKAROUND
 
 # You may uncomment this if you know that your system C libary provides
 # asprintf and  vasprintf. (GNU libc does.) If HAS_SYSTEM_ASPRINTF is not
@@ -39,7 +38,7 @@ CC ?= clang
 
 WARN=-W -Wall -pedantic 
 
-CFLAGS += -Os $(WARN) $(DEFINES) $(INCLUDES) $(EXTRA_INCLUDES) \
+CFLAGS += -Os $(WARN) $(INCLUDES) $(EXTRA_INCLUDES) \
           -DHAS_SYSTEM_ASPRINTF=$(HAS_SYSTEM_ASPRINTF)
 
 LDFLAGS += -Wl,--as-needed $(LIBS) $(EXTRA_LIBS)
@@ -77,5 +76,4 @@ USE_XFT=1
 ifeq ($(USE_XFT),1)
     X11_INCLUDES += `pkg-config xft --cflags`
     X11_LIBS += `pkg-config xft --libs`
-    DEFINES += -DHAVE_X11_XFT
 endif

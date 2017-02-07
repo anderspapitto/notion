@@ -1,11 +1,3 @@
-/*
- * ion/de/colour.h
- *
- * Copyright (c) Tuomo Valkonen 1999-2009.
- *
- * See the included file LICENSE for details.
- */
-
 #ifndef ION_DE_COLOUR_H
 #define ION_DE_COLOUR_H
 
@@ -13,20 +5,11 @@
 #include <ioncore/global.h>
 #include <ioncore/rootwin.h>
 
-#ifdef HAVE_X11_XFT
 #include <X11/Xft/Xft.h>
-#endif /* HAVE_X11_XFT */
-
 
 INTRSTRUCT(DEColourGroup);
 
-
-#ifndef HAVE_X11_XFT
-typedef unsigned long DEColour;
-#else /* HAVE_X11_XFT */
 typedef XftColor DEColour;
-#endif /* HAVE_X11_XFT */
-
 
 DECLSTRUCT(DEColourGroup){
     GrStyleSpec spec;

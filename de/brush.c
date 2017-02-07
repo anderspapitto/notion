@@ -14,8 +14,6 @@
 #include "colour.h"
 #include "private.h"
 
-/*{{{ Brush creation and releasing */
-
 #define MATCHES(S, A) (gr_stylespec_score(&(S), A) > 0)
 
 #define ENSURE_INITSPEC(S, NM) \
@@ -35,9 +33,7 @@ bool debrush_init(DEBrush *brush, Window win, const GrStyleSpec *spec,
 
   gr_stylespec_init(&brush->current_attr);
 
-#ifdef HAVE_X11_XFT
   brush->draw=NULL;
-#endif
 
   style->usecount++;
 
@@ -55,8 +51,7 @@ bool debrush_init(DEBrush *brush, Window win, const GrStyleSpec *spec,
     if (!style->tabbrush_data_ok) destyle_create_tab_gcs(style);
   } else if (MATCHES(tabmenuentry_spec, spec)) {
     brush->extras_fn = debrush_menuentry_extras;
-    brush->indicator_w =
-        grbrush_get_text_width((GrBrush *)brush, DE_SUB_IND, DE_SUB_IND_LEN);
+    brush->indicator_w = grbrush_get_text_width((GrBrush *)brush, DE_SUB_IND, DE_SUB_IND_LEN);
   }
 
   return TRUE;
@@ -84,8 +79,6 @@ static DEBrush *do_get_brush(Window win, WRootWin *rootwin, const char *stylenam
 
   gr_stylespec_unalloc(&spec);
 
-  /* Set background colour */
-
   return brush;
 }
 
@@ -100,37 +93,29 @@ DEBrush *debrush_get_slave(DEBrush *master, WRootWin *rootwin, const char *style
 void debrush_deinit(DEBrush *brush) {
   destyle_unref(brush->d);
   brush->d = NULL;
-#ifdef HAVE_X11_XFT
-  if(brush->draw!=NULL)
+  if(brush->draw!=NULL){
       XftDrawDestroy(brush->draw);
-#endif /* HAVE_X11_XFT */
+  }
   gr_stylespec_unalloc(&brush->current_attr);
   grbrush_deinit(&(brush->grbrush));
 }
 
 void debrush_release(DEBrush *brush) { destroy_obj((Obj *)brush); }
 
-#ifdef HAVE_X11_XFT
 XftDraw *debrush_get_draw(DEBrush *brush, Drawable d) {
-    if(brush->draw==NULL)
+    if(brush->draw==NULL){
         brush->draw=XftDrawCreate(ioncore_g.dpy, d,
                                   XftDEDefaultVisual(),
-                                  DefaultColormap(ioncore_g.dpy,
-                                  0));
-    else
+                                  DefaultColormap(ioncore_g.dpy, 0));
+    }
+    else {
         XftDrawChange(brush->draw, d);
-
+    }
     return brush->draw;
 }
-#endif
-
-/*}}}*/
-
-/*{{{ Attributes */
 
 void debrush_init_attr(DEBrush *brush, const GrStyleSpec *spec) {
   gr_stylespec_unalloc(&brush->current_attr);
-
   if (spec != NULL) gr_stylespec_append(&brush->current_attr, spec);
 }
 
@@ -145,10 +130,6 @@ void debrush_unset_attr(DEBrush *brush, GrAttr attr) {
 GrStyleSpec *debrush_get_current_attr(DEBrush *brush) {
   return &brush->current_attr;
 }
-
-/*}}}*/
-
-/*{{{ Border widths and extra information */
 
 void debrush_get_border_widths(DEBrush *brush, GrBorderWidths *bdw) {
   DEStyle *style = brush->d;
@@ -217,10 +198,6 @@ bool debrush_get_extra(DEBrush *brush, const char *key, char type, void *data) {
   return FALSE;
 }
 
-/*}}}*/
-
-/*{{{ Class implementation */
-
 static DynFunTab debrush_dynfuntab[] = {
     {grbrush_release, debrush_release},
     {grbrush_draw_border, debrush_draw_border},
@@ -245,5 +222,3 @@ static DynFunTab debrush_dynfuntab[] = {
     END_DYNFUNTAB};
 
 IMPLCLASS(DEBrush, GrBrush, debrush_deinit, debrush_dynfuntab);
-
-/*}}}*/

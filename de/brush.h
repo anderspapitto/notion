@@ -1,11 +1,3 @@
-/*
- * ion/de/brush.h
- *
- * Copyright (c) Tuomo Valkonen 1999-2009.
- *
- * See the included file LICENSE for details.
- */
-
 #ifndef ION_DE_BRUSH_H
 #define ION_DE_BRUSH_H
 
@@ -15,9 +7,7 @@
 #include <ioncore/gr.h>
 #include <ioncore/rectangle.h>
 
-#ifdef HAVE_X11_XFT
 #include <X11/Xft/Xft.h>
-#endif /* HAVE_X11_XFT */
 
 INTRCLASS(DEBrush);
 
@@ -41,38 +31,21 @@ DECLCLASS(DEBrush){
     int indicator_w;
     Window win;
     bool clip_set;
-#ifdef HAVE_X11_XFT
     XftDraw *draw;
-#endif
     GrStyleSpec current_attr;
 };
 
-extern DEBrush *de_get_brush(Window win, WRootWin *rootwin,
-                             const char *style);
-
-extern DEBrush *create_debrush(Window win,
-                               const GrStyleSpec *spec, DEStyle *style);
-extern bool debrush_init(DEBrush *brush, Window win,
-                         const GrStyleSpec *spec, DEStyle *style);
+extern DEBrush *de_get_brush(Window win, WRootWin *rootwin, const char *style);
+extern DEBrush *create_debrush(Window win, const GrStyleSpec *spec, DEStyle *style);
+extern bool debrush_init(DEBrush *brush, Window win, const GrStyleSpec *spec, DEStyle *style);
 extern void debrush_deinit(DEBrush *brush);
-
-extern DEBrush *debrush_get_slave(DEBrush *brush, WRootWin *rootwin,
-                                  const char *style);
-
+extern DEBrush *debrush_get_slave(DEBrush *brush, WRootWin *rootwin, const char *style);
 extern void debrush_release(DEBrush *brush);
-
-
-extern DEColourGroup *debrush_get_colour_group2(DEBrush *brush,
-                                                const GrStyleSpec *a1,
-                                                const GrStyleSpec *a2);
-
-extern DEColourGroup *debrush_get_colour_group(DEBrush *brush,
-                                               const GrStyleSpec *attr);
-
+extern DEColourGroup *debrush_get_colour_group2(DEBrush *brush, const GrStyleSpec *a1, const GrStyleSpec *a2);
+extern DEColourGroup *debrush_get_colour_group(DEBrush *brush, const GrStyleSpec *attr);
 extern DEColourGroup *debrush_get_current_colour_group(DEBrush *brush);
 
 /* Begin/end */
-
 extern void debrush_begin(DEBrush *brush, const WRectangle *geom, int flags);
 extern void debrush_end(DEBrush *brush);
 
@@ -82,24 +55,15 @@ extern void debrush_unset_attr(DEBrush *brush, GrAttr attr);
 extern GrStyleSpec *debrush_get_current_attr(DEBrush *brush);
 
 /* Information */
-
 extern void debrush_get_border_widths(DEBrush *brush, GrBorderWidths *bdw);
-extern bool debrush_get_extra(DEBrush *brush, const char *key, char type,
-                              void *data);
+extern bool debrush_get_extra(DEBrush *brush, const char *key, char type, void *data);
 
 /* Borders & boxes */
+extern void debrush_draw_border(DEBrush *brush, const WRectangle *geom);
+extern void debrush_draw_borderline(DEBrush *brush, const WRectangle *geom, GrBorderLine line);
 
-extern void debrush_draw_border(DEBrush *brush,
-                                const WRectangle *geom);
-extern void debrush_draw_borderline(DEBrush *brush, const WRectangle *geom,
-                                    GrBorderLine line);
-
-extern void debrush_draw_textbox(DEBrush *brush, const WRectangle *geom,
-                                 const char *text, bool needfill);
-
-extern void debrush_draw_textboxes(DEBrush *brush, const WRectangle *geom,
-                                   int n, const GrTextElem *elem,
-                                   bool needfill);
+extern void debrush_draw_textbox(DEBrush *brush, const WRectangle *geom, const char *text, bool needfill);
+extern void debrush_draw_textboxes(DEBrush *brush, const WRectangle *geom, int n, const GrTextElem *elem, bool needfill);
 
 extern DEBrushExtrasFn debrush_tab_extras;
 extern DEBrushExtrasFn debrush_menuentry_extras;
@@ -108,8 +72,6 @@ extern void debrush_set_window_shape(DEBrush *brush, bool rough, int n, const WR
 extern void debrush_fill_area(DEBrush *brush, const WRectangle *geom);
 extern void debrush_clear_area(DEBrush *brush, const WRectangle *geom);
 
-#ifdef HAVE_X11_XFT
 XftDraw *debrush_get_draw(DEBrush *brush, Drawable d);
-#endif
 
 #endif /* ION_DE_BRUSH_H */

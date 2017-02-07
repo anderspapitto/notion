@@ -1,11 +1,3 @@
-/*
- * ion/de/draw.c
- *
- * Copyright (c) Tuomo Valkonen 1999-2009.
- *
- * See the included file LICENSE for details.
- */
-
 #include <string.h>
 #include <limits.h>
 
@@ -19,17 +11,9 @@
 
 #include <X11/extensions/shape.h>
 
-#ifndef HAVE_X11_XFT
-#  define PIXEL(x) x
-#else /* HAVE_X11_XFT */
-#  define PIXEL(x) (x).pixel
-#endif /* HAVE_X11_XFT */
+#define PIXEL(x) (x).pixel
 
-/*{{{ Colour group lookup */
-
-static DEColourGroup *destyle_get_colour_group2(DEStyle *style,
-                                                const GrStyleSpec *a1,
-                                                const GrStyleSpec *a2) {
+static DEColourGroup *destyle_get_colour_group2(DEStyle *style, const GrStyleSpec *a1, const GrStyleSpec *a2) {
   int i, score, maxscore = 0;
   DEColourGroup *maxg = &(style->cgrp);
 
@@ -48,13 +32,11 @@ static DEColourGroup *destyle_get_colour_group2(DEStyle *style,
   return maxg;
 }
 
-DEColourGroup *debrush_get_colour_group2(DEBrush *brush, const GrStyleSpec *a1,
-                                         const GrStyleSpec *a2) {
+DEColourGroup *debrush_get_colour_group2(DEBrush *brush, const GrStyleSpec *a1, const GrStyleSpec *a2) {
   return destyle_get_colour_group2(brush->d, a1, a2);
 }
 
-DEColourGroup *debrush_get_colour_group(DEBrush *brush,
-                                        const GrStyleSpec *attr) {
+DEColourGroup *debrush_get_colour_group(DEBrush *brush, const GrStyleSpec *attr) {
   return destyle_get_colour_group2(brush->d, attr, NULL);
 }
 
@@ -62,15 +44,10 @@ DEColourGroup *debrush_get_current_colour_group(DEBrush *brush) {
   return debrush_get_colour_group(brush, debrush_get_current_attr(brush));
 }
 
-/*}}}*/
-
-/*{{{ Borders */
-
 /* Draw a border at x, y with outer width w x h. Top and left 'tl' pixels
  * wide with color 'tlc' and bottom and right 'br' pixels with colors 'brc'.
  */
-static void do_draw_border(Window win, GC gc, int x, int y, int w, int h,
-                           uint tl, uint br, DEColour tlc, DEColour brc) {
+static void do_draw_border(Window win, GC gc, int x, int y, int w, int h, uint tl, uint br, DEColour tlc, DEColour brc) {
   XPoint points[3];
   uint i = 0, a = 0, b = 0;
 
@@ -116,8 +93,7 @@ static void do_draw_border(Window win, GC gc, int x, int y, int w, int h,
   }
 }
 
-static void draw_border(Window win, GC gc, WRectangle *geom, uint tl, uint br,
-                        DEColour tlc, DEColour brc) {
+static void draw_border(Window win, GC gc, WRectangle *geom, uint tl, uint br, DEColour tlc, DEColour brc) {
   do_draw_border(win, gc, geom->x, geom->y, geom->w, geom->h, tl, br, tlc, brc);
   geom->x += tl;
   geom->y += tl;
@@ -125,9 +101,7 @@ static void draw_border(Window win, GC gc, WRectangle *geom, uint tl, uint br,
   geom->h -= tl + br;
 }
 
-static void draw_borderline(Window win, GC gc, WRectangle *geom, uint tl,
-                            uint br, DEColour tlc, DEColour brc,
-                            GrBorderLine line) {
+static void draw_borderline(Window win, GC gc, WRectangle *geom, uint tl, uint br, DEColour tlc, DEColour brc, GrBorderLine line) {
   if (line == GR_BORDERLINE_LEFT && geom->h > 0 && tl > 0) {
     XSetForeground(ioncore_g.dpy, gc, PIXEL(tlc));
     XSetBackground(ioncore_g.dpy, gc, PIXEL(tlc));
@@ -153,8 +127,7 @@ static void draw_borderline(Window win, GC gc, WRectangle *geom, uint tl,
   }
 }
 
-void debrush_do_draw_borderline(DEBrush *brush, WRectangle geom,
-                                DEColourGroup *cg, GrBorderLine line) {
+void debrush_do_draw_borderline(DEBrush *brush, WRectangle geom, DEColourGroup *cg, GrBorderLine line) {
   DEBorder *bd = &(brush->d->border);
   GC gc = brush->d->normal_gc;
   Window win = brush->win;

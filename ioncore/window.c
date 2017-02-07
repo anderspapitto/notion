@@ -68,16 +68,11 @@ void window_deinit(WWindow *wwin) {
    */
 }
 
-/*}}}*/
-
-/*{{{ Region dynfuns */
-
 static void window_notify_subs_rootpos(WWindow *wwin, int x, int y) {
-  WRegion *sub;
-
-  FOR_ALL_CHILDREN(wwin, sub) {
-    region_notify_rootpos(sub, x + REGION_GEOM(sub).x, y + REGION_GEOM(sub).y);
-  }
+  /* WRegion *sub; */
+  /* FOR_ALL_CHILDREN(wwin, sub) { */
+  /*   region_notify_rootpos(sub, x + REGION_GEOM(sub).x, y + REGION_GEOM(sub).y); */
+  /* } */
 }
 
 void window_notify_subs_move(WWindow *wwin) {
@@ -87,8 +82,7 @@ void window_notify_subs_move(WWindow *wwin) {
 }
 
 void window_do_fitrep(WWindow *wwin, WWindow *par, const WRectangle *geom) {
-  bool move =
-      (REGION_GEOM(wwin).x != geom->x || REGION_GEOM(wwin).y != geom->y);
+  bool move = (REGION_GEOM(wwin).x != geom->x || REGION_GEOM(wwin).y != geom->y);
   int w = maxof(1, geom->w);
   int h = maxof(1, geom->h);
 
@@ -135,13 +129,6 @@ void window_restack(WWindow *wwin, Window other, int mode) {
 
 Window window_xwindow(const WWindow *wwin) { return wwin->win; }
 
-/*}}}*/
-
-/*{{{ Misc. */
-
-/*EXTL_DOC
- * Return the X window id for \var{wwin}.
- */
 EXTL_SAFE
 EXTL_EXPORT_MEMBER
 double window_xid(WWindow *wwin) { return wwin->win; }
@@ -150,10 +137,6 @@ void window_select_input(WWindow *wwin, long event_mask) {
   XSelectInput(ioncore_g.dpy, wwin->win, event_mask);
   wwin->event_mask = event_mask;
 }
-
-/*}}}*/
-
-/*{{{ Dynamic function table and class implementation */
 
 static DynFunTab window_dynfuntab[] = {
     {region_map, window_map},
@@ -167,5 +150,3 @@ static DynFunTab window_dynfuntab[] = {
 
 EXTL_EXPORT
 IMPLCLASS(WWindow, WRegion, window_deinit, window_dynfuntab);
-
-/*}}}*/
