@@ -570,7 +570,6 @@ void frame_managed_notify(WFrame *frame, WRegion *UNUSED(sub), WRegionNotify how
 
     frame_update_attrs(frame);
     frame_recalc_bar(frame, complete);
-    frame_draw_bar(frame, complete);
   }
 }
 
@@ -586,7 +585,6 @@ static void frame_managed_changed(WFrame *frame, int mode, bool sw, WRegion *reg
   bool need_draw = TRUE;
   if (mode != MPLEX_CHANGE_SWITCHONLY) frame_initialise_titles(frame);
   else frame_update_attrs(frame);
-  if (need_draw) frame_draw_bar(frame, mode != MPLEX_CHANGE_SWITCHONLY);
   mplex_call_changed_hook((WMPlex *)frame, frame_managed_changed_hook, mode, sw, reg);
 }
 

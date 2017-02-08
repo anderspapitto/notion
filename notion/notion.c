@@ -8,6 +8,9 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+#include "/usr/include/xcb/xcb.h"
+#include "/usr/include/xcb/xproto.h"
+
 #include <libtu/util.h>
 #include <libtu/errorlog.h>
 #include <libtu/prefix.h>

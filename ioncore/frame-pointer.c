@@ -107,7 +107,6 @@ static bool tabdrag_kbd_handler(WRegion *reg, XEvent *xev) {
 static void setup_dragwin(WFrame *frame, uint tab) {
   WRootWin *rw;
   WFitParams fp;
-  const char *tab_style = framemode_get_tab_style(frame->mode);
 
   assert(tabdrag_infowin == NULL);
 
@@ -119,7 +118,7 @@ static void setup_dragwin(WFrame *frame, uint tab) {
   fp.g.w = frame_nth_tab_w(frame, tab);
   fp.g.h = frame->bar_h;
 
-  tabdrag_infowin = create_infowin((WWindow *)rw, &fp, tab_style);
+  tabdrag_infowin = create_infowin((WWindow *)rw, &fp, "");
 
   if (tabdrag_infowin == NULL) return;
 
@@ -156,8 +155,6 @@ static void p_tabdrag_begin(WFrame *frame, XMotionEvent *ev, int dx, int dy) {
 
   frame->tab_dragged_idx = p_tabnum;
   frame_update_attr_nth(frame, p_tabnum);
-
-  frame_draw_bar(frame, FALSE);
 
   p_tabdrag_motion(frame, ev, dx, dy);
 
@@ -225,7 +222,6 @@ static void tabdrag_deinit(WFrame *frame) {
 
 static void tabdrag_killed(WFrame *frame) {
   tabdrag_deinit(frame);
-  if (!OBJ_IS_BEING_DESTROYED(frame)) frame_draw_bar(frame, TRUE);
 }
 
 static void p_tabdrag_end(WFrame *frame, XButtonEvent *ev) {
@@ -243,14 +239,11 @@ static void p_tabdrag_end(WFrame *frame, XButtonEvent *ev) {
 
   if (dropped_on == NULL || dropped_on == (WRegion *)frame ||
       dropped_on == sub || !drop_ok(dropped_on, sub)) {
-    frame_draw_bar(frame, TRUE);
     return;
   }
 
   if (region_handle_drop(dropped_on, p_tab_x, p_tab_y, sub))
     region_goto(dropped_on);
-  else
-    frame_draw_bar(frame, TRUE);
 }
 
 EXTL_EXPORT_MEMBER

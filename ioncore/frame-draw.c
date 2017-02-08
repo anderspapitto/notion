@@ -174,7 +174,6 @@ void frame_recalc_bar(WFrame *frame, bool complete) {
     free_title(frame, i);
     textw = frame->titles[i].iw;
     if (textw > 0) {
-      title = grbrush_make_label(frame->bar_brush, "[ -- EmptyFrame -- ]", textw);
       frame->titles[i].text = title;
     }
     return;
@@ -184,25 +183,10 @@ void frame_recalc_bar(WFrame *frame, bool complete) {
     free_title(frame, i);
     textw = frame->titles[i].iw;
     if (textw > 0) {
-      title = region_make_label(sub, textw, frame->bar_brush);
       frame->titles[i].text = title;
     }
     i++;
   }
-}
-
-void frame_draw_bar(const WFrame *frame, bool complete) {
-  WRectangle geom;
-
-  if (frame->bar_brush == NULL || !BAR_EXISTS(frame) || frame->titles == NULL) {
-    return;
-  }
-
-  frame_bar_geom(frame, &geom);
-  grbrush_begin(frame->bar_brush, &geom, GRBRUSH_AMEND);
-  grbrush_init_attr(frame->bar_brush, &frame->baseattr);
-  grbrush_draw_textboxes(frame->bar_brush, &geom, frame->titles_n, frame->titles, complete);
-  grbrush_end(frame->bar_brush);
 }
 
 void frame_draw(const WFrame *frame, bool complete) {
@@ -213,7 +197,6 @@ void frame_draw(const WFrame *frame, bool complete) {
   grbrush_begin(frame->brush, &geom, (complete ? 0 : GRBRUSH_NO_CLEAR_OK));
   grbrush_init_attr(frame->brush, &frame->baseattr);
   grbrush_draw_border(frame->brush, &geom);
-  frame_draw_bar(frame, TRUE);
   grbrush_end(frame->brush);
 }
 
@@ -243,14 +226,6 @@ void frame_brushes_updated(WFrame *frame) {
 
   if (barmode == FRAME_BAR_NONE || frame->bar_brush == NULL) {
     frame->bar_h = 0;
-  } else {
-    GrBorderWidths bdw;
-    GrFontExtents fnte;
-
-    grbrush_get_border_widths(frame->bar_brush, &bdw);
-    grbrush_get_font_extents(frame->bar_brush, &fnte);
-
-    frame->bar_h = bdw.top + bdw.bottom + fnte.max_height;
   }
   frame_tabs_calc_brushes_updated(frame);
 }
@@ -266,42 +241,15 @@ void frame_updategr(WFrame *frame) {
   window_draw((WWindow *)frame, TRUE);
 }
 
-static StringIntMap frame_tab_styles[] = {
-    {"tab-frame-unknown", FRAME_MODE_UNKNOWN},
-    {"tab-frame-unknown-alt", FRAME_MODE_UNKNOWN_ALT},
-    {"tab-frame-tiled", FRAME_MODE_TILED},
-    {"tab-frame-tiled-alt", FRAME_MODE_TILED_ALT},
-    {"tab-frame-floating", FRAME_MODE_FLOATING},
-    {"tab-frame-floating-alt", FRAME_MODE_FLOATING_ALT},
-    {"tab-frame-transient", FRAME_MODE_TRANSIENT},
-    {"tab-frame-transient-alt", FRAME_MODE_TRANSIENT_ALT},
-    END_STRINGINTMAP};
-
-const char *framemode_get_tab_style(WFrameMode mode) {
-  return stringintmap_key(frame_tab_styles, mode, "tab-frame");
-}
-
-const char *framemode_get_style(WFrameMode mode) {
-  const char *p = framemode_get_tab_style(mode);
-  assert(p != NULL);
-  return (p + 4);
-}
-
 void frame_initialise_gr(WFrame *frame) {
   Window win = frame->mplex.win.win;
   WRootWin *rw = region_rootwin_of((WRegion *)frame);
-  const char *style = framemode_get_style(frame->mode);
-  const char *tab_style = framemode_get_tab_style(frame->mode);
-
-  frame->brush = gr_get_brush(win, rw, style);
+  frame->brush = gr_get_brush(win, rw, "frame");
   if (frame->brush == NULL) return;
-  frame->bar_brush = grbrush_get_slave(frame->brush, rw, tab_style);
-  if (frame->bar_brush == NULL) return;
   frame_brushes_updated(frame);
 }
 
 void frame_release_brushes(WFrame *frame) {
-  if (frame->bar_brush != NULL) { grbrush_release(frame->bar_brush); frame->bar_brush = NULL; }
   if (frame->brush != NULL) { grbrush_release(frame->brush); frame->brush = NULL; }
 }
 

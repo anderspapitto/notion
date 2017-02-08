@@ -30,7 +30,7 @@ CC ?= clang
 
 WARN=-W -Wall -pedantic 
 
-CFLAGS += -Os $(WARN) $(INCLUDES) $(EXTRA_INCLUDES)
+CFLAGS += -g -Os $(WARN) $(INCLUDES) $(EXTRA_INCLUDES)
 
 LDFLAGS += -Wl,--as-needed $(LIBS) $(EXTRA_LIBS)
 EXPORT_DYNAMIC=-Xlinker --export-dynamic
