@@ -3,10 +3,6 @@
 #define XK_MISCELLANY
 #include <X11/keysymdef.h>
 
-#ifdef CF_SUN_F1X_REMAP
-#include <X11/Sunkeysym.h>
-#endif
-
 #include <libtu/map.h>
 
 #include "common.h"

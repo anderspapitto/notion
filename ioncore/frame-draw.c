@@ -45,6 +45,9 @@ static void ensure_create_attrs() {
   GR_ALLOCATTR_END;
 }
 
+/* *****************************************************************************
+ * This function used to update visual attributes like border colors and another
+ * */
 void frame_update_attr(WFrame *frame, int i, WRegion *reg) {
   GrStyleSpec *spec;
   bool selected, tagged, dragged, activity;
@@ -147,13 +150,6 @@ void frame_clear_shape(WFrame *frame) {
   if (frame->brush != NULL) grbrush_set_window_shape(frame->brush, TRUE, 0, NULL);
 }
 
-static void free_title(WFrame *frame, int i) {
-  if (frame->titles[i].text != NULL) {
-    free(frame->titles[i].text);
-    frame->titles[i].text = NULL;
-  }
-}
-
 void frame_draw(const WFrame *frame, bool complete) {
   WRectangle geom;
   if (frame->brush == NULL) return;
@@ -219,7 +215,6 @@ void frame_release_brushes(WFrame *frame) {
 
 void frame_setup_dragwin_style(WFrame *frame, GrStyleSpec *spec, int tab) {
   gr_stylespec_append(spec, &frame->baseattr);
-  gr_stylespec_append(spec, &frame->titles[tab].attr);
 }
 
 void frame_inactivated(WFrame *frame) {
