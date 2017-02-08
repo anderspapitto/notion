@@ -31,8 +31,6 @@
 #include "return.h"
 
 extern void frame_initialise_gr(WFrame *frame);
-static bool frame_initialise_titles(WFrame *frame);
-static void frame_free_titles(WFrame *frame);
 static void frame_add_mode_bindmaps(WFrame *frame);
 
 WHook *frame_managed_changed_hook = NULL;
@@ -71,7 +69,6 @@ bool frame_init(WFrame *frame, WWindow *parent, const WFitParams *fp, WFrameMode
   if (!mplex_init((WMPlex *)frame, parent, fp)) return FALSE;
 
   frame_initialise_gr(frame);
-  frame_initialise_titles(frame);
 
   region_add_bindmap((WRegion *)frame, ioncore_frame_bindmap);
   region_add_bindmap((WRegion *)frame, ioncore_mplex_bindmap);
@@ -88,7 +85,6 @@ WFrame *create_frame(WWindow *parent, const WFitParams *fp, WFrameMode mode) {
 }
 
 void frame_deinit(WFrame *frame) {
-  frame_free_titles(frame);
   frame_release_brushes(frame);
   gr_stylespec_unalloc(&frame->baseattr);
   mplex_deinit((WMPlex *)frame);
@@ -216,49 +212,6 @@ static void frame_update_attrs(WFrame *frame) {
     frame_update_attr(frame, i, sub);
     i++;
   }
-}
-
-static void frame_free_titles(WFrame *frame) {
-  int i;
-
-  if (frame->titles != NULL) {
-    for (i = 0; i < frame->titles_n; i++) {
-      if (frame->titles[i].text) free(frame->titles[i].text);
-      gr_stylespec_unalloc(&frame->titles[i].attr);
-    }
-    free(frame->titles);
-    frame->titles = NULL;
-  }
-  frame->titles_n = 0;
-}
-
-static void do_init_title(WFrame *frame, int i, WRegion *sub) {
-  frame->titles[i].text = NULL;
-  gr_stylespec_init(&frame->titles[i].attr);
-  frame_update_attr(frame, i, sub);
-}
-
-static bool frame_initialise_titles(WFrame *frame) {
-  int i, n = FRAME_MCOUNT(frame);
-  frame_free_titles(frame);
-  if (n == 0) n = 1;
-  frame->titles = ALLOC_N(GrTextElem, n);
-  if (frame->titles == NULL) return FALSE;
-  frame->titles_n = n;
-
-  if (FRAME_MCOUNT(frame) == 0) {
-    do_init_title(frame, 0, NULL);
-  } else {
-    WLListIterTmp tmp;
-    WRegion *sub;
-    i = 0;
-    FRAME_MX_FOR_ALL(sub, frame, tmp) {
-      do_init_title(frame, i, sub);
-      i++;
-    }
-  }
-  frame_recalc_bar(frame, FALSE);
-  return TRUE;
 }
 
 bool frame_fitrep(WFrame *frame, WWindow *par, const WFitParams *fp) {
@@ -569,22 +522,18 @@ void frame_managed_notify(WFrame *frame, WRegion *UNUSED(sub), WRegionNotify how
     complete = how == ioncore_g.notifies.name;
 
     frame_update_attrs(frame);
-    frame_recalc_bar(frame, complete);
   }
 }
 
 static void frame_size_changed_default(WFrame *frame, bool wchg, bool hchg) {
   int bar_w = frame->bar_w;
-  if (wchg) frame_recalc_bar(frame, TRUE);
   if (frame->barmode == FRAME_BAR_SHAPED && ((!wchg && hchg) || (wchg && bar_w == frame->bar_w))) {
     frame_set_shape(frame);
   }
 }
 
 static void frame_managed_changed(WFrame *frame, int mode, bool sw, WRegion *reg) {
-  bool need_draw = TRUE;
-  if (mode != MPLEX_CHANGE_SWITCHONLY) frame_initialise_titles(frame);
-  else frame_update_attrs(frame);
+  if (mode == MPLEX_CHANGE_SWITCHONLY) frame_update_attrs(frame);
   mplex_call_changed_hook((WMPlex *)frame, frame_managed_changed_hook, mode, sw, reg);
 }
 

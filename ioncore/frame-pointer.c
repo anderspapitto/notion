@@ -123,12 +123,6 @@ static void setup_dragwin(WFrame *frame, uint tab) {
   if (tabdrag_infowin == NULL) return;
 
   frame_setup_dragwin_style(frame, infowin_stylespec(tabdrag_infowin), tab);
-
-  if (frame->titles[tab].text != NULL) {
-    char *buf = INFOWIN_BUFFER(tabdrag_infowin);
-    strncpy(buf, frame->titles[tab].text, INFOWIN_BUFFER_LEN - 1);
-    buf[INFOWIN_BUFFER_LEN - 1] = '\0';
-  }
 }
 
 static void p_tabdrag_motion(WFrame *UNUSED(frame), XMotionEvent *UNUSED(ev),

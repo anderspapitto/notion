@@ -154,41 +154,6 @@ static void free_title(WFrame *frame, int i) {
   }
 }
 
-void frame_recalc_bar(WFrame *frame, bool complete) {
-  int textw, i;
-  WLListIterTmp tmp;
-  WRegion *sub;
-  char *title;
-  bool set_shape;
-  if (frame->bar_brush == NULL || frame->titles == NULL) return;
-  set_shape = frame->tabs_params.alg(frame, complete);
-  if (set_shape) {
-    if (frame->barmode == FRAME_BAR_SHAPED)
-      frame_set_shape(frame);
-    else
-      frame_clear_shape(frame);
-  }
-
-  i = 0;
-  if (FRAME_MCOUNT(frame) == 0) {
-    free_title(frame, i);
-    textw = frame->titles[i].iw;
-    if (textw > 0) {
-      frame->titles[i].text = title;
-    }
-    return;
-  }
-
-  FRAME_MX_FOR_ALL(sub, frame, tmp) {
-    free_title(frame, i);
-    textw = frame->titles[i].iw;
-    if (textw > 0) {
-      frame->titles[i].text = title;
-    }
-    i++;
-  }
-}
-
 void frame_draw(const WFrame *frame, bool complete) {
   WRectangle geom;
   if (frame->brush == NULL) return;
@@ -237,7 +202,6 @@ void frame_updategr(WFrame *frame) {
   region_updategr_default((WRegion *)frame);
 
   mplex_fit_managed(&frame->mplex);
-  frame_recalc_bar(frame, TRUE);
   window_draw((WWindow *)frame, TRUE);
 }
 
