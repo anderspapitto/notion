@@ -152,68 +152,10 @@ XFontSet de_create_font_in_c_locale(const char *fontname) {
   return fs;
 }
 
-XFontSet de_create_font_kludged(const char *fontname) {
-  XFontSet fs = NULL;
-#ifndef CF_NO_FONTSET_KLUDGE
-  char *pattern2 = NULL;
-  char weight[CF_FONT_ELEMENT_SIZE], slant[CF_FONT_ELEMENT_SIZE];
-  int pixel_size = 0;
-
-  LOG(DEBUG, FONT, "Doing the fontset_kludge with fontname %s.", fontname);
-
-  get_font_element(fontname, weight, CF_FONT_ELEMENT_SIZE, "-medium-", "-bold-",
-                   "-demibold-", "-regular-", NULL);
-  get_font_element(fontname, slant, CF_FONT_ELEMENT_SIZE, "-r-", "-i-", "-o-",
-                   "-ri-", "-ro-", NULL);
-  get_font_size(fontname, &pixel_size);
-
-  if (!strcmp(weight, "*")) strncpy(weight, "medium", CF_FONT_ELEMENT_SIZE);
-  if (!strcmp(slant, "*")) strncpy(slant, "r", CF_FONT_ELEMENT_SIZE);
-  if (pixel_size < 3)
-    pixel_size = 3;
-  else if (pixel_size > 97)
-    pixel_size = 97;
-
-  if (ioncore_g.enc_utf8) {
-    libtu_asprintf(&pattern2,
-                   "%s,"
-                   "-misc-fixed-%s-%s-*-*-%d-*-*-*-*-*-*-*,"
-                   "-misc-fixed-*-*-*-*-%d-*-*-*-*-*-*-*",
-                   fontname, weight, slant, pixel_size, pixel_size);
-  } else {
-    libtu_asprintf(&pattern2,
-                   "%s,"
-                   "-*-*-%s-%s-*-*-%d-*-*-*-*-*-*-*,"
-                   "-*-*-*-*-*-*-%d-*-*-*-*-*-*-*",
-                   fontname, weight, slant, pixel_size, pixel_size);
-  }
-
-  if (pattern2 != NULL) {
-    LOG(DEBUG, FONT, "no_fontset_kludge resulted in fontname %s", pattern2);
-
-    fs = de_create_font_in_current_locale(pattern2);
-
-    free(pattern2);
-  }
-
-#endif
-  return fs;
-}
-
 XFontSet de_create_font_set(const char *fontname) {
   XFontSet fs = de_create_font_in_current_locale(fontname);
 
   if (fs) return fs;
-
   fs = de_create_font_in_c_locale(fontname);
-
   if (fs) return fs;
-
-  fs = de_create_font_kludged(fontname);
-
-  if (fs) return fs;
-
-  /* The final fallback... */
-  warn("Could not load font %s", fontname);
-  return de_create_font_in_current_locale("-*-*-*-*-*-*-*-*-*-*-*-*-*-*");
 }

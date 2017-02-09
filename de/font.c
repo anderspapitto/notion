@@ -154,3 +154,7 @@ void debrush_draw_string(DEBrush *brush, int x, int y, const char *str, int len,
   DEColourGroup *cg = debrush_get_current_colour_group(brush);
   if (cg != NULL) debrush_do_draw_string(brush, x, y, str, len, needfill, cg);
 }
+
+
+#include "../version.h"
+char de_ion_api_version[] = NOTION_API_VERSION;
