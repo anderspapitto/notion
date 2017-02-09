@@ -10,13 +10,6 @@
 
 static DEFont *fonts = NULL;
 
-const char *de_default_fontname() {
-  if (ioncore_g.use_mb)
-    return "-*-helvetica-medium-r-normal-*-12-*-*-*-*-*-*-*";
-  else
-    return "fixed";
-}
-
 DEFont *de_load_font(const char *fontname) {
   XftFont *font;
   DEFont *fnt;

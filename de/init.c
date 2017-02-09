@@ -109,13 +109,11 @@ static bool de_get_colour_(WRootWin *rootwin, DEColour *ret, ExtlTab tab, const 
   return set;
 }
 
-static bool de_get_colour(WRootWin *rootwin, DEColour *ret, ExtlTab tab,
-                          const char *what, DEColour substitute) {
+static bool de_get_colour(WRootWin *rootwin, DEColour *ret, ExtlTab tab, const char *what, DEColour substitute) {
   return de_get_colour_(rootwin, ret, tab, what, substitute, substitute);
 }
 
-void de_get_colour_group(WRootWin *rootwin, DEColourGroup *cg, ExtlTab tab,
-                         DEStyle *based_on) {
+void de_get_colour_group(WRootWin *rootwin, DEColourGroup *cg, ExtlTab tab, DEStyle *based_on) {
   bool bgset;
   DEColour padinh;
 
@@ -127,13 +125,11 @@ void de_get_colour_group(WRootWin *rootwin, DEColourGroup *cg, ExtlTab tab,
   de_get_colour(rootwin, &(cg->hl), tab, "highlight_colour", (based_on ? based_on->cgrp.hl : white));
   de_get_colour(rootwin, &(cg->sh), tab, "shadow_colour", (based_on ? based_on->cgrp.sh : white));
   de_get_colour(rootwin, &(cg->fg), tab, "foreground_colour", (based_on ? based_on->cgrp.fg : white));
-  bgset = de_get_colour(rootwin, &(cg->bg), tab, "background_colour",
-                        (based_on ? based_on->cgrp.bg : black));
+  bgset = de_get_colour(rootwin, &(cg->bg), tab, "background_colour", (based_on ? based_on->cgrp.bg : black));
 
   padinh = (based_on ? based_on->cgrp.pad : white);
 
-  de_get_colour_(rootwin, &(cg->pad), tab, "padding_colour",
-                 (bgset ? cg->bg : padinh), padinh);
+  de_get_colour_(rootwin, &(cg->pad), tab, "padding_colour", (bgset ? cg->bg : padinh), padinh);
 }
 
 void de_get_extra_cgrps(WRootWin *rootwin, DEStyle *style, ExtlTab tab) {
@@ -242,9 +238,6 @@ void de_get_nonfont(WRootWin *rootwin, DEStyle *style, ExtlTab tab) {
   de_get_extra_cgrps(rootwin, style, tab);
 }
 
-/*EXTL_DOC
- * Define a style for the root window \var{rootwin}.
- */
 EXTL_EXPORT
 bool de_defstyle_rootwin(WRootWin *rootwin, const char *name, ExtlTab tab) {
   DEStyle *style, *based_on = NULL;
@@ -282,8 +275,6 @@ bool de_defstyle_rootwin(WRootWin *rootwin, const char *name, ExtlTab tab) {
   } else if (based_on != NULL && based_on->font != NULL) {
     de_set_font_for_style(style, based_on->font);
   }
-
-  if (style->font == NULL) de_load_font_for_style(style, de_default_fontname());
 
   if (based_on != NULL && gr_stylespec_equals(&based_on->spec, &style->spec)) {
     /* The new style replaces based_on, so it may be dumped. */
@@ -324,15 +315,10 @@ bool de_defstyle_rootwin(WRootWin *rootwin, const char *name, ExtlTab tab) {
   }
 
   filter_extras(&style->extras_table, tab);
-
   destyle_add(style);
-
   return TRUE;
 }
 
-/*EXTL_DOC
- * Define a style.
- */
 EXTL_EXPORT
 bool de_defstyle(const char *name, ExtlTab tab) {
   bool ok = TRUE;
@@ -345,9 +331,6 @@ bool de_defstyle(const char *name, ExtlTab tab) {
   return ok;
 }
 
-/*EXTL_DOC
- * Define a substyle.
- */
 EXTL_SAFE
 EXTL_EXPORT
 ExtlTab de_substyle(const char *pattern, ExtlTab tab) {
@@ -355,31 +338,11 @@ ExtlTab de_substyle(const char *pattern, ExtlTab tab) {
   return extl_ref_table(tab);
 }
 
-/*}}}*/
-
-/*{{{ Module initialisation */
-
-#include "../version.h"
-
-char de_ion_api_version[] = NOTION_API_VERSION;
-
 bool de_init() {
   WRootWin *rootwin;
   DEStyle *style;
-
   if (!de_register_exports()) return FALSE;
-
   if (!gr_register_engine("de", (GrGetBrushFn *)&de_get_brush)) goto fail;
-
-  /* Create fallback brushes */
-  FOR_ALL_ROOTWINS(rootwin) {
-    style = de_create_style(rootwin, "*");
-    if (style != NULL) {
-      style->is_fallback = TRUE;
-      de_load_font_for_style(style, de_default_fontname());
-    }
-  }
-
   return TRUE;
 
 fail:
@@ -392,5 +355,3 @@ void de_deinit() {
   de_unregister_exports();
   de_deinit_styles();
 }
-
-/*}}}*/

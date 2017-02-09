@@ -46,8 +46,7 @@
 #define CF_FONT_ELEMENT_SIZE 50
 #endif
 
-static const char *get_font_element(const char *pattern, char *buf, int bufsiz,
-                                    ...) {
+static const char *get_font_element(const char *pattern, char *buf, int bufsiz, ...) {
   const char *p, *v;
   char *p2;
   va_list va;
